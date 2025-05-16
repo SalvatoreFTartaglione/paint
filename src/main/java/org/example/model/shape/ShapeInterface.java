@@ -1,7 +1,6 @@
-package org.example.model;
+package org.example.model.shape;
 
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Shape;
 
 public interface ShapeInterface {
 

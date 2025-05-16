@@ -1,6 +1,6 @@
 
 
-package org.example.model;
+package org.example.model.shape;
 
 import javafx.scene.shape.Line;
 import javafx.scene.paint.Color;
@@ -16,7 +16,7 @@ public class LineShape extends Line implements ShapeInterface{
     // private double angle;
 
 
-    public LineShape(Color stroke, Color fill, double angle, int count) {
+    public LineShape(Color stroke, Color fill/*double angle, int count*/) {
         this.strokeColor = stroke;
         this.fillColor = fill;
         //this.angle = angle;
@@ -134,22 +134,6 @@ public class LineShape extends Line implements ShapeInterface{
     public void setY(double point) {
         this.startY = point;
 
-    }
-
-    /**
-     * @param point
-     * Sets the coordinate along the abscissa axis of the end point of the line
-     */
-    public void endX(double point) {
-        this.endX = point;
-    }
-
-    /**
-     * @param point
-     * Sets the coordinate along the ordinate axis of the end point of the line
-     */
-    public void endY(double point) {
-        this.endY = point;
     }
 
     /**

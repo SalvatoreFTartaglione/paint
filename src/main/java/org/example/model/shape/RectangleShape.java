@@ -1,8 +1,7 @@
-    package org.example.model;
+    package org.example.model.shape;
 
     import javafx.scene.paint.Color;
     import javafx.scene.shape.Rectangle;
-    import javafx.scene.shape.Shape;
 
     public class RectangleShape extends Rectangle implements ShapeInterface {
 
@@ -11,7 +10,7 @@
 
         // Constructor for rectangle with user input for fillColor and strokeColor
         //  If the user doesn't input filling color or stroke color then null will be passed to the constructor
-        public RectangleShape(int count, double width, double height, Color fillColor, Color strokeColor) {
+        public RectangleShape(Color fillColor, Color strokeColor, double width, double height) {
             super(width, height);
             this.fillColor = (fillColor != null) ? fillColor : Color.GRAY;
             this.strokeColor = (strokeColor != null) ? strokeColor : Color.GRAY;

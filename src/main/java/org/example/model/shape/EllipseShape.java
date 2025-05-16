@@ -1,4 +1,4 @@
-package org.example.model;
+package org.example.model.shape;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
@@ -17,12 +17,12 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
     private double width;
 
 
-    public EllipseShape(Color stroke, Color fill, double angle, int count, double width, double height) {
+    public EllipseShape(Color stroke, Color fill, /*double angle, int count,*/ double width, double height) {
         this.setSize(width, height);                    //default value
         this.strokeColor = stroke;
         this.fillColor = fill;
         //this.angle = angle;
-        this.strokeWidth = count;
+        //this.strokeWidth = count;
     }
 
     @Override
