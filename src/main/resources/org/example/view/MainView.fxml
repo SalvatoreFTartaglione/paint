@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+
+<SplitPane fx:id="splitPane" dividerPositions="0.3" orientation="VERTICAL" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.view.MainViewController">
+  <items>
+      <TabPane fx:id="tabPane" prefHeight="151.0" prefWidth="799.0" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab fx:id="tabPaneDraw" text="Draw">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="325.0">
+                     <children>
+                        <Button fx:id="undoButton" layoutX="14.0" layoutY="35.0">
+                            <graphic>
+                                <ImageView fx:id="undoImageButton" fitHeight="30.0" fitWidth="30.0" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../images/undo.png" />
+                                    </image>
+                                </ImageView>
+                            </graphic>
+                        </Button>
+                        <ComboBox fx:id="shapeComboBox" layoutX="152.0" layoutY="12.0" prefWidth="150.0" />
+                        <ImageView fx:id="genericShapePhoto" fitHeight="28.0" fitWidth="28.0" layoutX="111.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/genericShapes.png" />
+                           </image>
+                        </ImageView>
+                        <TextArea fx:id="textArea" layoutX="152.0" layoutY="49.0" prefHeight="33.0" prefWidth="152.0" />
+                        <ImageView fx:id="genericTextPhoto" fitHeight="29.0" fitWidth="30.0" layoutX="110.0" layoutY="53.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/genericText.png" />
+                           </image>
+                        </ImageView>
+                        <Button fx:id="enterTextButton" layoutX="310.0" layoutY="55.0" mnemonicParsing="false" text="Enter" />
+                        <ColorPicker fx:id="fillColorPicker" editable="true" layoutX="466.0" layoutY="27.0">
+                           <value>
+                              <Color red="0.5986841917037964" green="0.5848257541656494" blue="0.5848257541656494" />
+                           </value>
+                        </ColorPicker>
+                        <StackPane fx:id="currentShape" layoutX="639.0" layoutY="28.0" prefHeight="76.0" prefWidth="105.0" />
+                        <Label layoutX="640.0" layoutY="4.0" prefHeight="17.0" prefWidth="137.0" text="Current shape:">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <ImageView fx:id="chooseColorPhoto" fitHeight="45.0" fitWidth="53.0" layoutX="396.0" layoutY="42.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/colorPalette.png" />
+                           </image>
+                        </ImageView>
+                            <Label layoutX="464.0" layoutY="6.0" prefHeight="17.0" prefWidth="121.0" text="Fill color">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="466.0" layoutY="60.0" prefHeight="17.0" prefWidth="122.0" text="Border color">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <ColorPicker fx:id="borderColorPicker" editable="true" layoutX="466.0" layoutY="82.0">
+                           <value>
+                              <Color />
+                           </value>
+                        </ColorPicker>
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+          <Tab fx:id="tabPaneFile" text="File">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Button fx:id="saveButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" text="Save" />
+                        <Button fx:id="loadButton" layoutX="14.0" layoutY="49.0" mnemonicParsing="false" text="Load" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+      <ScrollPane fx:id="scrollPane" pannable="true" prefHeight="357.0" prefWidth="793.0">
+          <StackPane fx:id="mainCanvasContainer" style="-fx-border-color: black; -fx-border-width: 2;">
+              <Label fx:id="gridOnLabel" text="Grid ON" visible="false" style="-fx-font-size: 24px; -fx-text-fill: green;" StackPane.alignment="TOP_LEFT" />
+              <Label fx:id="gridOffLabel" text="Grid OFF" visible="true" style="-fx-font-size: 24px; -fx-text-fill: red;" StackPane.alignment="TOP_LEFT" />
+              <Canvas fx:id="noGridCanvas" height="1500.0" width="1500.0" />
+              <Canvas fx:id="gridCanvas" height="1500.0" visible="false" width="1500.0" />
+          </StackPane>
+      </ScrollPane>
+  </items>
+</SplitPane>
