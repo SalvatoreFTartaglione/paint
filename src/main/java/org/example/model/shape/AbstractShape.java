@@ -7,24 +7,22 @@ public abstract class AbstractShape {
     private ShapeInterface shape;
 
     // Abstract method to create a shape that will be implemented in  the subclasses (LineCreator, RectangleCreator, EllipseCreator)
-    public abstract ShapeInterface createShape(Color stroke, Color fill, /*double angle, String text, int count,*/ double width, double height);
+    public abstract ShapeInterface createShape(Color stroke, Color fill, /*double angle, String text,*/ int strokeWidth, double width, double height);
 
     /**
      * @param stroke
      * @param fill
-     * @param angle
-     * @param text
-     * @param count
+     * @param strokeWidth
      * Create a generic Shape by setting all the properties passed as a parameter
      */
     // Concrete method that creates a shape
-    public void creationOfShape(Color stroke, Color fill, double angle, String text, int count, double width, double height) {
-        shape = this.createShape(stroke, fill, /*angle, text, count,*/ width, height);
+    public void creationOfShape(Color stroke, Color fill, /*double angle, String text,*/ int strokeWidth, double width, double height) {
+        shape = this.createShape(stroke, fill, /*angle, text,*/ strokeWidth, width, height);
         shape.setStrokeColor(stroke);
         shape.setFillColor(fill);
         /*shape.setAngle(angle);
-        shape.setString(text);
-        shape.setCount(count);*/
+        shape.setString(text);*/
+        shape.setStrokeWidth(strokeWidth);
         shape.setSize(width, height);
     }
 

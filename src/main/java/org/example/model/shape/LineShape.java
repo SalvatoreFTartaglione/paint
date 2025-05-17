@@ -12,15 +12,15 @@ public class LineShape extends Line implements ShapeInterface{
     private Color fillColor;
     private double startX, startY, endX, endY;
     private Double[] points;
-    //private int strokeWidth;
+    private int strokeWidth;
     // private double angle;
 
 
-    public LineShape(Color stroke, Color fill/*double angle, int count*/) {
+    public LineShape(Color stroke, Color fill/*double angle*/, int strokeWidth) {
         this.strokeColor = stroke;
         this.fillColor = fill;
         //this.angle = angle;
-        //this.strokeWidth = count;
+        this.strokeWidth = strokeWidth;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class LineShape extends Line implements ShapeInterface{
         this.setEndX(this.points[2]);
         this.setEndY(this.points[3]);
         this.setStroke(this.getStrokeColor());
-        //this.setStrokeWidth(this.getCount());
+        this.setStrokeWidth(this.getCustomStrokeWidth());
         this.setFill(this.getFillColor());
     }
 
@@ -58,7 +58,7 @@ public class LineShape extends Line implements ShapeInterface{
         this.setEndX(points[2]);
         this.setEndY(points[3]);
         //this.setRotate(this.getAngle());
-        //this.setStrokeWidth(this.getCount());
+        this.setStrokeWidth(this.getCustomStrokeWidth());
         this.setPoints(points);
     }
 
@@ -157,7 +157,7 @@ public class LineShape extends Line implements ShapeInterface{
      * Returns the heigth of the shape
      */
     @Override
-    public double getHeightShape() {
+    public double getHeight() {
         return this.getEndY();
     }
 
@@ -166,7 +166,7 @@ public class LineShape extends Line implements ShapeInterface{
      * Returns the width of the shape
      */
     @Override
-    public double getWidthShape() {
+    public double getWidth() {
         return this.getEndX();
     }
 
@@ -187,6 +187,16 @@ public class LineShape extends Line implements ShapeInterface{
      */
     public void setPoints(Double[] points){
         this.points = points;
+    }
+
+    @Override
+    public int getCustomStrokeWidth() {
+        return strokeWidth;
+    }
+
+    @Override
+    public void setStrokeWidth(int strokeWidth) {
+        this.strokeWidth = strokeWidth;
     }
 
     /**

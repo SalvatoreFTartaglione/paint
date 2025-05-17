@@ -8,10 +8,12 @@ public interface ShapeInterface {
     // Shape color management
     public void setStrokeColor(Color color);
     public Color getStrokeColor();
+    void setStrokeWidth(int strokeWidth);
+    int getCustomStrokeWidth();
 
     // Height and Width
-    public double getWidthShape();
-    public double getHeightShape();
+    public double getWidth();
+    public double getHeight();
     public void setSize(double width, double height);
 
     //
@@ -30,4 +32,5 @@ public interface ShapeInterface {
 
     // Simplified serialization
     public String toString();
+
 }

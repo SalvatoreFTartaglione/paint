@@ -17,17 +17,17 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
     private double width;
 
 
-    public EllipseShape(Color stroke, Color fill, /*double angle, int count,*/ double width, double height) {
+    public EllipseShape(Color stroke, Color fill, /*double angle,*/ int strokeWidth, double width, double height) {
         this.setSize(width, height);                    //default value
         this.strokeColor = stroke;
         this.fillColor = fill;
         //this.angle = angle;
-        //this.strokeWidth = count;
+        this.strokeWidth = strokeWidth;
     }
 
     @Override
     public void draw(double X, double Y) {
-        //this.setStrokeWidth(this.getCount()); //default value
+        this.setStrokeWidth(this.getStrokeWidth()); //default value
         this.setStroke(this.getStrokeColor());
         this.setFill(this.getFillColor());
         //this.setRotate(this.getAngle());
@@ -124,7 +124,7 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
      * Returns the heigth of the shape
      */
     @Override
-    public double getHeightShape() {
+    public double getHeight() {
         return this.height;
     }
 
@@ -134,7 +134,7 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
      * Returns the width of the shape
      */
     @Override
-    public double getWidthShape() {
+    public double getWidth() {
         return this.width;
     }
 
@@ -155,12 +155,14 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
         this.width = width;
     }
 
-    public double getHeight(){
-        return this.height;
+    @Override
+    public int getCustomStrokeWidth() {
+        return strokeWidth;
     }
 
-    public double getWidth(){
-        return this.width;
+    @Override
+    public void setStrokeWidth(int strokeWidth) {
+        this.strokeWidth = strokeWidth;
     }
 
     /**

@@ -7,6 +7,7 @@
 
         private Color fillColor;
         private Color strokeColor;
+        private int strokeWidth;
 
         // Constructor for rectangle with user input for fillColor and strokeColor
         //  If the user doesn't input filling color or stroke color then null will be passed to the constructor
@@ -46,19 +47,19 @@
         }
 
         @Override
-        public double getHeightShape() {
-            return this.getHeight();
-        }
-
-        @Override
-        public double getWidthShape() {
-            return this.getWidth();
-        }
-
-        @Override
         public void setSize(double width, double height) {
             this.setWidth(width);
             this.setHeight(height);
+        }
+
+        @Override
+        public int getCustomStrokeWidth() {
+            return strokeWidth;
+        }
+
+        @Override
+        public void setStrokeWidth(int strokeWidth) {
+            this.strokeWidth = strokeWidth;
         }
 
         @Override
