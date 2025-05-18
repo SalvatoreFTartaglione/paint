@@ -16,6 +16,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -26,6 +27,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     public CheckBox gridButton;
+    public Pane drawingPane;
     @FXML
     private SplitPane splitPane;
     @FXML
@@ -65,7 +67,7 @@ public class MainViewController implements Initializable {
     @FXML
     private Pane mainCanvasContainer;
     @FXML
-    private Canvas drawingCanvas;
+    private ContextMenu scrollPaneContextMenu;
 
     private boolean isDragging = false;
     /**
@@ -73,10 +75,6 @@ public class MainViewController implements Initializable {
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
-        drawingCanvas.setDisable(false);
-        drawingCanvas.setVisible(true);
-
         initializeSplitPane();
         initializeShapeChoiceBox();
         initializeContextMenu();
@@ -101,6 +99,24 @@ public class MainViewController implements Initializable {
     private void initializeContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
 
+        // Fill Color Menu Item
+        Label fillLabel = new Label("Change Fill Color:");
+        ColorPicker changeFillColorPickerContexMenu = new ColorPicker();
+        HBox fillBox = new HBox(10, fillLabel, changeFillColorPickerContexMenu);
+        CustomMenuItem fillColorItem = new CustomMenuItem(fillBox);
+        fillColorItem.setHideOnClick(false); // evita che si chiuda subito
+
+        // Border Color Menu Item
+        Label borderLabel = new Label("Change Border Color:");
+        ColorPicker changeBorderColorPickerContexMenu = new ColorPicker();
+        HBox borderBox = new HBox(10, borderLabel, changeBorderColorPickerContexMenu);
+        CustomMenuItem borderColorItem = new CustomMenuItem(borderBox);
+        borderColorItem.setHideOnClick(false);
+
+        // Aggiungi gli item al context menu
+        contextMenu.getItems().addAll(fillColorItem, borderColorItem);
+
+        // Mostra il menu su click destro
         scrollPane.setOnMousePressed(event -> {
             if (event.isSecondaryButtonDown()) {
                 contextMenu.show(scrollPane, event.getScreenX(), event.getScreenY());
@@ -109,6 +125,7 @@ public class MainViewController implements Initializable {
             }
         });
     }
+
 
     /*private void drawGrid() {
         double width = gridCanvas.getWidth();
@@ -130,7 +147,6 @@ public class MainViewController implements Initializable {
         }
     }*/
 
-
     private void initializeShapeChoiceBox() {
         List<ShapeOption> shapes = List.of(
                 new ShapeOption("Ellipse", "/org/example/images/ellipse.png"),
@@ -141,7 +157,7 @@ public class MainViewController implements Initializable {
         shapeComboBox.getItems().addAll(shapes);
 
         // Imposto la cell factory per mostrare nome + immagine
-        shapeComboBox.setCellFactory(lv -> new ListCell<ShapeOption>() {
+        shapeComboBox.setCellFactory(lv -> new ListCell<>() {
             private final ImageView imageView = new ImageView();
 
             @Override
@@ -224,7 +240,7 @@ public class MainViewController implements Initializable {
                             EllipseShape ellipseShape = (EllipseShape) shapeInterface;
                             ellipseShape.draw(x, y);
                             // Aggiungi l'ellisse al contenitore del Canvas
-                            mainCanvasContainer.getChildren().add(ellipseShape);
+                            drawingPane.getChildren().add(ellipseShape);
                         }
                         break;
                     }
@@ -234,7 +250,7 @@ public class MainViewController implements Initializable {
                         if (shapeInterface instanceof LineShape) {
                             LineShape lineShape = (LineShape) shapeInterface;
                             lineShape.draw(x, y);
-                            mainCanvasContainer.getChildren().add(lineShape);
+                            drawingPane.getChildren().add(lineShape);
                         }
                         break;
                     }
@@ -244,7 +260,7 @@ public class MainViewController implements Initializable {
                         if (shapeInterface instanceof RectangleShape) {
                             RectangleShape rectangleShape = (RectangleShape) shapeInterface;
                             rectangleShape.draw(x, y);
-                            mainCanvasContainer.getChildren().add(rectangleShape);
+                            drawingPane.getChildren().add(rectangleShape);
                         }
                         break;
                     }
@@ -269,6 +285,15 @@ public class MainViewController implements Initializable {
         AbstractShape ellipse = new EllipseCreator();
         ellipse.creationOfShape(borderColor, fillColor, borderWidth, width, height);
         return ellipse;
+    }
+
+    public void onRightClick(MouseEvent mouseEvent) {
+    }
+
+    public void check(MouseEvent mouseEvent) {
+        if (mouseEvent.getButton() == MouseButton.SECONDARY) {
+            System.out.println(drawingPane.getChildren().size());
+        }
     }
 
 

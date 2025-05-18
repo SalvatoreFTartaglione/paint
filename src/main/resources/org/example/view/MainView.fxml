@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
@@ -79,10 +78,11 @@
           </Tab>
         </tabs>
       </TabPane>
-      <ScrollPane fx:id="scrollPane" pannable="true" prefHeight="357.0" prefWidth="793.0">
+      <ScrollPane fx:id="scrollPane" onMouseClicked="#onRightClick" pannable="true" prefHeight="357.0" prefWidth="793.0">
           <Pane fx:id="mainCanvasContainer" style="-fx-border-color: black; -fx-border-width: 2;">
-            <Canvas fx:id="drawingCanvas" height="1500.0" width="1500.0" />
+              <Pane fx:id="drawingPane" onMouseClicked="#check" prefHeight="1500.0" prefWidth="1500.0" />
           </Pane>
       </ScrollPane>
+
   </items>
 </SplitPane>
