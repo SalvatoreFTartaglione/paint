@@ -5,21 +5,27 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.util.StringConverter;
+import javafx.scene.paint.Color;
 import org.example.controller.ShapeOption;
+import org.example.model.shape.*;
 
 public class MainViewController implements Initializable {
 
+    @FXML
+    public CheckBox gridButton;
     @FXML
     private SplitPane splitPane;
     @FXML
@@ -57,9 +63,9 @@ public class MainViewController implements Initializable {
     @FXML
     private ScrollPane scrollPane;
     @FXML
-    private StackPane mainCanvasContainer;
+    private Pane mainCanvasContainer;
     @FXML
-    private Canvas noGridCanvas;
+    private Canvas drawingCanvas;
     @FXML
     private Canvas gridCanvas;
     @FXML
@@ -67,24 +73,41 @@ public class MainViewController implements Initializable {
     @FXML
     private Label gridOffLabel;
 
+    private boolean isDragging = false;
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         gridCanvas.setDisable(true);
-        noGridCanvas.setDisable(false);
+        gridCanvas.setVisible(false); // griglia nascosta inizialmente
+
+        drawingCanvas.setDisable(false);
+        drawingCanvas.setVisible(true); // canvas delle forme sempre visibile
+
         initializeSplitPane();
         initializeShapeChoiceBox();
         initializeContextMenu();
+
+        mainCanvasContainer.setOnMousePressed(event -> {
+            isDragging = false;
+        });
+
+        mainCanvasContainer.setOnMouseDragged(event -> {
+            isDragging = true;
+        });
+
+        mainCanvasContainer.setOnMouseReleased(event -> {
+            if (!isDragging && event.getButton() == MouseButton.PRIMARY) {
+                DrawOnCanvas(event);
+            }
+        });
     }
+
+
 
     private void initializeContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
-
-        CheckMenuItem gridItem = getCheckMenuItem();
-
-        contextMenu.getItems().add(gridItem);
 
         scrollPane.setOnMousePressed(event -> {
             if (event.isSecondaryButtonDown()) {
@@ -105,39 +128,14 @@ public class MainViewController implements Initializable {
 
         gc.setLineWidth(0.5);
         gc.setStroke(javafx.scene.paint.Color.GRAY); // colore griglia
-
         // linee verticali
         for (double x = 0; x <= width; x += cellSize) {
             gc.strokeLine(x, 0, x, height);
         }
-
         // linee orizzontali
         for (double y = 0; y <= height; y += cellSize) {
             gc.strokeLine(0, y, width, y);
         }
-    }
-
-
-    private CheckMenuItem getCheckMenuItem() {
-        CheckMenuItem gridItem = new CheckMenuItem("Grid");
-
-        // Inizializza lo stato coerente all’avvio
-        gridItem.setSelected(gridCanvas.isVisible());
-
-        gridItem.setOnAction(e -> {
-            boolean selected = gridItem.isSelected();
-
-            gridCanvas.setVisible(selected);
-            noGridCanvas.setVisible(!selected);
-
-            gridOnLabel.setVisible(selected);
-            gridOffLabel.setVisible(!selected);
-
-            if (selected) {
-                drawGrid();
-            }
-        });
-        return gridItem;
     }
 
 
@@ -215,6 +213,89 @@ public class MainViewController implements Initializable {
             });
         });
     }
+
+
+    public void DrawOnCanvas(MouseEvent mouseEvent) {
+        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
+            ShapeOption selectedShape = shapeComboBox.getValue();
+            if (selectedShape != null) {
+                // coordinate locali del clic sul Canvas
+                Point2D localCoords = mainCanvasContainer.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                double x = localCoords.getX();
+                double y = localCoords.getY();
+                switch (selectedShape.getName()) {
+                    case "Ellipse": {
+                        AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 2, 40, 20);
+                        ShapeInterface shapeInterface = abstractEllipse.getShape();
+                        //controllo che la shape selezionata sia un'ellisse
+                        if (shapeInterface instanceof EllipseShape) {
+                            EllipseShape ellipseShape = (EllipseShape) shapeInterface;
+                            ellipseShape.draw(x, y);
+                            // Aggiungi l'ellisse al contenitore del Canvas
+                            mainCanvasContainer.getChildren().add(ellipseShape);
+                        }
+                        break;
+                    }
+                    case "Line": {
+                        AbstractShape abstractLine = createLine(borderColorPicker.getValue(), fillColorPicker.getValue(), 2, 40, 20);
+                        ShapeInterface shapeInterface = abstractLine.getShape();
+                        if (shapeInterface instanceof LineShape) {
+                            LineShape lineShape = (LineShape) shapeInterface;
+                            lineShape.draw(x, y);
+                            mainCanvasContainer.getChildren().add(lineShape);
+                        }
+                        break;
+                    }
+                    case "Rectangle": {
+                        AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 2, 40, 20);
+                        ShapeInterface shapeInterface = abstractRectangle.getShape();
+                        if (shapeInterface instanceof RectangleShape) {
+                            RectangleShape rectangleShape = (RectangleShape) shapeInterface;
+                            rectangleShape.draw(x, y);
+                            mainCanvasContainer.getChildren().add(rectangleShape);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private AbstractShape createRectangle(Color borderColor, Color fillColor, int borderWidth, double width, double height) {
+        AbstractShape rectangle = new RectangleCreator();
+        rectangle.creationOfShape(borderColor,fillColor,borderWidth, width, height);
+        return rectangle;
+    }
+
+    private AbstractShape createLine(Color borderColor, Color fillColor, int borderWidth, double width, double height) {
+        AbstractShape line = new LineCreator();
+        line.creationOfShape(borderColor, fillColor, borderWidth, width, height);
+        return line;
+    }
+
+    private AbstractShape createEllipse(Color borderColor, Color fillColor, int borderWidth, int width, int height) {
+        AbstractShape ellipse = new EllipseCreator();
+        ellipse.creationOfShape(borderColor, fillColor, borderWidth, width, height);
+        return ellipse;
+    }
+
+
+    @FXML
+    private void onGridCheckBoxToggle(ActionEvent event) {
+        if (gridButton.isSelected()) {
+            drawGrid();
+            gridCanvas.setVisible(true);
+            gridCanvas.setDisable(false);
+            gridOnLabel.setVisible(true);
+            gridOffLabel.setVisible(false);
+        } else {
+            gridCanvas.setVisible(false);
+            gridCanvas.setDisable(true);
+            gridOnLabel.setVisible(false);
+            gridOffLabel.setVisible(true);
+        }
+    }
+
 
 
 }

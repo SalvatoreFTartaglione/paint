@@ -13,7 +13,7 @@ public class RectangleCreator extends AbstractShape {
      */
     @Override
     public ShapeInterface createShape(Color stroke, Color fill, /*double angle, String text,*/ int strokeWidth, double width, double height) {
-        return new RectangleShape(stroke, fill, /*angle, count,*/ width, height);
+        return new RectangleShape(stroke, fill, /*angle, count,*/ width, height, strokeWidth);
     }
 
 
