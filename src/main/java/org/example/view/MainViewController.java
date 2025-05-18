@@ -66,12 +66,6 @@ public class MainViewController implements Initializable {
     private Pane mainCanvasContainer;
     @FXML
     private Canvas drawingCanvas;
-    @FXML
-    private Canvas gridCanvas;
-    @FXML
-    private Label gridOnLabel;
-    @FXML
-    private Label gridOffLabel;
 
     private boolean isDragging = false;
     /**
@@ -79,11 +73,9 @@ public class MainViewController implements Initializable {
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        gridCanvas.setDisable(true);
-        gridCanvas.setVisible(false); // griglia nascosta inizialmente
 
         drawingCanvas.setDisable(false);
-        drawingCanvas.setVisible(true); // canvas delle forme sempre visibile
+        drawingCanvas.setVisible(true);
 
         initializeSplitPane();
         initializeShapeChoiceBox();
@@ -118,7 +110,7 @@ public class MainViewController implements Initializable {
         });
     }
 
-    private void drawGrid() {
+    /*private void drawGrid() {
         double width = gridCanvas.getWidth();
         double height = gridCanvas.getHeight();
         double cellSize = 50; // dimensione delle celle
@@ -136,7 +128,7 @@ public class MainViewController implements Initializable {
         for (double y = 0; y <= height; y += cellSize) {
             gc.strokeLine(0, y, width, y);
         }
-    }
+    }*/
 
 
     private void initializeShapeChoiceBox() {
@@ -161,7 +153,7 @@ public class MainViewController implements Initializable {
                 } else {
                     setText(item.getName());
                     imageView.setImage(item.getImage());
-                    imageView.setFitHeight(20);  // opzionale: scala l'immagine
+                    imageView.setFitHeight(20);
                     imageView.setFitWidth(20);
                     setGraphic(imageView);
                 }
@@ -280,7 +272,7 @@ public class MainViewController implements Initializable {
     }
 
 
-    @FXML
+    /*@FXML
     private void onGridCheckBoxToggle(ActionEvent event) {
         if (gridButton.isSelected()) {
             drawGrid();
@@ -294,7 +286,7 @@ public class MainViewController implements Initializable {
             gridOnLabel.setVisible(false);
             gridOffLabel.setVisible(true);
         }
-    }
+    }*/
 
 
 

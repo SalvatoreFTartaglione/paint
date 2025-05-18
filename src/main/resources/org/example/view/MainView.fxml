@@ -62,7 +62,7 @@
                               <Color />
                            </value>
                         </ColorPicker>
-                        <CheckBox fx:id="gridButton" layoutX="682.0" layoutY="41.0" mnemonicParsing="false" onAction="#onGridCheckBoxToggle" prefHeight="33.0" prefWidth="70.0" text="Grid" />
+                        <!--<CheckBox fx:id="gridButton" layoutX="682.0" layoutY="41.0" mnemonicParsing="false" prefHeight="33.0" prefWidth="70.0" text="Grid" />-->
                      </children>
                   </AnchorPane>
             </content>
@@ -81,10 +81,7 @@
       </TabPane>
       <ScrollPane fx:id="scrollPane" pannable="true" prefHeight="357.0" prefWidth="793.0">
           <Pane fx:id="mainCanvasContainer" style="-fx-border-color: black; -fx-border-width: 2;">
-          <Canvas fx:id="gridCanvas" height="1500.0" visible="false" width="1500.0" />
-              <Canvas fx:id="drawingCanvas" height="1500.0" width="1500.0" />
-              <Label fx:id="gridOnLabel" style="-fx-font-size: 24px; -fx-text-fill: green;" text="Grid ON" visible="false" StackPane.alignment="TOP_LEFT" />
-              <Label fx:id="gridOffLabel" style="-fx-font-size: 24px; -fx-text-fill: red;" text="Grid OFF" visible="true" StackPane.alignment="TOP_LEFT" />
+            <Canvas fx:id="drawingCanvas" height="1500.0" width="1500.0" />
           </Pane>
       </ScrollPane>
   </items>
