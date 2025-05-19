@@ -30,8 +30,9 @@ import org.example.model.shape.*;
 public class MainViewController implements Initializable {
 
     @FXML
-    public CheckBox gridButton;
-    public Pane drawingPane;
+    private CheckBox gridButton;
+    @FXML
+    private Pane drawingPane;
     @FXML
     private SplitPane splitPane;
     @FXML
@@ -72,7 +73,10 @@ public class MainViewController implements Initializable {
     private Pane mainCanvasContainer;
     @FXML
     private ContextMenu scrollPaneContextMenu;
+
     private boolean isDragging = false;
+    private Point2D startPoint = null;
+
     /**
      * Initializes the controller class.
      */
@@ -230,12 +234,13 @@ public class MainViewController implements Initializable {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             ShapeOption selectedShape = shapeComboBox.getValue();
             if (selectedShape != null) {
-                // coordinate locali del clic sul Canvas
-                Point2D localCoords = mainCanvasContainer.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                double x = localCoords.getX();
-                double y = localCoords.getY();
+
                 switch (selectedShape.getName()) {
                     case "Ellipse": {
+                        // coordinate locali del clic sul Canvas
+                        Point2D localCoords = mainCanvasContainer.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                        double x = localCoords.getX();
+                        double y = localCoords.getY();
                         AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
                         ShapeInterface shapeInterface = abstractEllipse.getShape();
                         //controllo che la shape selezionata sia un'ellisse
@@ -248,16 +253,34 @@ public class MainViewController implements Initializable {
                         break;
                     }
                     case "Line": {
-                        AbstractShape abstractLine = createLine(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
-                        ShapeInterface shapeInterface = abstractLine.getShape();
-                        if (shapeInterface instanceof LineShape) {
-                            LineShape lineShape = (LineShape) shapeInterface;
-                            lineShape.draw(x, y);
-                            drawingPane.getChildren().add(lineShape);
+                        Point2D localCoords = mainCanvasContainer.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                        double x = localCoords.getX();
+                        double y = localCoords.getY();
+                        if (startPoint == null) {
+                            // first click: save starting point
+                            startPoint = new Point2D(x, y);
+                        } else {
+                            // second click: save end point
+                            LineCreator lineCreator = new LineCreator();
+                            lineCreator.creationOfShape(borderColorPicker.getValue(), null, 10, 0, 0);
+                            // Add line to container
+                            ShapeInterface shapeInterface = lineCreator.getShape();
+                            Double[] points = {x, y, startPoint.getX(), startPoint.getY()};
+                            if (shapeInterface instanceof LineShape) {
+                                LineShape lineShape = (LineShape) shapeInterface;
+                                lineShape.draw(points);
+                                mainCanvasContainer.getChildren().add(lineShape);
+                            }
+                            // Reset state variable
+                            startPoint = null;
                         }
                         break;
                     }
                     case "Rectangle": {
+                        // coordinate locali del clic sul Canvas
+                        Point2D localCoords = mainCanvasContainer.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                        double x = localCoords.getX();
+                        double y = localCoords.getY();
                         AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
                         ShapeInterface shapeInterface = abstractRectangle.getShape();
                         if (shapeInterface instanceof RectangleShape) {
@@ -305,7 +328,7 @@ public class MainViewController implements Initializable {
      */
     @FXML
     private void saveFile(ActionEvent event) {
-        Save saveFile = new Save(mainCanvasContainer);
+        Save saveFile = new Save(drawingPane);
         saveFile.executeCommand(null);
     }
 

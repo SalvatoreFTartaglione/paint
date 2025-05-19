@@ -29,5 +29,6 @@ public interface ShapeInterface {
     // Simplified serialization
     public String toString();
 
+    // CHECK!!!!!!
     void setFillColor(Color fill);
 }
