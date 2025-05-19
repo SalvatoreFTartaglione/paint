@@ -2,6 +2,7 @@ package org.example.view;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
@@ -20,7 +21,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import org.example.controller.ShapeOption;
+import org.example.model.commands.Load;
+import org.example.model.commands.Save;
 import org.example.model.shape.*;
 
 public class MainViewController implements Initializable {
@@ -68,7 +72,6 @@ public class MainViewController implements Initializable {
     private Pane mainCanvasContainer;
     @FXML
     private ContextMenu scrollPaneContextMenu;
-
     private boolean isDragging = false;
     /**
      * Initializes the controller class.
@@ -108,13 +111,13 @@ public class MainViewController implements Initializable {
 
         // Border Color Menu Item
         Label borderLabel = new Label("Change Border Color:");
-        ColorPicker changeBorderColorPickerContexMenu = new ColorPicker();
-        HBox borderBox = new HBox(10, borderLabel, changeBorderColorPickerContexMenu);
-        CustomMenuItem borderColorItem = new CustomMenuItem(borderBox);
-        borderColorItem.setHideOnClick(false);
+        ColorPicker changeStrokeColorPickerContexMenu = new ColorPicker();
+        HBox borderBox = new HBox(10, borderLabel, changeStrokeColorPickerContexMenu);
+        CustomMenuItem strokeColorItem = new CustomMenuItem(borderBox);
+        strokeColorItem.setHideOnClick(false);
 
         // Aggiungi gli item al context menu
-        contextMenu.getItems().addAll(fillColorItem, borderColorItem);
+        contextMenu.getItems().addAll(fillColorItem, strokeColorItem);
 
         // Mostra il menu su click destro
         scrollPane.setOnMousePressed(event -> {
@@ -233,7 +236,7 @@ public class MainViewController implements Initializable {
                 double y = localCoords.getY();
                 switch (selectedShape.getName()) {
                     case "Ellipse": {
-                        AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 2, 40, 20);
+                        AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
                         ShapeInterface shapeInterface = abstractEllipse.getShape();
                         //controllo che la shape selezionata sia un'ellisse
                         if (shapeInterface instanceof EllipseShape) {
@@ -245,7 +248,7 @@ public class MainViewController implements Initializable {
                         break;
                     }
                     case "Line": {
-                        AbstractShape abstractLine = createLine(borderColorPicker.getValue(), fillColorPicker.getValue(), 2, 40, 20);
+                        AbstractShape abstractLine = createLine(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
                         ShapeInterface shapeInterface = abstractLine.getShape();
                         if (shapeInterface instanceof LineShape) {
                             LineShape lineShape = (LineShape) shapeInterface;
@@ -255,7 +258,7 @@ public class MainViewController implements Initializable {
                         break;
                     }
                     case "Rectangle": {
-                        AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 2, 40, 20);
+                        AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
                         ShapeInterface shapeInterface = abstractRectangle.getShape();
                         if (shapeInterface instanceof RectangleShape) {
                             RectangleShape rectangleShape = (RectangleShape) shapeInterface;
@@ -269,21 +272,21 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private AbstractShape createRectangle(Color borderColor, Color fillColor, int borderWidth, double width, double height) {
+    private AbstractShape createRectangle(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
         AbstractShape rectangle = new RectangleCreator();
-        rectangle.creationOfShape(borderColor,fillColor,borderWidth, width, height);
+        rectangle.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
         return rectangle;
     }
 
-    private AbstractShape createLine(Color borderColor, Color fillColor, int borderWidth, double width, double height) {
+    private AbstractShape createLine(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
         AbstractShape line = new LineCreator();
-        line.creationOfShape(borderColor, fillColor, borderWidth, width, height);
+        line.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
         return line;
     }
 
-    private AbstractShape createEllipse(Color borderColor, Color fillColor, int borderWidth, int width, int height) {
+    private AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, int width, int height) {
         AbstractShape ellipse = new EllipseCreator();
-        ellipse.creationOfShape(borderColor, fillColor, borderWidth, width, height);
+        ellipse.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
         return ellipse;
     }
 
@@ -295,6 +298,66 @@ public class MainViewController implements Initializable {
             System.out.println(drawingPane.getChildren().size());
         }
     }
+
+    /**
+     * @param event
+     * Calls the function to save the file
+     */
+    @FXML
+    private void saveFile(ActionEvent event) {
+        Save saveFile = new Save(mainCanvasContainer);
+        saveFile.executeCommand(null);
+    }
+
+
+
+    /**
+     * @param event
+     * Calls the function to load a file
+     */
+    @FXML
+    private void loadFile(ActionEvent event) {
+        // Check if canvas is empty
+        if ( ! drawingPane.getChildren().isEmpty() ) {
+            // Confirmation alert
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Save Workspace");
+            alert.setHeaderText("Canvas is not empty.");
+            alert.setContentText("Save current workspace?");
+            ButtonType saveButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+            ButtonType dontSaveButton = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+            alert.getButtonTypes().setAll(saveButton, dontSaveButton);
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent()) {
+                if (result.get().getText().equals("Yes")) {
+                    // Saving file
+                    Save saveFile = new Save(drawingPane);
+                    saveFile.executeCommand(null);
+                    // Clear workspace from older shapes
+                    drawingPane.getChildren().clear();
+                    // After saving execute load
+                    Load loadFile = new Load(drawingPane);
+                    loadFile.executeCommand(null);
+
+                } else if (result.get().getText().equals("No")) {
+                    // Clear workspace from older shapes
+                    drawingPane.getChildren().clear();
+                    // Execute load
+                    Load loadFile = new Load(drawingPane);
+                    loadFile.executeCommand(null);
+                }
+            }
+        }
+        else {
+            // Clear workspace from older shapes
+            drawingPane.getChildren().clear();
+            // Execute load
+            Load loadFile = new Load(drawingPane);
+            loadFile.executeCommand(null);
+        }
+    }
+
 
 
     /*@FXML

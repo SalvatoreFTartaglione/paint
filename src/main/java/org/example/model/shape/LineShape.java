@@ -9,17 +9,14 @@ import javafx.scene.paint.Color;
 public class LineShape extends Line implements ShapeInterface{
 
     private Color strokeColor;
-    private Color fillColor;
     private double startX, startY, endX, endY;
     private Double[] points;
     private int strokeWidth;
     // private double angle;
 
 
-    public LineShape(Color stroke, Color fill/*double angle*/, int strokeWidth) {
-        this.strokeColor = stroke;
-        this.fillColor = fill;
-        //this.angle = angle;
+    public LineShape(Color strokeColor, int strokeWidth) {
+        this.strokeColor = strokeColor;
         this.strokeWidth = strokeWidth;
     }
 
@@ -33,15 +30,12 @@ public class LineShape extends Line implements ShapeInterface{
         this.points[1] = Y;
         this.points[2] = X + (endX - startX);
         this.points[3] = Y + (endY - startY);
-        //this.setPoints(points);
-        //this.setRotate(this.getAngle());
         this.setStartX(this.points[0]);
         this.setStartY(this.points[1]);
         this.setEndX(this.points[2]);
         this.setEndY(this.points[3]);
         this.setStroke(this.getStrokeColor());
         this.setStrokeWidth(this.getCustomStrokeWidth());
-        this.setFill(this.getFillColor());
     }
 
     /**
@@ -52,12 +46,10 @@ public class LineShape extends Line implements ShapeInterface{
     @Override
     public void draw(Double[] points) {
         this.setStroke(this.getStrokeColor());
-        this.setFill(this.getFillColor());
         this.setStartX(points[0]);
         this.setStartY(points[1]);
         this.setEndX(points[2]);
         this.setEndY(points[3]);
-        //this.setRotate(this.getAngle());
         this.setStrokeWidth(this.getCustomStrokeWidth());
         this.setPoints(points);
     }
@@ -72,30 +64,12 @@ public class LineShape extends Line implements ShapeInterface{
     }
 
     /**
-     * @return Color
-     * Returns the fill color of the shape
-     */
-    @Override
-    public Color getFillColor() {
-        return this.fillColor;
-    }
-
-    /**
      * @param stroke
      * Sets the border color of the shape
      */
     @Override
     public void setStrokeColor(Color stroke) {
         this.strokeColor = stroke;
-    }
-
-    /**
-     * @param fill
-     * Sets the fill color of the shape
-     */
-    @Override
-    public void setFillColor(Color fill) {
-        this.fillColor = fill;
     }
 
     /**
@@ -205,9 +179,13 @@ public class LineShape extends Line implements ShapeInterface{
      */
     @Override
     public String toString() {
-        return "Line" + ";" + this.getStrokeColor() + ";" + this.getFillColor() + ";" +
-                this.getEndX() + ";" + this.getEndY() + ";" + this.getStartX() + ";" +
-                this.getStartY() + "\n";
+        return "Line" + ";" + this.getStrokeColor() + ";" + this.getEndX() + ";" + this.getEndY() + ";"
+                + this.getStartX() + ";" + this.getStartY() + "\n";
+    }
+
+    @Override
+    public void setFillColor(Color fill) {
+
     }
 
 

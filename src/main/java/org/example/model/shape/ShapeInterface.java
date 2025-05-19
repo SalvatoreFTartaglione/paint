@@ -16,15 +16,11 @@ public interface ShapeInterface {
     public double getHeight();
     public void setSize(double width, double height);
 
-    //
+    // Drawing points for the shape
     public double getX();
     public double getY();
     public void setX(double X);
     public void setY(double Y);
-
-    // Managing selection and filling logic (where usable)
-    public void setFillColor(Color color);
-    public Color getFillColor();
 
     // Draws the shape
     public void draw(double X, double Y);
@@ -33,4 +29,5 @@ public interface ShapeInterface {
     // Simplified serialization
     public String toString();
 
+    void setFillColor(Color fill);
 }

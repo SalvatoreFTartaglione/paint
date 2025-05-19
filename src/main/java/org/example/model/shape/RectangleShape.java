@@ -9,12 +9,11 @@
         private Color strokeColor;
         private int strokeWidth;
 
-        // Constructor for rectangle with user input for fillColor and strokeColor
-        //  If the user doesn't input filling color or stroke color then null will be passed to the constructor
-        public RectangleShape(Color fillColor, Color strokeColor, double width, double height, int strokeWidth) {
+
+        public RectangleShape(Color strokeColor, Color fillColor, double width, double height, int strokeWidth) {
             super(width, height);
-            this.fillColor = (fillColor != null) ? fillColor : Color.GRAY;
-            this.strokeColor = (strokeColor != null) ? strokeColor : Color.GRAY;
+            this.strokeColor = strokeColor;
+            this.fillColor = fillColor;
             this.strokeWidth = strokeWidth;
         }
 
@@ -66,7 +65,7 @@
 
         @Override
         public String toString() {
-            return "Rectangle" + ";" + Color.web(this.getStrokeColor().toString()) + ";" + Color.web(this.getFillColor().toString()) +
+            return "Rectangle" + ";" + this.getStrokeColor() + ";" + this.getFillColor() + ";" + this.getCustomStrokeWidth() +
                     ";" + this.getWidth() + ";" + this.getHeight() + ";" + this.getX() + ";" + this.getY() + "\n";
         }
 

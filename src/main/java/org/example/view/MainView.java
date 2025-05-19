@@ -20,7 +20,7 @@ public class MainView {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/view/MainView.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root);
-            stage.setTitle("Tartaglione loss aura");
+            stage.setTitle("Paint");
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {

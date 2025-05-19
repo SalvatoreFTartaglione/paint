@@ -5,6 +5,7 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Pane;
 import org.example.model.shape.ShapeInterface;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
@@ -16,12 +17,11 @@ import java.io.*;
 
 public class Save implements CommandInterface {
 
-    private AnchorPane canvas;
+    private Pane canvas;
     private Stage primaryStage;
 
-    public Save(AnchorPane canvas, Stage primaryStage) {
+    public Save(Pane canvas) {
         this.canvas = canvas;
-        this.primaryStage = primaryStage;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class Save implements CommandInterface {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text File (*.txt)", "*.txt"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png"));
 
-        File file = fileChooser.showSaveDialog(primaryStage);
+        File file = fileChooser.showSaveDialog(null);
 
         if (file != null && file.getName().endsWith(".txt")) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {

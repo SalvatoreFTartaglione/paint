@@ -1,7 +1,8 @@
 package org.example.model.commands;
-/*
+
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import org.example.model.shape.*;
@@ -12,10 +13,10 @@ import java.util.Scanner;
 
 public class Load implements CommandInterface {
 
-    private final AnchorPane anchorPane;
+    private final Pane pane;
 
-    public Load(AnchorPane anchorPane) {
-        this.anchorPane = anchorPane;
+    public Load(Pane pane) {
+        this.pane = pane;
     }
 
     @Override
@@ -24,44 +25,81 @@ public class Load implements CommandInterface {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"));
         File file = fileChooser.showOpenDialog(null);
 
-        if (file == null) return;
+        if (file == null) {
+            return;
+        }
 
         try (Scanner in = new Scanner(new BufferedReader(new FileReader(file)))) {
+
+            Color strokeColor;
+            Color fillingColor = null;
+            int strokeColorWidth;
+            double width, height, x, y;
+            ShapeInterface shape;
+
             in.useLocale(Locale.US);
             in.useDelimiter(";|\\n");
 
             while (in.hasNext()) {
-                String type = in.next();  // Rectangle / Ellipse / Line
-                Color stroke = Color.web(in.next());
-                Color fill = Color.web(in.next());
+                String shapeType = in.next();
+                // Distinction accounts for fillingColor absence in Line
+                if (shapeType.equals("Line")) {
+                    strokeColor = Color.web(in.next());
+                    strokeColorWidth = Integer.parseInt(in.next());
+                    width = Double.parseDouble(in.next());               // in LineShape the attribute has a different name
+                    height = Double.parseDouble(in.next());              // in LineShape the attribute has a different name
+                    x = Double.parseDouble(in.next());                   // in LineShape the attribute has a different name
+                    y = Double.parseDouble(in.next());                   // in LineShape the attribute has a different name
+                }
+                else {
+                    strokeColor = Color.web(in.next());
+                    fillingColor = Color.web(in.next());
+                    strokeColorWidth = Integer.parseInt(in.next());
+                    width = Double.parseDouble(in.next());
+                    height = Double.parseDouble(in.next());
+                    x = Double.parseDouble(in.next());                   // in Ellipse the attribute has a different name
+                    y = Double.parseDouble(in.next());                   // in Ellipse the attribute has a different name
+                }
 
-                double width = Double.parseDouble(in.next());
-                double height = Double.parseDouble(in.next());
-
-                double x = Double.parseDouble(in.next());
-                double y = Double.parseDouble(in.next());
-
-                ShapeInterface shape;
-
-                switch (type) {
+                switch (shapeType) {
                     case "Rectangle":
-                        shape = new RectangleShape(fill, stroke, width, height);
+                        // Creating the shape with the loaded attributes
+                        RectangleCreator rectangleCreator = new RectangleCreator();
+                        rectangleCreator.creationOfShape(strokeColor, fillingColor, strokeColorWidth, width, height);
+                        // Gets the specific shape from ShapeCreator
+                        shape = rectangleCreator.getShape();
+                        // Draw the shape
                         shape.draw(x, y);
                         break;
+
                     case "Ellipse":
-                        shape = new EllipseShape(stroke, fill, width, height);
+                        // Creating the shape with the loaded attributes
+                        EllipseCreator ellipseCreator = new EllipseCreator();
+                        ellipseCreator.creationOfShape(strokeColor, fillingColor, strokeColorWidth, width, height);
+                        // Gets the specific shape from ShapeCreator
+                        shape = ellipseCreator.getShape();
+                        // Draw the shape
                         shape.draw(x, y);
                         break;
+
                     case "Line":
-                        shape = new LineShape(stroke, fill);
-                        Double[] points = new Double[] {x, y, width, height}; // StartX, StartY, EndX, EndY
+                        // Creating the shape with the loaded attributes
+                        LineCreator lineCreator = new LineCreator();
+                        lineCreator.creationOfShape(strokeColor, fillingColor, strokeColorWidth, width, height);        // only stroke and filling are not null
+                        // Gets the specific shape from ShapeCreator
+                        shape = lineCreator.getShape();
+                        // Draw the shape
+                        Double[] points = new Double[] {x, y, width, height};               // StartX, StartY, EndX, EndY
                         shape.draw(points);
                         break;
                     default:
-                        continue; // ignora formati sconosciuti
+                        continue;   // ignores unknown formats
                 }
 
-                anchorPane.getChildren().add((Node) shape);
+                Node node1 = (Node) shape;
+                pane.getChildren().add(node1);
+                //DragMod dm = new DragMod(node1, anchorPane, this.getcTaker(), this.getController());
+                //d.makeDraggable();
             }
 
         } catch (IOException e) {
@@ -70,5 +108,5 @@ public class Load implements CommandInterface {
     }
 
 }
-*/
+
 

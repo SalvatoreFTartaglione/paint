@@ -20,7 +20,6 @@ public class Main extends Application {
         MainController controller = new MainController(model);
         MainView view = new MainView(controller);
         view.start(stage);
-
 /*
 
         AbstractShape rectangle = new RectangleCreator();
@@ -34,8 +33,8 @@ public class Main extends Application {
         System.out.println(rectangle.getShape().toString());
         System.out.println(ellipse.getShape().toString());
         System.out.println(line.getShape().toString());
-
 */
+
 
     }
 

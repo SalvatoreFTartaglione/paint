@@ -3,7 +3,7 @@ package org.example.model.shape;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 
-public class EllipseShape extends Ellipse implements ShapeInterface {
+public class EllipseShape extends Ellipse implements ShapeInterface, FillableShape {
 
 
 
@@ -12,7 +12,6 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
     private double coordinateX;
     private double coordinateY;
     private int strokeWidth;
-    //private double angle;
     private double height;
     private double width;
 
@@ -21,7 +20,6 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
         this.setSize(width, height);                    //default value
         this.strokeColor = stroke;
         this.fillColor = fill;
-        //this.angle = angle;
         this.strokeWidth = strokeWidth;
     }
 
@@ -29,7 +27,7 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
     public void draw(double X, double Y) {
         this.setStrokeWidth(this.getStrokeWidth()); //default value
         this.setStroke(this.getStrokeColor());
-        this.setFill(this.getFillColor());
+        this.setFill(this.getFillingColor());
         //this.setRotate(this.getAngle());
         this.setCenterX(X);
         this.setCenterY(Y);
@@ -53,7 +51,7 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
      * Returns the fill color of the shape
      */
     @Override
-    public Color getFillColor() {
+    public Color getFillingColor() {
         return this.fillColor;
     }
 
@@ -73,7 +71,7 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
      * Sets the fill color of the shape
      */
     @Override
-    public void setFillColor(Color fill) {
+    public void setFillingColor(Color fill) {
         this.fillColor = fill;
 
     }
@@ -166,34 +164,6 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
     }
 
     /**
-     * @param shape
-     * @return ShapeInterface
-     * Returns a copy of the shape passed as a parameter
-     */
-    /*
-    @Override
-    public ShapeInterface getAcopy(ShapeInterface shape) {
-        EllipseShape newCopy = new EllipseShape(shape.getStrokeColor(), shape.getFillColor(), shape.getAngle(), shape.getCount(), shape.getWidthShape(), shape.getHeightShape());
-        newCopy.draw(shape.getX(), shape.getY());
-        newCopy.setSize(shape.getWidthShape(), shape.getHeightShape());
-        newCopy.setCenterX(((EllipseShape)shape).getCenterX());
-        newCopy.setCenterY(((EllipseShape)shape).getCenterY());
-        return (ShapeInterface) newCopy;
-    }
-    */
-
-
-    /**
-     * @return double
-     * Returns the rotation angle of the shape
-     */
-    /*@Override
-    public double getAngle() {
-        return this.angle;
-    }*/
-
-
-    /**
      * @param points
      */
     @Override
@@ -214,25 +184,19 @@ public class EllipseShape extends Ellipse implements ShapeInterface {
         this.setWidth(width);
     }
 
-
-    /**
-     * @param angle
-     * Sets the rotation angle of the shape
-     */
-    /*@Override
-    public void setAngle(double angle) {
-        this.angle = angle;
-    }
-*/
-
     /**
      * @return String
      * Prints the properties of the shape
      */
     @Override
     public String toString() {
-        return "Ellipse" + ";" + this.getStrokeColor() + ";" + this.getFillColor() + ";" +
+        return "Ellipse" + ";" + this.getStrokeColor() + ";" + this.getFillingColor() + ";" + this.getCustomStrokeWidth() + ";"
                 + this.getWidth() + ";" + this.getHeight() + ";" + this.getCenterX() + ";" + this.getCenterY() + "\n";
+    }
+
+    @Override
+    public void setFillColor(Color fill) {
+
     }
 
 }
