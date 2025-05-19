@@ -31,4 +31,5 @@ public interface ShapeInterface {
 
     // CHECK!!!!!!
     void setFillColor(Color fill);
+    Color getFillColor();
 }

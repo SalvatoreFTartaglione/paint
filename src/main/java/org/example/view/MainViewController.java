@@ -490,7 +490,7 @@ public class MainViewController implements Initializable {
         return line;
     }
 
-    private AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, int width, int height) {
+    private AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
         AbstractShape ellipse = new EllipseCreator();
         ellipse.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
         return ellipse;
