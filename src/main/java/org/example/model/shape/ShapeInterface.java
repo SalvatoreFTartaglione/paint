@@ -11,9 +11,6 @@ public interface ShapeInterface {
     void setStrokeWidth(int strokeWidth);
     int getCustomStrokeWidth();
 
-    Color getFillColor();
-    void setFillColor(Color fill);
-
     // Height and Width
     public double getWidth();
     public double getHeight();
@@ -31,4 +28,7 @@ public interface ShapeInterface {
 
     // Simplified serialization
     public String toString();
+
+    // CHECK!!!!!!
+    void setFillColor(Color fill);
 }

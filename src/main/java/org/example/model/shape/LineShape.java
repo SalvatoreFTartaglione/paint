@@ -10,7 +10,7 @@ public class LineShape extends Line implements ShapeInterface{
 
     private Color strokeColor;
     private double startX, startY, endX, endY;
-    private Double[] points;
+    private Double[]    points;
     private int strokeWidth;
     // private double angle;
 

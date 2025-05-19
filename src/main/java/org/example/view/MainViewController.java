@@ -1,11 +1,17 @@
 package org.example.view;
 
+import java.net.URL;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -15,21 +21,18 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import org.example.controller.ShapeOption;
 import org.example.model.commands.Load;
 import org.example.model.commands.Save;
 import org.example.model.shape.*;
 
-import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
 public class MainViewController implements Initializable {
 
     @FXML
-    public CheckBox gridButton;
-    public Pane drawingPane;
+    private CheckBox gridButton;
+    @FXML
+    private Pane drawingPane;
     @FXML
     private SplitPane splitPane;
     @FXML
@@ -70,7 +73,10 @@ public class MainViewController implements Initializable {
     private Pane mainCanvasContainer;
     @FXML
     private ContextMenu scrollPaneContextMenu;
+
     private boolean isDragging = false;
+    private Point2D startPoint = null;
+
     private ShapeInterface selectedShapeForContextMenu = null;
     private ContextMenu contextMenu = new ContextMenu();
 
@@ -410,12 +416,12 @@ public class MainViewController implements Initializable {
             if(!contextMenu.isShowing()) {
                 ShapeOption selectedShape = shapeComboBox.getValue();
                 if (selectedShape != null) {
-                    // coordinate locali del clic sul Canvas
+    switch (selectedShape.getName()) {
+                    case "Ellipse": {                // coordinate locali del clic sul Canvas
                     Point2D localCoords = mainCanvasContainer.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
                     double x = localCoords.getX();
                     double y = localCoords.getY();
-                    switch (selectedShape.getName()) {
-                        case "Ellipse": {
+
                             AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
                             ShapeInterface shapeInterface = abstractEllipse.getShape();
                             //controllo che la shape selezionata sia un'ellisse
@@ -428,16 +434,32 @@ public class MainViewController implements Initializable {
                             break;
                         }
                         case "Line": {
-                            AbstractShape abstractLine = createLine(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
-                            ShapeInterface shapeInterface = abstractLine.getShape();
+                            Point2D localCoords = mainCanvasContainer.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                        double x = localCoords.getX();
+                        double y = localCoords.getY();
+                        if (startPoint == null) {
+                            // first click: save starting point
+                            startPoint = new Point2D(x, y);
+                        } else {
+                            // second click: save end point
+                            LineCreator lineCreator = new LineCreator();
+                            lineCreator.creationOfShape(borderColorPicker.getValue(), null, 10, 0, 0);
+                            // Add line to container
+                            ShapeInterface shapeInterface = lineCreator.getShape();
+                            Double[] points = {x, y, startPoint.getX(), startPoint.getY()};
                             if (shapeInterface instanceof LineShape) {
                                 LineShape lineShape = (LineShape) shapeInterface;
-                                lineShape.draw(x, y);
-                                drawingPane.getChildren().add(lineShape);
+                                lineShape.draw(points);
+                                mainCanvasContainer.getChildren().add(lineShape);
                             }
-                            break;
+                            // Reset state variable
+                            startPoint = null;
+                        }break;
                         }
-                        case "Rectangle": {
+                        case "Rectangle": {// coordinate locali del clic sul Canvas
+                        Point2D localCoords = mainCanvasContainer.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                        double x = localCoords.getX();
+                        double y = localCoords.getY();
                             AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
                             ShapeInterface shapeInterface = abstractRectangle.getShape();
                             if (shapeInterface instanceof RectangleShape) {
@@ -468,10 +490,19 @@ public class MainViewController implements Initializable {
         return line;
     }
 
-    private AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
+    private AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, int width, int height) {
         AbstractShape ellipse = new EllipseCreator();
         ellipse.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
         return ellipse;
+    }
+
+    public void onRightClick(MouseEvent mouseEvent) {
+    }
+
+    public void check(MouseEvent mouseEvent) {
+        if (mouseEvent.getButton() == MouseButton.SECONDARY) {
+            System.out.println(drawingPane.getChildren().size());
+        }
     }
 
     /**
@@ -481,7 +512,6 @@ public class MainViewController implements Initializable {
     @FXML
     private void saveFile(ActionEvent event) {
         Save saveFile = new Save(drawingPane);
-        System.out.println(drawingPane.getChildren().size());
         saveFile.executeCommand(null);
     }
 

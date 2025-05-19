@@ -1,6 +1,5 @@
 package org.example.model.shape;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Shape;
 
 public abstract class AbstractShape {
 
@@ -18,12 +17,8 @@ public abstract class AbstractShape {
      * Create a generic Shape by setting all the properties passed as a parameter
      */
     // Concrete method that creates a shape
-    public void creationOfShape(Color stroke, Color fill, /*double angle, String text,*/ int strokeWidth, double width, double height) {
-        shape = this.createShape(stroke, fill, /*angle, text,*/ strokeWidth, width, height);
-        /*shape.setStrokeColor(stroke);
-        shape.setFillColor(fill);
-        shape.setStrokeWidth(strokeWidth);
-        shape.setSize(width, height);*/
+    public void creationOfShape(Color strokeColor, Color fillingColor, int strokeColorWidth, double width, double height) {
+        shape = this.createShape(strokeColor, fillingColor, strokeColorWidth, width, height);
     }
 
     /**
