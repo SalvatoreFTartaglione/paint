@@ -457,71 +457,75 @@ public class MainViewController implements Initializable {
     public void DrawOnCanvas(MouseEvent mouseEvent) {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             ShapeOption selectedShape = shapeComboBox.getValue();
-            if (selectedShape != null) {
-                switch (selectedShape.getName()) {
-                    case "Ellipse": {
-                        // coordinate locali del clic sul Canvas
-                        Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                        double x = localCoords.getX();
-                        double y = localCoords.getY();
-                        AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
-                        ShapeInterface shapeInterface = abstractEllipse.getShape();
-                        //controllo che la shape selezionata sia un'ellisse
-                        if (shapeInterface instanceof EllipseShape) {
-                            EllipseShape ellipseShape = (EllipseShape) shapeInterface;
-                            ellipseShape.draw(x, y);
-                            // Aggiungi l'ellisse al contenitore del Canvas
-                            drawingPane.getChildren().add(ellipseShape);
-                            shapeComboBox.setValue(null);
-                            //makeDraggable(ellipseShape);
-                        }
-                        break;
-                    }
-                    case "Line": {
-                        Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                        double x = localCoords.getX();
-                        double y = localCoords.getY();
-                        if (startPoint == null) {
-                            // first click: save starting point
-                            startPoint = new Point2D(x, y);
-                        } else {
-                            // second click: save end point
-                            LineCreator lineCreator = new LineCreator();
-                            lineCreator.creationOfShape(borderColorPicker.getValue(), null, 5, 0, 0);
-                            // Add line to container
-                            ShapeInterface shapeInterface = lineCreator.getShape();
-                            Double[] points = {x, y, startPoint.getX(), startPoint.getY()};
-                            if (shapeInterface instanceof LineShape) {
-                                LineShape lineShape = (LineShape) shapeInterface;
-                                lineShape.draw(points);
-                                drawingPane.getChildren().add(lineShape);
+            if (!contextMenu.isShowing()) {
+                if (selectedShape != null) {
+                    switch (selectedShape.getName()) {
+                        case "Ellipse": {
+                            // coordinate locali del clic sul Canvas
+                            Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                            double x = localCoords.getX();
+                            double y = localCoords.getY();
+                            AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
+                            ShapeInterface shapeInterface = abstractEllipse.getShape();
+                            //controllo che la shape selezionata sia un'ellisse
+                            if (shapeInterface instanceof EllipseShape) {
+                                EllipseShape ellipseShape = (EllipseShape) shapeInterface;
+                                ellipseShape.draw(x, y);
+                                // Aggiungi l'ellisse al contenitore del Canvas
+                                drawingPane.getChildren().add(ellipseShape);
                                 shapeComboBox.setValue(null);
-                                //makeDraggable(lineShape);
+                                //makeDraggable(ellipseShape);
                             }
-                            // Reset state variable
-                            startPoint = null;
+                            break;
+                        }
+                        case "Line": {
+                            Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                            double x = localCoords.getX();
+                            double y = localCoords.getY();
+                            if (startPoint == null) {
+                                // first click: save starting point
+                                startPoint = new Point2D(x, y);
+                            } else {
+                                // second click: save end point
+                                LineCreator lineCreator = new LineCreator();
+                                lineCreator.creationOfShape(borderColorPicker.getValue(), null, 5, 0, 0);
+                                // Add line to container
+                                ShapeInterface shapeInterface = lineCreator.getShape();
+                                Double[] points = {x, y, startPoint.getX(), startPoint.getY()};
+                                if (shapeInterface instanceof LineShape) {
+                                    LineShape lineShape = (LineShape) shapeInterface;
+                                    lineShape.draw(points);
+                                    drawingPane.getChildren().add(lineShape);
+                                    shapeComboBox.setValue(null);
+                                    //makeDraggable(lineShape);
+                                }
+                                // Reset state variable
+                                startPoint = null;
 
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case "Rectangle": {
-                        // coordinate locali del clic sul Canvas
-                        Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                        double x = localCoords.getX();
-                        double y = localCoords.getY();
-                        AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
-                        ShapeInterface shapeInterface = abstractRectangle.getShape();
-                        if (shapeInterface instanceof RectangleShape) {
-                            RectangleShape rectangleShape = (RectangleShape) shapeInterface;
-                            rectangleShape.draw(x, y);
-                            drawingPane.getChildren().add(rectangleShape);
-                            shapeComboBox.setValue(null);
-                            //makeDraggable(rectangleShape);
+                        case "Rectangle": {
+                            // coordinate locali del clic sul Canvas
+                            Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                            double x = localCoords.getX();
+                            double y = localCoords.getY();
+                            AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
+                            ShapeInterface shapeInterface = abstractRectangle.getShape();
+                            if (shapeInterface instanceof RectangleShape) {
+                                RectangleShape rectangleShape = (RectangleShape) shapeInterface;
+                                rectangleShape.draw(x, y);
+                                drawingPane.getChildren().add(rectangleShape);
+                                shapeComboBox.setValue(null);
+                                //makeDraggable(rectangleShape);
+                            }
+                            break;
                         }
-                        break;
                     }
+
                 }
-
+            }else {
+                contextMenu.hide();
             }
         }
     }
