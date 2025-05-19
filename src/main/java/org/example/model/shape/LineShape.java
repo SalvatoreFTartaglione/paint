@@ -169,6 +169,11 @@ public class LineShape extends Line implements ShapeInterface{
     }
 
     @Override
+    public Color getFillColor() {
+        return null;
+    }
+
+    @Override
     public void setStrokeWidth(int strokeWidth) {
         this.strokeWidth = strokeWidth;
     }

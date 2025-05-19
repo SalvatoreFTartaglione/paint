@@ -73,7 +73,6 @@ public class EllipseShape extends Ellipse implements ShapeInterface, FillableSha
     @Override
     public void setFillingColor(Color fill) {
         this.fillColor = fill;
-
     }
 
 
@@ -159,6 +158,16 @@ public class EllipseShape extends Ellipse implements ShapeInterface, FillableSha
     }
 
     @Override
+    public Color getFillColor() {
+        return this.fillColor;
+    }
+
+    @Override
+    public void setFillColor(Color fill) {
+        this.fillColor = fill;
+    }
+
+    @Override
     public void setStrokeWidth(int strokeWidth) {
         this.strokeWidth = strokeWidth;
     }
@@ -192,11 +201,6 @@ public class EllipseShape extends Ellipse implements ShapeInterface, FillableSha
     public String toString() {
         return "Ellipse" + ";" + this.getStrokeColor() + ";" + this.getFillingColor() + ";" + this.getCustomStrokeWidth() + ";"
                 + this.getWidth() + ";" + this.getHeight() + ";" + this.getCenterX() + ";" + this.getCenterY() + "\n";
-    }
-
-    @Override
-    public void setFillColor(Color fill) {
-
     }
 
 }

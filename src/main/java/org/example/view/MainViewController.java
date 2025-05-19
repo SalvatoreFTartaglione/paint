@@ -1,17 +1,11 @@
 package org.example.view;
 
-import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -21,11 +15,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import org.example.controller.ShapeOption;
 import org.example.model.commands.Load;
 import org.example.model.commands.Save;
 import org.example.model.shape.*;
+
+import java.net.URL;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 public class MainViewController implements Initializable {
 
@@ -73,6 +71,9 @@ public class MainViewController implements Initializable {
     @FXML
     private ContextMenu scrollPaneContextMenu;
     private boolean isDragging = false;
+    private ShapeInterface selectedShapeForContextMenu = null;
+    private ContextMenu contextMenu = new ContextMenu();
+
     /**
      * Initializes the controller class.
      */
@@ -100,33 +101,211 @@ public class MainViewController implements Initializable {
 
 
     private void initializeContextMenu() {
-        ContextMenu contextMenu = new ContextMenu();
 
-        // Fill Color Menu Item
+        // Fill Color
         Label fillLabel = new Label("Change Fill Color:");
-        ColorPicker changeFillColorPickerContexMenu = new ColorPicker();
-        HBox fillBox = new HBox(10, fillLabel, changeFillColorPickerContexMenu);
+        ColorPicker changeFillColorPicker = new ColorPicker();
+        HBox fillBox = new HBox(10, fillLabel, changeFillColorPicker);
         CustomMenuItem fillColorItem = new CustomMenuItem(fillBox);
-        fillColorItem.setHideOnClick(false); // evita che si chiuda subito
+        fillColorItem.setHideOnClick(false);
 
-        // Border Color Menu Item
+        // Stroke Color
         Label borderLabel = new Label("Change Border Color:");
-        ColorPicker changeStrokeColorPickerContexMenu = new ColorPicker();
-        HBox borderBox = new HBox(10, borderLabel, changeStrokeColorPickerContexMenu);
+        ColorPicker changeStrokeColorPicker = new ColorPicker();
+        HBox borderBox = new HBox(10, borderLabel, changeStrokeColorPicker);
         CustomMenuItem strokeColorItem = new CustomMenuItem(borderBox);
         strokeColorItem.setHideOnClick(false);
 
-        // Aggiungi gli item al context menu
         contextMenu.getItems().addAll(fillColorItem, strokeColorItem);
 
-        // Mostra il menu su click destro
-        scrollPane.setOnMousePressed(event -> {
-            if (event.isSecondaryButtonDown()) {
-                contextMenu.show(scrollPane, event.getScreenX(), event.getScreenY());
-            } else {
-                contextMenu.hide();
+        // Cambia colori al volo se c'è una shape selezionata
+        changeFillColorPicker.setOnAction(event -> {
+            if (selectedShapeForContextMenu != null) {
+                selectedShapeForContextMenu.setFillColor(changeFillColorPicker.getValue());
             }
         });
+
+        changeStrokeColorPicker.setOnAction(event -> {
+            if (selectedShapeForContextMenu != null) {
+                selectedShapeForContextMenu.setStrokeColor(changeStrokeColorPicker.getValue());
+            }
+        });
+
+        // Mostra il menu su clic destro dentro `drawingPane`
+        drawingPane.setOnMousePressed(event -> {
+            if (event.isSecondaryButtonDown()) {
+                Node clickedShape = findShapeAt(event.getX(), event.getY());
+                if (clickedShape instanceof ShapeInterface) {
+                    selectedShapeForContextMenu = (ShapeInterface) clickedShape;
+
+                    // Imposta i color picker con i colori attuali della shape selezionata
+                    changeFillColorPicker.setValue(selectedShapeForContextMenu.getFillColor());
+                    changeStrokeColorPicker.setValue(selectedShapeForContextMenu.getStrokeColor());
+
+                    contextMenu.show(drawingPane, event.getScreenX(), event.getScreenY());
+                } else {
+                    selectedShapeForContextMenu = null;
+                    contextMenu.hide();
+                }
+            }
+        });
+
+        // Impedisci la chiusura automatica quando il ColorPicker si apre
+        changeFillColorPicker.setOnShowing(e -> contextMenu.setAutoHide(false));
+        changeFillColorPicker.setOnHiding(e -> contextMenu.setAutoHide(true));
+
+        changeStrokeColorPicker.setOnShowing(e -> contextMenu.setAutoHide(false));
+        changeStrokeColorPicker.setOnHiding(e -> contextMenu.setAutoHide(true));
+
+        changeFillColorPicker.setOnAction(event -> {
+            if (selectedShapeForContextMenu != null) {
+                // Rimuove la shape selezionata
+                /*((Shape) selectedShapeForContextMenu).setFill(changeFillColorPicker.getValue());*/
+                drawingPane.getChildren().remove(selectedShapeForContextMenu);
+
+                Color newFillColor = changeFillColorPicker.getValue();
+                selectedShapeForContextMenu.setFillColor(newFillColor);
+
+                String shapeName = selectedShapeForContextMenu.getClass().getSimpleName().replace("Shape", "");
+
+                AbstractShape abstractShape = null;
+
+                switch (shapeName) {
+                    case "Ellipse":
+                        abstractShape = createEllipse(
+                                selectedShapeForContextMenu.getStrokeColor(),
+                                newFillColor,
+                                selectedShapeForContextMenu.getCustomStrokeWidth(),
+                                selectedShapeForContextMenu.getWidth(),
+                                selectedShapeForContextMenu.getHeight()
+                        );
+                        break;
+                    case "Line":
+                        abstractShape = createLine(
+                                selectedShapeForContextMenu.getStrokeColor(),
+                                newFillColor,
+                                selectedShapeForContextMenu.getCustomStrokeWidth(),
+                                selectedShapeForContextMenu.getWidth(),
+                                selectedShapeForContextMenu.getHeight()
+                        );
+                        break;
+                    case "Rectangle":
+                        abstractShape = createRectangle(
+                                selectedShapeForContextMenu.getStrokeColor(),
+                                newFillColor,
+                                selectedShapeForContextMenu.getCustomStrokeWidth(),
+                                selectedShapeForContextMenu.getWidth(),
+                                selectedShapeForContextMenu.getHeight()
+                        );
+                        break;
+                    default:
+                        System.out.println("Forma non riconosciuta: " + shapeName);
+                }
+
+                if (abstractShape != null) {
+                    ShapeInterface shapeInterface = abstractShape.getShape();
+
+                    if (shapeInterface instanceof EllipseShape) {
+                        EllipseShape ellipse = (EllipseShape) shapeInterface;
+                        ellipse.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
+                        selectedShapeForContextMenu = ellipse;
+                        drawingPane.getChildren().add(ellipse);
+                    } else if (shapeInterface instanceof LineShape) {
+                        LineShape line = (LineShape) shapeInterface;
+                        line.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
+                        selectedShapeForContextMenu = line;
+                        drawingPane.getChildren().add(line);
+                    } else if (shapeInterface instanceof RectangleShape) {
+                        RectangleShape rectangle = (RectangleShape) shapeInterface;
+                        rectangle.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
+                        selectedShapeForContextMenu = rectangle;
+                        drawingPane.getChildren().add(rectangle);
+                    }
+                }
+            }
+        });
+
+
+        changeStrokeColorPicker.setOnAction(event -> {
+            /*((Ellipse) selectedShapeForContextMenu).setStroke(changeStrokeColorPicker.getValue());*/
+            if (selectedShapeForContextMenu != null) {
+                drawingPane.getChildren().remove(selectedShapeForContextMenu);
+
+                Color newStrokeColor = changeStrokeColorPicker.getValue();
+                selectedShapeForContextMenu.setStrokeColor(newStrokeColor);
+
+                String shapeName = selectedShapeForContextMenu.getClass().getSimpleName().replace("Shape", "");
+
+                AbstractShape abstractShape = null;
+
+                switch (shapeName) {
+                    case "Ellipse":
+                        abstractShape = createEllipse(
+                                newStrokeColor,
+                                selectedShapeForContextMenu.getFillColor(),
+                                selectedShapeForContextMenu.getCustomStrokeWidth(),
+                                selectedShapeForContextMenu.getWidth(),
+                                selectedShapeForContextMenu.getHeight()
+                        );
+                        break;
+                    case "Line":
+                        abstractShape = createLine(
+                                newStrokeColor,
+                                selectedShapeForContextMenu.getFillColor(),
+                                selectedShapeForContextMenu.getCustomStrokeWidth(),
+                                selectedShapeForContextMenu.getWidth(),
+                                selectedShapeForContextMenu.getHeight()
+                        );
+                        break;
+                    case "Rectangle":
+                        abstractShape = createRectangle(
+                                newStrokeColor,
+                                selectedShapeForContextMenu.getFillColor(),
+                                selectedShapeForContextMenu.getCustomStrokeWidth(),
+                                selectedShapeForContextMenu.getWidth(),
+                                selectedShapeForContextMenu.getHeight()
+                        );
+                        break;
+                    default:
+                        System.out.println("Forma non riconosciuta: " + shapeName);
+                }
+
+                if (abstractShape != null) {
+                    ShapeInterface shapeInterface = abstractShape.getShape();
+
+                    if (shapeInterface instanceof EllipseShape) {
+                        EllipseShape ellipse = (EllipseShape) shapeInterface;
+                        ellipse.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
+                        selectedShapeForContextMenu = ellipse;
+                        drawingPane.getChildren().add(ellipse);
+                    } else if (shapeInterface instanceof LineShape) {
+                        LineShape line = (LineShape) shapeInterface;
+                        line.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
+                        selectedShapeForContextMenu = line;
+                        drawingPane.getChildren().add(line);
+                    } else if (shapeInterface instanceof RectangleShape) {
+                        RectangleShape rectangle = (RectangleShape) shapeInterface;
+                        rectangle.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
+                        selectedShapeForContextMenu = rectangle;
+                        drawingPane.getChildren().add(rectangle);
+                    }
+                }
+            }
+        });
+
+    }
+
+    private Node findShapeAt(double x, double y) {
+        for (Node node : drawingPane.getChildren()) {
+            if (node instanceof ShapeInterface) {
+                ShapeInterface shape = (ShapeInterface) node;
+                // Verifica approssimata della presenza del click nella shape
+                if (Math.abs(shape.getX() - x) <= 40 && Math.abs(shape.getY() - y) <= 80) {
+                    return node;
+                }
+            }
+        }
+        return null;
     }
 
 
@@ -228,47 +407,52 @@ public class MainViewController implements Initializable {
 
     public void DrawOnCanvas(MouseEvent mouseEvent) {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
-            ShapeOption selectedShape = shapeComboBox.getValue();
-            if (selectedShape != null) {
-                // coordinate locali del clic sul Canvas
-                Point2D localCoords = mainCanvasContainer.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                double x = localCoords.getX();
-                double y = localCoords.getY();
-                switch (selectedShape.getName()) {
-                    case "Ellipse": {
-                        AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
-                        ShapeInterface shapeInterface = abstractEllipse.getShape();
-                        //controllo che la shape selezionata sia un'ellisse
-                        if (shapeInterface instanceof EllipseShape) {
-                            EllipseShape ellipseShape = (EllipseShape) shapeInterface;
-                            ellipseShape.draw(x, y);
-                            // Aggiungi l'ellisse al contenitore del Canvas
-                            drawingPane.getChildren().add(ellipseShape);
+            if(!contextMenu.isShowing()) {
+                ShapeOption selectedShape = shapeComboBox.getValue();
+                if (selectedShape != null) {
+                    // coordinate locali del clic sul Canvas
+                    Point2D localCoords = mainCanvasContainer.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                    double x = localCoords.getX();
+                    double y = localCoords.getY();
+                    switch (selectedShape.getName()) {
+                        case "Ellipse": {
+                            AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
+                            ShapeInterface shapeInterface = abstractEllipse.getShape();
+                            //controllo che la shape selezionata sia un'ellisse
+                            if (shapeInterface instanceof EllipseShape) {
+                                EllipseShape ellipseShape = (EllipseShape) shapeInterface;
+                                ellipseShape.draw(x, y);
+                                // Aggiungi l'ellisse al contenitore del Canvas
+                                drawingPane.getChildren().add(ellipseShape);
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case "Line": {
-                        AbstractShape abstractLine = createLine(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
-                        ShapeInterface shapeInterface = abstractLine.getShape();
-                        if (shapeInterface instanceof LineShape) {
-                            LineShape lineShape = (LineShape) shapeInterface;
-                            lineShape.draw(x, y);
-                            drawingPane.getChildren().add(lineShape);
+                        case "Line": {
+                            AbstractShape abstractLine = createLine(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
+                            ShapeInterface shapeInterface = abstractLine.getShape();
+                            if (shapeInterface instanceof LineShape) {
+                                LineShape lineShape = (LineShape) shapeInterface;
+                                lineShape.draw(x, y);
+                                drawingPane.getChildren().add(lineShape);
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case "Rectangle": {
-                        AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
-                        ShapeInterface shapeInterface = abstractRectangle.getShape();
-                        if (shapeInterface instanceof RectangleShape) {
-                            RectangleShape rectangleShape = (RectangleShape) shapeInterface;
-                            rectangleShape.draw(x, y);
-                            drawingPane.getChildren().add(rectangleShape);
+                        case "Rectangle": {
+                            AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
+                            ShapeInterface shapeInterface = abstractRectangle.getShape();
+                            if (shapeInterface instanceof RectangleShape) {
+                                RectangleShape rectangleShape = (RectangleShape) shapeInterface;
+                                rectangleShape.draw(x, y);
+                                drawingPane.getChildren().add(rectangleShape);
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
+            }else {
+                contextMenu.hide();
             }
+
         }
     }
 
@@ -284,19 +468,10 @@ public class MainViewController implements Initializable {
         return line;
     }
 
-    private AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, int width, int height) {
+    private AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
         AbstractShape ellipse = new EllipseCreator();
         ellipse.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
         return ellipse;
-    }
-
-    public void onRightClick(MouseEvent mouseEvent) {
-    }
-
-    public void check(MouseEvent mouseEvent) {
-        if (mouseEvent.getButton() == MouseButton.SECONDARY) {
-            System.out.println(drawingPane.getChildren().size());
-        }
     }
 
     /**
@@ -305,7 +480,8 @@ public class MainViewController implements Initializable {
      */
     @FXML
     private void saveFile(ActionEvent event) {
-        Save saveFile = new Save(mainCanvasContainer);
+        Save saveFile = new Save(drawingPane);
+        System.out.println(drawingPane.getChildren().size());
         saveFile.executeCommand(null);
     }
 
