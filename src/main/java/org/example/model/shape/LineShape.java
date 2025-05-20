@@ -79,20 +79,7 @@ public class LineShape implements ShapeInterface{
      */
     @Override
     public double getX() {
-        return lineShape.getStartX() ;
-    }
-
-    public double getEndX(){
-        return
-    }
-
-    /**
-     * @return double
-     * Returns the coordinate along the ordinate axis of the start point of the line
-     */
-    @Override
-    public double getY() {
-        return this.startY;
+        return lineShape.getStartX();
     }
 
     /**
@@ -101,8 +88,17 @@ public class LineShape implements ShapeInterface{
      */
     @Override
     public void setX(double point) {
-        this.startX = point;
+        lineShape.setStartX(point);
 
+    }
+
+    /**
+     * @return double
+     * Returns the coordinate along the ordinate axis of the start point of the line
+     */
+    @Override
+    public double getY() {
+        return lineShape.getStartY();
     }
 
     /**
@@ -111,24 +107,8 @@ public class LineShape implements ShapeInterface{
      */
     @Override
     public void setY(double point) {
-        this.startY = point;
+        lineShape.setStartY(point);
 
-    }
-
-    /**
-     * @param point
-     * Sets the coordinate along the abscissa axis of the end point of the line
-     */
-    public void endX(double point) {
-        this.endX = point;
-    }
-
-    /**
-     * @param point
-     * Sets the coordinate along the ordinate axis of the end point of the line
-     */
-    public void endY(double point) {
-        this.endY = point;
     }
 
     /**
@@ -137,7 +117,7 @@ public class LineShape implements ShapeInterface{
      */
     @Override
     public double getHeight() {
-        return this.getEndY();
+        return lineShape.getEndY();
     }
 
     /**
@@ -146,31 +126,23 @@ public class LineShape implements ShapeInterface{
      */
     @Override
     public double getWidth() {
-        return this.getEndX();
+        return lineShape.getEndX();
     }
 
     /**
-     * @param X
-     * @param Y
+     * @param x
+     * @param y
      * Set the size of the shape
      */
     @Override
-    public void setSize(double X, double Y) {
-        this.setEndX(X);
-        this.setEndY(Y);
-    }
-
-    /**
-     * @param points
-     * Sets the coordinate of the line and inserts them in an array of double
-     */
-    public void setPoints(Double[] points){
-        this.points = points;
+    public void setSize(double x, double y) {
+        lineShape.setStartX(x);
+        lineShape.setStartY(y);
     }
 
     @Override
     public double getCustomStrokeWidth() {
-        return strokeWidth;
+        return lineShape.getStrokeWidth();
     }
 
     @Override
@@ -180,18 +152,12 @@ public class LineShape implements ShapeInterface{
 
     @Override
     public Node getNode() {
-        return this;
+        return lineShape;
     }
-
-    @Override
-    public void setStrokeWidth(int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-    }
-
 
     @Override
     public void setFillColor(Color fill) {
-
+        throw new UnsupportedOperationException("The following feature is not supported");
     }
 
     /**
@@ -202,6 +168,14 @@ public class LineShape implements ShapeInterface{
     public String toString() {
         return "Line" + ";" + lineShape.getStroke() + ";" + lineShape.getEndX() + ";" + lineShape.getEndY() + ";"
                 + lineShape.getStartX() + ";" + lineShape.getStartY() + "\n";
+    }
+
+    /**
+     * @param points
+     * Sets the coordinate of the line and inserts them in an array of double
+     */
+    private void setPoints(Double[] points){
+        this.points = points;
     }
 
 
