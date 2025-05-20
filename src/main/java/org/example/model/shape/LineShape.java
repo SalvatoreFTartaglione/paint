@@ -68,15 +68,15 @@ public class LineShape extends Line implements ShapeInterface{
      * @param stroke
      * Sets the border color of the shape
      */
-    @Override
+   /* @Override
     public void setStrokeColor(Color stroke) {
         this.strokeColor = stroke;
-    }
-    /*@Override
+    }*/
+    @Override
     public void setStrokeColor(Color color) {
         this.strokeColor = color;
         this.setStroke(color); // aggiorna visivamente
-    }*/
+    }
 
     /**
      * @return double

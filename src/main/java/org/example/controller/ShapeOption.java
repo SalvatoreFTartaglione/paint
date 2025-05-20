@@ -24,4 +24,18 @@ public class ShapeOption {
     public String toString() {
         return name;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        ShapeOption other = (ShapeOption) obj;
+        return name.equals(other.name); // o confronta su base più ampia se necessario
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
 }

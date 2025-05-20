@@ -23,7 +23,7 @@
                                 </ImageView>
                             </graphic>
                         </Button>
-                        <ComboBox fx:id="shapeComboBox" layoutX="152.0" layoutY="12.0" prefWidth="150.0" />
+                        <ComboBox fx:id="shapeComboBox" layoutX="152.0" layoutY="12.0" prefWidth="150.0"/>
                         <ImageView fx:id="genericShapePhoto" fitHeight="28.0" fitWidth="28.0" layoutX="111.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../images/genericShapes.png" />
