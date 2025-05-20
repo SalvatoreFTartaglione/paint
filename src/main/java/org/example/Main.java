@@ -17,6 +17,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
 
+        System.out.println("Hello World");
         MessageModel model = new MessageModel();
         MainController controller = new MainController(model);
         UndoManager undoManager = new UndoManager(); // crea il gestore Undo

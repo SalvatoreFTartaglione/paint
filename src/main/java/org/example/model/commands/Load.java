@@ -15,10 +15,24 @@ public class Load implements CommandInterface {
 
     private final Pane pane;
 
+    /**
+     * Constructs a Load command that will load shapes into the given drawing pane.
+     *
+     * @param pane the pane where the shapes will be loaded
+     */
     public Load(Pane pane) {
         this.pane = pane;
     }
 
+    /**
+     * Executes the load operation by opening a .txt file and reconstructing shapes defined in it.
+     * <p>
+     * The method uses a FileChooser to select the file, parses shape data, recreates the corresponding
+     * shapes, and adds them to the canvas.
+     * </p>
+     *
+     * @param node unused in this context, required by the interface
+     */
     @Override
     public void executeCommand(Node node) {
         FileChooser fileChooser = new FileChooser();

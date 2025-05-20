@@ -80,14 +80,19 @@ public class MainViewController implements Initializable {
     private ShapeInterface selectedShapeForContextMenu = null;
     private ContextMenu contextMenu = new ContextMenu();
     private UndoManager undoManager;
+
     /**
-     * Initializes the controller class.
+     * Initializes the controller after the root element has been completely processed.
+     *
+     * @param location the location used to resolve relative paths
+     * @param resources the resources used to localize the root object
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initializeSplitPane();
         initializeShapeChoiceBox();
         initializeContextMenu();
+
 
         mainCanvasContainer.setOnMousePressed(event -> {
             isDragging = false;
@@ -104,6 +109,11 @@ public class MainViewController implements Initializable {
         });
     }
 
+    /**
+     * Sets the undo manager for this controller.
+     *
+     * @param undoManager the {@code UndoManager} to associate with the canvas
+     */
     public void setUndoManager(UndoManager undoManager) {
         this.undoManager = undoManager;
     }
@@ -131,36 +141,40 @@ public class MainViewController implements Initializable {
         // Cambia colori al volo se c'è una shape selezionata
         changeFillColorPicker.setOnAction(event -> {
             if (selectedShapeForContextMenu != null) {
-                Color newColor = changeFillColorPicker.getValue();
-                Command cmd = new ChangeFillColorCommand(selectedShapeForContextMenu, newColor);
+                Command cmd = new ChangeFillColorCommand(selectedShapeForContextMenu, changeFillColorPicker.getValue());
                 undoManager.executeCommand(cmd);
-
-                //selectedShapeForContextMenu.setFillColor(changeFillColorPicker.getValue());
             }
         });
 
         changeStrokeColorPicker.setOnAction(event -> {
             if (selectedShapeForContextMenu != null) {
-                Color newColor = changeStrokeColorPicker.getValue();
-                Command cmd = new ChangeStrokeColorCommand(selectedShapeForContextMenu, newColor);
+                Command cmd = new ChangeStrokeColorCommand(selectedShapeForContextMenu, changeStrokeColorPicker.getValue());
                 undoManager.executeCommand(cmd);
-                //selectedShapeForContextMenu.setStrokeColor(changeStrokeColorPicker.getValue());
             }
         });
 
         // Mostra il menu su clic destro dentro `drawingPane`
         drawingPane.setOnMousePressed(event -> {
+            contextMenu.getItems().clear();
+
             if (event.isSecondaryButtonDown()) {
                 Node clickedShape = findShapeAt(event.getX(), event.getY());
-                if (clickedShape instanceof ShapeInterface) {
+                if (clickedShape instanceof RectangleShape || clickedShape instanceof EllipseShape) {
                     selectedShapeForContextMenu = (ShapeInterface) clickedShape;
 
                     // Imposta i color picker con i colori attuali della shape selezionata
                     changeFillColorPicker.setValue(selectedShapeForContextMenu.getFillColor());
                     changeStrokeColorPicker.setValue(selectedShapeForContextMenu.getStrokeColor());
-
+                    contextMenu.getItems().addAll(fillColorItem, strokeColorItem);
                     contextMenu.show(drawingPane, event.getScreenX(), event.getScreenY());
-                } else {
+                }
+                if(clickedShape instanceof LineShape){
+                    selectedShapeForContextMenu = (ShapeInterface) clickedShape;
+                    changeStrokeColorPicker.setValue(selectedShapeForContextMenu.getStrokeColor());
+                    contextMenu.getItems().add(strokeColorItem);
+                    contextMenu.show(drawingPane, event.getScreenX(), event.getScreenY());
+                }
+                if(clickedShape == null){
                     selectedShapeForContextMenu = null;
                     contextMenu.hide();
                 }
@@ -174,41 +188,50 @@ public class MainViewController implements Initializable {
         changeStrokeColorPicker.setOnShowing(e -> contextMenu.setAutoHide(false));
         changeStrokeColorPicker.setOnHiding(e -> contextMenu.setAutoHide(true));
 
-        //qui
-        changeFillColorPicker.setOnAction(event -> {
-            if (selectedShapeForContextMenu != null) {
-                Color newColor = changeFillColorPicker.getValue();
-                Command cmd = new ChangeFillColorCommand(selectedShapeForContextMenu, newColor);
-                undoManager.executeCommand(cmd);
-            }
-        });
-
-        // REMOVE !!!!
-        scrollPane.setPannable(false);
-
-
-        //qui
-        changeStrokeColorPicker.setOnAction(event -> {
-            if (selectedShapeForContextMenu != null) {
-                Color newColor = changeStrokeColorPicker.getValue();
-                Command cmd = new ChangeStrokeColorCommand(selectedShapeForContextMenu, newColor);
-                undoManager.executeCommand(cmd);
-            }
-        });
-
     }
 
     private Node findShapeAt(double x, double y) {
         for (Node node : drawingPane.getChildren()) {
             if (node instanceof ShapeInterface) {
-                ShapeInterface shape = (ShapeInterface) node;
-                // Verifica approssimata della presenza del click nella shape
-                if (Math.abs(shape.getX() - x) <= 40 && Math.abs(shape.getY() - y) <= 80) {
-                    return node;
+                if (node instanceof LineShape) {
+                    LineShape line = (LineShape) node;
+                    if (isPointNearLine(x, y, line)) {
+                        return line;
+                    }
+                } else {
+                    ShapeInterface shape = (ShapeInterface) node;
+                    if (Math.abs(shape.getX() - x) <= 40 && Math.abs(shape.getY() - y) <= 80) {
+                        return node;
+                    }
                 }
             }
         }
         return null;
+    }
+
+    private boolean isPointNearLine(double x, double y, LineShape line) {
+        double x1 = line.getStartX();
+        double y1 = line.getStartY();
+        double x2 = line.getEndX();
+        double y2 = line.getEndY();
+
+        double distance = pointToSegmentDistance(x, y, x1, y1, x2, y2);
+        return distance <= 5;  // tolleranza clic
+    }
+
+    private double pointToSegmentDistance(double px, double py, double x1, double y1, double x2, double y2) {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        if (dx == 0 && dy == 0) {
+            return Math.hypot(px - x1, py - y1);
+        }
+
+        double t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
+        t = Math.max(0, Math.min(1, t));
+
+        double projX = x1 + t * dx;
+        double projY = y1 + t * dy;
+        return Math.hypot(px - projX, py - projY);
     }
 
 
@@ -280,6 +303,14 @@ public class MainViewController implements Initializable {
                 }
             }
         });
+
+        shapeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (oldVal != null && newVal != null && !newVal.equals(oldVal)) {
+                // Resetto lo stato del disegno parziale (es. punto iniziale della linea)
+                startPoint = null;
+            }
+        });
+
     }
 
 
@@ -347,7 +378,12 @@ public class MainViewController implements Initializable {
 */
 
 
-
+    /**
+     * Handles the primary mouse click to draw the selected shape on the canvas.
+     * Supports Ellipse, Line, and Rectangle.
+     *
+     * @param mouseEvent the mouse event containing click coordinates
+     */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             ShapeOption selectedShape = shapeComboBox.getValue();
@@ -516,6 +552,11 @@ public class MainViewController implements Initializable {
         }
     }
 
+    /**
+     * Handles the Undo button action to undo the last executed command.
+     *
+     * @param actionEvent the action event triggered by the undo button
+     */
     @FXML
     public void undoClicked(ActionEvent actionEvent) {
         undoManager.undo();
