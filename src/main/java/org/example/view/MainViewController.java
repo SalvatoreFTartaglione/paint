@@ -80,8 +80,12 @@ public class MainViewController implements Initializable {
     private ShapeInterface selectedShapeForContextMenu = null;
     private ContextMenu contextMenu = new ContextMenu();
     private UndoManager undoManager;
+
     /**
-     * Initializes the controller class.
+     * Initializes the controller after the root element has been completely processed.
+     *
+     * @param location the location used to resolve relative paths
+     * @param resources the resources used to localize the root object
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -105,6 +109,11 @@ public class MainViewController implements Initializable {
         });
     }
 
+    /**
+     * Sets the undo manager for this controller.
+     *
+     * @param undoManager the {@code UndoManager} to associate with the canvas
+     */
     public void setUndoManager(UndoManager undoManager) {
         this.undoManager = undoManager;
     }
@@ -369,7 +378,12 @@ public class MainViewController implements Initializable {
 */
 
 
-
+    /**
+     * Handles the primary mouse click to draw the selected shape on the canvas.
+     * Supports Ellipse, Line, and Rectangle.
+     *
+     * @param mouseEvent the mouse event containing click coordinates
+     */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             ShapeOption selectedShape = shapeComboBox.getValue();
@@ -538,6 +552,11 @@ public class MainViewController implements Initializable {
         }
     }
 
+    /**
+     * Handles the Undo button action to undo the last executed command.
+     *
+     * @param actionEvent the action event triggered by the undo button
+     */
     @FXML
     public void undoClicked(ActionEvent actionEvent) {
         undoManager.undo();

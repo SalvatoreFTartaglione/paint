@@ -16,7 +16,15 @@ public class EllipseShape extends Ellipse implements ShapeInterface, FillableSha
     private double height;
     private double width;
 
-
+    /**
+     * Constructs an {@code EllipseShape} with the given properties.
+     *
+     * @param stroke the border color
+     * @param fill the fill color
+     * @param strokeWidth the stroke width
+     * @param width the horizontal radius
+     * @param height the vertical radius
+     */
     public EllipseShape(Color stroke, Color fill, /*double angle,*/ int strokeWidth, double width, double height) {
         this.setSize(width, height);                    //default value
         this.strokeColor = stroke;
@@ -24,6 +32,12 @@ public class EllipseShape extends Ellipse implements ShapeInterface, FillableSha
         this.strokeWidth = strokeWidth;
     }
 
+    /**
+     * Draws the ellipse at the given center coordinates.
+     *
+     * @param X the center X position
+     * @param Y the center Y position
+     */
     @Override
     public void draw(double X, double Y) {
         this.setStrokeWidth(this.getStrokeWidth()); //default value
@@ -58,7 +72,7 @@ public class EllipseShape extends Ellipse implements ShapeInterface, FillableSha
 
 
     /**
-     * @param stroke
+     * @param color
      * Sets the border color of the shape
      */
     @Override
@@ -154,20 +168,30 @@ public class EllipseShape extends Ellipse implements ShapeInterface, FillableSha
         this.width = width;
     }
 
+    /**
+     * @return the custom stroke width used for this shape
+     */
     @Override
     public int getCustomStrokeWidth() {
         return strokeWidth;
     }
 
+    /**
+     * @return the current fill color
+     */
     @Override
     public Color getFillColor() {
         return this.fillColor;
     }
 
+    /**
+     * @return the JavaFX node representing this shape
+     */
     @Override
     public Node getNode() {
         return this;
     }
+
 
     @Override
     public void setFillColor(Color fill) {
@@ -175,8 +199,11 @@ public class EllipseShape extends Ellipse implements ShapeInterface, FillableSha
         this.setFill(fill);  //aggiorna graficamente la figura
     }
 
-
-
+    /**
+     * Sets the stroke width (without applying it visually).
+     *
+     * @param strokeWidth the new stroke width
+     */
     @Override
     public void setStrokeWidth(int strokeWidth) {
         this.strokeWidth = strokeWidth;

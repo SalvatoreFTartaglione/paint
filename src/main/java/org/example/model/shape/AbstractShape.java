@@ -8,13 +8,29 @@ public abstract class AbstractShape {
 
 
     // Abstract method to create a shape that will be implemented in  the subclasses (LineCreator, RectangleCreator, EllipseCreator)
+    /**
+     * Creates a shape with the given properties.
+     * <p>
+     * This method must be implemented by subclasses to instantiate
+     * specific shapes (e.g., rectangle, ellipse, line).
+     *
+     * @param strokeColor the border color of the shape
+     * @param fillingColor the fill color (nullable for open shapes)
+     * @param strokeColorWidth the stroke width
+     * @param width the shape width
+     * @param height the shape height
+     * @return the created shape
+     */
     public abstract ShapeInterface createShape(Color strokeColor, Color fillingColor, int strokeColorWidth, double width, double height);
 
     /**
-     * @param strokeColor
-     * @param fillingColor
-     * @param strokeColorWidth
-     * Create a generic Shape by setting all the properties passed as a parameter
+     * Creates and stores a shape using the subclass-defined {@code createShape} method.
+     *
+     * @param strokeColor the border color
+     * @param fillingColor the fill color (nullable)
+     * @param strokeColorWidth the stroke width
+     * @param width the width of the shape
+     * @param height the height of the shape
      */
     // Concrete method that creates a shape
     public void creationOfShape(Color strokeColor, Color fillingColor, int strokeColorWidth, double width, double height) {
@@ -22,8 +38,9 @@ public abstract class AbstractShape {
     }
 
     /**
-     * @return ShapeInterface
-     * Return an object of type shape
+     * Returns the most recently created shape.
+     *
+     * @return the created {@code ShapeInterface} instance
      */
     public ShapeInterface getShape(){
         return this.shape;

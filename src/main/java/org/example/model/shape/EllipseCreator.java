@@ -6,10 +6,14 @@ public class EllipseCreator extends AbstractShape{
 
 
     /**
-     * @param stroke
-     * @param fillingColor
-     * @return ShapeInterface
-     * Create a new shape of type ellipse by setting all the properties passed as a parameter
+     * Creates an {@code EllipseShape} with the specified properties.
+     *
+     * @param stroke the border color of the ellipse
+     * @param fillingColor the fill color of the ellipse (can be {@code null})
+     * @param strokeWidth the width of the border
+     * @param width the horizontal radius of the ellipse
+     * @param height the vertical radius of the ellipse
+     * @return a new instance of {@code EllipseShape}
      */
     @Override
     public ShapeInterface createShape(Color stroke, Color fillingColor, int strokeWidth, double width, double height) {

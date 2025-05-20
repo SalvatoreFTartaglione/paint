@@ -20,10 +20,25 @@ public class Save implements CommandInterface {
     private Pane canvas;
     private Stage primaryStage;
 
+    /**
+     * Creates a Save command that allows exporting the canvas content to a file.
+     *
+     * @param canvas the drawing pane to be saved
+     */
     public Save(Pane canvas) {
         this.canvas = canvas;
     }
 
+    /**
+     * Executes the save operation.
+     * <p>
+     * Opens a file chooser to let the user export the canvas content as a .txt or .png file.
+     * If a .txt file is selected, it saves shape data via {@code ShapeInterface.toString()}.
+     * If a .png file is selected, it saves a snapshot image of the canvas.
+     * </p>
+     *
+     * @param unused not used, required by the interface
+     */
     @Override
     public void executeCommand(Node unused) {
         FileChooser fileChooser = new FileChooser();

@@ -15,12 +15,23 @@ public class LineShape extends Line implements ShapeInterface{
     private int strokeWidth;
     // private double angle;
 
-
+    /**
+     * Creates a new {@code LineShape} with the specified stroke color and stroke width.
+     *
+     * @param strokeColor the border color
+     * @param strokeWidth the line thickness
+     */
     public LineShape(Color strokeColor, int strokeWidth) {
         this.strokeColor = strokeColor;
         this.strokeWidth = strokeWidth;
     }
 
+    /**
+     * Draws the line using the previously stored relative offset and updates the visual position.
+     *
+     * @param X the new start X coordinate
+     * @param Y the new start Y coordinate
+     */
     @Override
     public void draw(double X, double Y) {
         startX = this.points[0];
@@ -65,13 +76,9 @@ public class LineShape extends Line implements ShapeInterface{
     }
 
     /**
-     * @param stroke
+     * @param color
      * Sets the border color of the shape
      */
-   /* @Override
-    public void setStrokeColor(Color stroke) {
-        this.strokeColor = stroke;
-    }*/
     @Override
     public void setStrokeColor(Color color) {
         this.strokeColor = color;
@@ -169,21 +176,33 @@ public class LineShape extends Line implements ShapeInterface{
         this.points = points;
     }
 
+    /**
+     * @return the custom stroke width of the line
+     */
     @Override
     public int getCustomStrokeWidth() {
         return strokeWidth;
     }
 
+    /**
+     * @return always null (lines are not fillable)
+     */
     @Override
     public Color getFillColor() {
         return null;
     }
+
 
     @Override
     public Node getNode() {
         return this;
     }
 
+    /**
+     * Sets the stroke width of the line.
+     *
+     * @param strokeWidth the new stroke width
+     */
     @Override
     public void setStrokeWidth(int strokeWidth) {
         this.strokeWidth = strokeWidth;
