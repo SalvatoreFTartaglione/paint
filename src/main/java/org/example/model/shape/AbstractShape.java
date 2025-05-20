@@ -37,13 +37,4 @@ public abstract class AbstractShape {
         shape = this.createShape(strokeColor, fillingColor, strokeColorWidth, width, height);
     }
 
-    /**
-     * Returns the most recently created shape.
-     *
-     * @return the created {@code ShapeInterface} instance
-     */
-    public ShapeInterface getShape(){
-        return this.shape;
-    }
-
 }

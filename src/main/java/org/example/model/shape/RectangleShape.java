@@ -25,6 +25,11 @@
         }
 
         @Override
+        public void draw(Double[] points) {
+            throw new UnsupportedOperationException("The following feature is not supported");
+        }
+
+        @Override
         public Color getStrokeColor() {
             return (Color) rectangleShape.getStroke();
         }
