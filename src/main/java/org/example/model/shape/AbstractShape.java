@@ -37,4 +37,8 @@ public abstract class AbstractShape {
         shape = this.createShape(strokeColor, fillingColor, strokeColorWidth, width, height);
     }
 
+    public ShapeInterface getShape() {
+        return shape;
+    }
+
 }

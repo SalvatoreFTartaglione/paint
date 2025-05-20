@@ -3,8 +3,12 @@
 package org.example.model.shape;
 
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
+import org.example.model.commands.UndoManager;
 
 
 public class LineShape implements ShapeInterface{
@@ -66,6 +70,16 @@ public class LineShape implements ShapeInterface{
     @Override
     public void setCustomStrokeWidth(double strokeWidth) {
 
+    }
+
+    @Override
+    public void getContextMenu(Pane drawingPane, ContextMenu contextMenu, UndoManager undoManager) {
+
+    }
+
+    @Override
+    public Node findShapeAt(Pane drawingPane, double x, double y) {
+        return null;
     }
 
     @Override
@@ -148,11 +162,6 @@ public class LineShape implements ShapeInterface{
     @Override
     public Color getFillColor() {
         return null;
-    }
-
-    @Override
-    public Node getNode() {
-        return lineShape;
     }
 
     @Override

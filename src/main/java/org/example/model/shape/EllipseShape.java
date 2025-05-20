@@ -1,11 +1,14 @@
 package org.example.model.shape;
 
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
+import org.example.model.commands.UndoManager;
 
 
-public class EllipseShape implements ShapeInterface {
+public class EllipseShape extends ContextMenuCreator implements ShapeInterface {
 
     private Ellipse ellipseShape;
 
@@ -82,6 +85,16 @@ public class EllipseShape implements ShapeInterface {
     public void setSize(double width, double height){
         ellipseShape.setRadiusX(width);
         ellipseShape.setRadiusY(height);
+    }
+
+    @Override
+    public void getContextMenu(Pane drawingPane, ContextMenu contextMenu, UndoManager undoManager) {
+        super.getContextMenu(drawingPane, contextMenu, undoManager, getFillColor(), getStrokeColor());
+    }
+
+    @Override
+    public Node findShapeAt(Pane drawingPane, double x, double y) {
+        return super.findShapeAt(drawingPane, x, y);
     }
 
     @Override

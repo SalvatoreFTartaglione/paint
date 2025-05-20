@@ -1,11 +1,18 @@
 package org.example.view;
 
+import java.net.URL;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -15,14 +22,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import org.example.controller.ShapeOption;
 import org.example.model.commands.*;
 import org.example.model.shape.*;
-
-import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
 
 public class MainViewController implements Initializable {
 
@@ -118,102 +121,24 @@ public class MainViewController implements Initializable {
 
 
     private void initializeContextMenu() {
-
-        // Fill Color
-        Label fillLabel = new Label("Change Fill Color:");
-        ColorPicker changeFillColorPicker = new ColorPicker();
-        HBox fillBox = new HBox(10, fillLabel, changeFillColorPicker);
-        CustomMenuItem fillColorItem = new CustomMenuItem(fillBox);
-        fillColorItem.setHideOnClick(false);
-
-        // Stroke Color
-        Label borderLabel = new Label("Change Border Color:");
-        ColorPicker changeStrokeColorPicker = new ColorPicker();
-        HBox borderBox = new HBox(10, borderLabel, changeStrokeColorPicker);
-        CustomMenuItem strokeColorItem = new CustomMenuItem(borderBox);
-        strokeColorItem.setHideOnClick(false);
-
-        contextMenu.getItems().addAll(fillColorItem, strokeColorItem);
-
-        // Cambia colori al volo se c'è una shape selezionata
-        changeFillColorPicker.setOnAction(event -> {
-            if (selectedShapeForContextMenu != null) {
-                Command cmd = new ChangeFillColorCommand(selectedShapeForContextMenu, changeFillColorPicker.getValue());
-                undoManager.executeCommand(cmd);
-            }
-        });
-
-        changeStrokeColorPicker.setOnAction(event -> {
-            if (selectedShapeForContextMenu != null) {
-                Command cmd = new ChangeStrokeColorCommand(selectedShapeForContextMenu, changeStrokeColorPicker.getValue());
-                undoManager.executeCommand(cmd);
-            }
-        });
-
-        // Mostra il menu su clic destro dentro `drawingPane`
-        drawingPane.setOnMousePressed(event -> {
+        drawingPane.setOnContextMenuRequested(event -> {
             contextMenu.getItems().clear();
 
-            if (event.isSecondaryButtonDown()) {
-                Node clickedShape = findShapeAt(event.getX(), event.getY());
-                if (clickedShape instanceof RectangleShape || clickedShape instanceof EllipseShape) {
-                    selectedShapeForContextMenu = (ShapeInterface) clickedShape;
+            Node clickedShape = selectedShapeForContextMenu.findShapeAt(drawingPane, event.getX(), event.getY());
+            if (clickedShape instanceof ShapeInterface) {
+                selectedShapeForContextMenu = (ShapeInterface) clickedShape;
 
-                    // Imposta i color picker con i colori attuali della shape selezionata
-                    changeFillColorPicker.setValue(selectedShapeForContextMenu.getFillColor());
-                    changeStrokeColorPicker.setValue(selectedShapeForContextMenu.getStrokeColor());
-                    contextMenu.getItems().addAll(fillColorItem, strokeColorItem);
-                    contextMenu.show(drawingPane, event.getScreenX(), event.getScreenY());
-                }
-                if(clickedShape instanceof LineShape){
-                    selectedShapeForContextMenu = (ShapeInterface) clickedShape;
-                    changeStrokeColorPicker.setValue(selectedShapeForContextMenu.getStrokeColor());
-                    contextMenu.getItems().add(strokeColorItem);
-                    contextMenu.show(drawingPane, event.getScreenX(), event.getScreenY());
-                }
-                if(clickedShape == null){
-                    selectedShapeForContextMenu = null;
-                    contextMenu.hide();
-                }
+                // Delega creazione menu
+                selectedShapeForContextMenu.getContextMenu(drawingPane, contextMenu, undoManager);
+
+                contextMenu.show(drawingPane, event.getScreenX(), event.getScreenY());
+            } else {
+                selectedShapeForContextMenu = null;
+                contextMenu.hide();
             }
+
+            event.consume();
         });
-
-        // Impedisci la chiusura automatica quando il ColorPicker si apre
-        changeFillColorPicker.setOnShowing(e -> contextMenu.setAutoHide(false));
-        changeFillColorPicker.setOnHiding(e -> contextMenu.setAutoHide(true));
-
-        changeStrokeColorPicker.setOnShowing(e -> contextMenu.setAutoHide(false));
-        changeStrokeColorPicker.setOnHiding(e -> contextMenu.setAutoHide(true));
-
-    }
-
-    private Node findShapeAt(double x, double y) {
-        for (Node node : drawingPane.getChildren()) {
-            if (node instanceof ShapeInterface) {
-                if (node instanceof LineShape) {
-                    LineShape line = (LineShape) node;
-                    if (isPointNearLine(x, y, line)) {
-                        return line;
-                    }
-                } else {
-                    ShapeInterface shape = (ShapeInterface) node;
-                    if (Math.abs(shape.getX() - x) <= 40 && Math.abs(shape.getY() - y) <= 80) {
-                        return node;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private boolean isPointNearLine(double x, double y, LineShape line) {
-        double x1 = line.getStartX();
-        double y1 = line.getStartY();
-        double x2 = line.getEndX();
-        double y2 = line.getEndY();
-
-        double distance = pointToSegmentDistance(x, y, x1, y1, x2, y2);
-        return distance <= 5;  // tolleranza clic
     }
 
     private double pointToSegmentDistance(double px, double py, double x1, double y1, double x2, double y2) {
@@ -395,16 +320,14 @@ public class MainViewController implements Initializable {
                             AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
                             ShapeInterface shapeInterface = abstractEllipse.getShape();
                             //controllo che la shape selezionata sia un'ellisse
-                            if (shapeInterface instanceof EllipseShape) {
-                                EllipseShape ellipseShape = (EllipseShape) shapeInterface;
-                                ellipseShape.draw(x, y);
-                                // Aggiungi l'ellisse al contenitore del Canvas
-                                Command cmd = new AddShapeCommand(drawingPane, ellipseShape);
-                                undoManager.executeCommand(cmd);
-                                //drawingPane.getChildren().add(ellipseShape);
-                                //shapeComboBox.setValue(null);
-                                //makeDraggable(ellipseShape);
-                            }
+                            EllipseShape ellipseShape = (EllipseShape) shapeInterface;
+                            ellipseShape.draw(x, y);
+                            // Aggiungi l'ellisse al contenitore del Canvas
+                            Command cmd = new AddShapeCommand(drawingPane, ellipseShape);
+                            undoManager.executeCommand(cmd);
+                            //drawingPane.getChildren().add(ellipseShape);
+                            //shapeComboBox.setValue(null);
+                            //makeDraggable(ellipseShape);
                             break;
                         }
                         case "Line": {
@@ -421,15 +344,13 @@ public class MainViewController implements Initializable {
                                 // Add line to container
                                 ShapeInterface shapeInterface = lineCreator.getShape();
                                 Double[] points = {x, y, startPoint.getX(), startPoint.getY()};
-                                if (shapeInterface instanceof LineShape) {
-                                    LineShape lineShape = (LineShape) shapeInterface;
-                                    lineShape.draw(points);
-                                    Command cmd = new AddShapeCommand(drawingPane, lineShape);
-                                    undoManager.executeCommand(cmd);
-                                    //drawingPane.getChildren().add(lineShape);
-                                    //shapeComboBox.setValue(null);
-                                    //makeDraggable(lineShape);
-                                }
+                                LineShape lineShape = (LineShape) shapeInterface;
+                                lineShape.draw(points);
+                                Command cmd = new AddShapeCommand(drawingPane, lineShape);
+                                undoManager.executeCommand(cmd);
+                                //drawingPane.getChildren().add(lineShape);
+                                //shapeComboBox.setValue(null);
+                                //makeDraggable(lineShape);
                                 // Reset state variable
                                 startPoint = null;
 
@@ -443,15 +364,13 @@ public class MainViewController implements Initializable {
                             double y = localCoords.getY();
                             AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
                             ShapeInterface shapeInterface = abstractRectangle.getShape();
-                            if (shapeInterface instanceof RectangleShape) {
-                                RectangleShape rectangleShape = (RectangleShape) shapeInterface;
-                                rectangleShape.draw(x, y);
-                                Command cmd = new AddShapeCommand(drawingPane, rectangleShape);
-                                undoManager.executeCommand(cmd);
-                                //drawingPane.getChildren().add(rectangleShape);
-                                //shapeComboBox.setValue(null);
-                                //makeDraggable(rectangleShape);
-                            }
+                            RectangleShape rectangleShape = (RectangleShape) shapeInterface;
+                            rectangleShape.draw(x, y);
+                            Command cmd = new AddShapeCommand(drawingPane, rectangleShape);
+                            undoManager.executeCommand(cmd);
+                            //drawingPane.getChildren().add(rectangleShape);
+                            //shapeComboBox.setValue(null);
+                            //makeDraggable(rectangleShape);
                             break;
                         }
                     }
