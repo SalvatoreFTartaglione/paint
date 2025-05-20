@@ -7,37 +7,40 @@ import javafx.scene.shape.Line;
 import javafx.scene.paint.Color;
 
 
-public class LineShape extends Line implements ShapeInterface{
+public class LineShape implements ShapeInterface{
 
-    private Color strokeColor;
-    private double startX, startY, endX, endY;
-    private Double[]    points;
-    private int strokeWidth;
-    // private double angle;
+    private Line lineShape;
+    private Double[] points;
 
 
-    public LineShape(Color strokeColor, int strokeWidth) {
-        this.strokeColor = strokeColor;
-        this.strokeWidth = strokeWidth;
+    public LineShape(Color stroke, double strokeWidth) {
+        lineShape = new Line();
+        lineShape.setStroke(stroke);
+        lineShape.setStrokeWidth(strokeWidth);
     }
+
 
     @Override
     public void draw(double X, double Y) {
-        startX = this.points[0];
-        startY = this.points[1];
-        endX = this.points[2];
-        endY = this.points[3];
+        lineShape.setStartX(this.points[0]);
+        lineShape.setStartY(this.points[1]);
+        lineShape.setEndX(this.points[2]);
+        lineShape.setEndY(this.points[3]);
+
         this.points[0] = X;
         this.points[1] = Y;
-        this.points[2] = X + (endX - startX);
-        this.points[3] = Y + (endY - startY);
-        this.setStartX(this.points[0]);
-        this.setStartY(this.points[1]);
-        this.setEndX(this.points[2]);
-        this.setEndY(this.points[3]);
-        this.setStroke(this.getStrokeColor());
-        this.setStrokeWidth(this.getCustomStrokeWidth());
+        this.points[2] = X + (lineShape.getEndX() - lineShape.getStartX());
+        this.points[3] = Y + (lineShape.getEndY() - lineShape.getStartY());
+
+        lineShape.setStartX(this.points[0]);
+        lineShape.setStartY(this.points[1]);
+        lineShape.setEndX(this.points[2]);
+        lineShape.setEndY(this.points[3]);
+
+        //this.setStroke(this.getStrokeColor());
+        //this.setStrokeWidth(this.getCustomStrokeWidth());
     }
+
 
     /**
      * @param points
@@ -46,37 +49,29 @@ public class LineShape extends Line implements ShapeInterface{
      */
     @Override
     public void draw(Double[] points) {
-        this.setStroke(this.getStrokeColor());
-        this.setStartX(points[0]);
-        this.setStartY(points[1]);
-        this.setEndX(points[2]);
-        this.setEndY(points[3]);
-        this.setStrokeWidth(this.getCustomStrokeWidth());
+        //this.setStroke(this.getStrokeColor());
+        lineShape.setStartX(points[0]);
+        lineShape.setStartY(points[1]);
+        lineShape.setEndX(points[2]);
+        lineShape.setEndY(points[3]);
+        //this.setStrokeWidth(this.getCustomStrokeWidth());
         this.setPoints(points);
     }
 
-    /**
-     * @return Color
-     * Returns the border color of the shape
-     */
     @Override
     public Color getStrokeColor() {
-        return this.strokeColor;
+        return (Color) lineShape.getStroke();
     }
 
-    /**
-     * @param stroke
-     * Sets the border color of the shape
-     */
+    @Override
+    public void setCustomStrokeWidth(double strokeWidth) {
+
+    }
+
     @Override
     public void setStrokeColor(Color stroke) {
-        this.strokeColor = stroke;
+        lineShape.setStroke(stroke);
     }
-    /*@Override
-    public void setStrokeColor(Color color) {
-        this.strokeColor = color;
-        this.setStroke(color); // aggiorna visivamente
-    }*/
 
     /**
      * @return double
@@ -84,7 +79,11 @@ public class LineShape extends Line implements ShapeInterface{
      */
     @Override
     public double getX() {
-        return this.startX;
+        return lineShape.getStartX() ;
+    }
+
+    public double getEndX(){
+        return
     }
 
     /**
@@ -170,7 +169,7 @@ public class LineShape extends Line implements ShapeInterface{
     }
 
     @Override
-    public int getCustomStrokeWidth() {
+    public double getCustomStrokeWidth() {
         return strokeWidth;
     }
 
@@ -189,25 +188,21 @@ public class LineShape extends Line implements ShapeInterface{
         this.strokeWidth = strokeWidth;
     }
 
+
+    @Override
+    public void setFillColor(Color fill) {
+
+    }
+
     /**
      * @return String
      * Prints the propeties of the shape
      */
     @Override
     public String toString() {
-        return "Line" + ";" + this.getStrokeColor() + ";" + this.getEndX() + ";" + this.getEndY() + ";"
-                + this.getStartX() + ";" + this.getStartY() + "\n";
+        return "Line" + ";" + lineShape.getStroke() + ";" + lineShape.getEndX() + ";" + lineShape.getEndY() + ";"
+                + lineShape.getStartX() + ";" + lineShape.getStartY() + "\n";
     }
-
-    @Override
-    public void setFillColor(Color fill) {
-
-    }
-    /*@Override
-    public void setFillColor(Color fill) {
-        this.fillColor = fill;
-        this.setFill(fill);  // ✅ aggiorna graficamente la figura
-    }*/
 
 
 

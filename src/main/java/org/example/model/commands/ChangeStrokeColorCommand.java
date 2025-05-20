@@ -24,3 +24,4 @@ public class ChangeStrokeColorCommand implements Command {
         shape.setStrokeColor(oldColor);
     }
 }
+
