@@ -405,7 +405,7 @@ public class MainViewController implements Initializable {
                                 Command cmd = new AddShapeCommand(drawingPane, ellipseShape);
                                 undoManager.executeCommand(cmd);
                                 //drawingPane.getChildren().add(ellipseShape);
-                                shapeComboBox.setValue(null);
+                                //shapeComboBox.setValue(null);
                                 //makeDraggable(ellipseShape);
                             }
                             break;
@@ -430,7 +430,7 @@ public class MainViewController implements Initializable {
                                     Command cmd = new AddShapeCommand(drawingPane, lineShape);
                                     undoManager.executeCommand(cmd);
                                     //drawingPane.getChildren().add(lineShape);
-                                    shapeComboBox.setValue(null);
+                                    //shapeComboBox.setValue(null);
                                     //makeDraggable(lineShape);
                                 }
                                 // Reset state variable
@@ -452,7 +452,7 @@ public class MainViewController implements Initializable {
                                 Command cmd = new AddShapeCommand(drawingPane, rectangleShape);
                                 undoManager.executeCommand(cmd);
                                 //drawingPane.getChildren().add(rectangleShape);
-                                shapeComboBox.setValue(null);
+                                //shapeComboBox.setValue(null);
                                 //makeDraggable(rectangleShape);
                             }
                             break;
