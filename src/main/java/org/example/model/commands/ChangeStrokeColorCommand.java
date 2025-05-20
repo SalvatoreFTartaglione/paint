@@ -1,5 +1,6 @@
 package org.example.model.commands;
 
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import org.example.model.shape.ShapeInterface;
 
@@ -35,5 +36,6 @@ public class ChangeStrokeColorCommand implements Command {
     public void undo() {
         shape.setStrokeColor(oldColor);
     }
+
 }
 

@@ -6,6 +6,7 @@ public interface CommandInterface {
 
     void executeCommand(Node node);
     //void exeCommand(Node node, double x, double y);
+    void undoCommand();
 
 
 }

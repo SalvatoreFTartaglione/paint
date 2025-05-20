@@ -1,5 +1,6 @@
 package org.example.model.commands;
 
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import org.example.model.shape.ShapeInterface;
 

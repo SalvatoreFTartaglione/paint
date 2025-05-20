@@ -52,8 +52,9 @@ public class Save implements CommandInterface {
         if (file != null && file.getName().endsWith(".txt")) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
                 for (Node node : canvas.getChildren()) {
-                    if (node instanceof ShapeInterface) {
-                        writer.write(((ShapeInterface) node).toString());
+                    Object userData = node.getUserData();
+                    if (userData instanceof ShapeInterface) {
+                        writer.write(userData.toString());
                     }
                 }
             } catch (IOException e) {
@@ -76,6 +77,11 @@ public class Save implements CommandInterface {
         }
 
 
+    }
+
+    @Override
+    public void undoCommand() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 /*

@@ -1,5 +1,6 @@
 package org.example.model.commands;
 
+import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import org.example.model.shape.ShapeInterface;
 
@@ -27,8 +28,15 @@ public class AddShapeCommand implements Command {
      */
     @Override
     public void execute() {
-        canvas.getChildren().add(shape.getNode());
+        Node node = shape.getNode();
+        node.setUserData(shape);  // collega il node alla ShapeInterface
+        if (!canvas.getChildren().contains(node)) {
+            canvas.getChildren().add(node);
+        }
     }
+
+
+
 
     /**
      * Undoes the command by removing the shape's node from the canvas.

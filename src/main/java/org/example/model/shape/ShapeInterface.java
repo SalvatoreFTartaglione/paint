@@ -2,15 +2,14 @@ package org.example.model.shape;
 
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import org.example.model.commands.UndoManager;
 
 public interface ShapeInterface {
 
     // utils method
-    void getContextMenu(Pane drawingPane, ContextMenu contextMenu, UndoManager undoManager);
-    Node findShapeAt(Pane drawingPane, double x, double y);
+    Node findShapeAt(double x, double y);
+    ContextMenu getContextMenu(UndoManager undoManager, Color colorFill, Color colorStroke, ShapeInterface shape);
 
 
     // Shape color management
@@ -38,4 +37,5 @@ public interface ShapeInterface {
 
     // Simplified serialization
     String toString();
+    Node getNode();
 }

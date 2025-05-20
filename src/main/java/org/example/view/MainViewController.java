@@ -1,31 +1,27 @@
 package org.example.view;
 
-import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import org.example.controller.ShapeOption;
 import org.example.model.commands.*;
 import org.example.model.shape.*;
+
+import java.net.URL;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 public class MainViewController implements Initializable {
 
@@ -78,8 +74,8 @@ public class MainViewController implements Initializable {
     private Point2D startPoint = null;
 
     private ShapeInterface selectedShapeForContextMenu = null;
-    private ContextMenu contextMenu = new ContextMenu();
     private UndoManager undoManager;
+    private ContextMenu contextMenu = new ContextMenu();
 
     /**
      * Initializes the controller after the root element has been completely processed.
@@ -91,8 +87,29 @@ public class MainViewController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         initializeSplitPane();
         initializeShapeChoiceBox();
-        initializeContextMenu();
 
+        mainCanvasContainer.setOnContextMenuRequested(event -> {
+            if (contextMenu.isShowing()) {
+                contextMenu.hide();
+            }
+            double x = event.getX();
+            double y = event.getY();
+
+            for (Node node : drawingPane.getChildren()) {
+                Object userData = node.getUserData();
+                if (userData instanceof ShapeInterface) {
+                    ShapeInterface shape = (ShapeInterface) userData; // cast esplicito
+                    Node found = shape.findShapeAt(x, y);
+                    if (found != null) {
+                        selectedShapeForContextMenu = shape;
+                        System.out.println("Cerco di aprire il context menu");
+                        contextMenu = shape.getContextMenu(undoManager, shape.getFillColor(), shape.getStrokeColor(),shape);
+                        contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+                        break;
+                    }
+                }
+            }
+        });
 
         mainCanvasContainer.setOnMousePressed(event -> {
             isDragging = false;
@@ -116,44 +133,6 @@ public class MainViewController implements Initializable {
      */
     public void setUndoManager(UndoManager undoManager) {
         this.undoManager = undoManager;
-    }
-
-
-
-    private void initializeContextMenu() {
-        drawingPane.setOnContextMenuRequested(event -> {
-            contextMenu.getItems().clear();
-
-            Node clickedShape = selectedShapeForContextMenu.findShapeAt(drawingPane, event.getX(), event.getY());
-            if (clickedShape instanceof ShapeInterface) {
-                selectedShapeForContextMenu = (ShapeInterface) clickedShape;
-
-                // Delega creazione menu
-                selectedShapeForContextMenu.getContextMenu(drawingPane, contextMenu, undoManager);
-
-                contextMenu.show(drawingPane, event.getScreenX(), event.getScreenY());
-            } else {
-                selectedShapeForContextMenu = null;
-                contextMenu.hide();
-            }
-
-            event.consume();
-        });
-    }
-
-    private double pointToSegmentDistance(double px, double py, double x1, double y1, double x2, double y2) {
-        double dx = x2 - x1;
-        double dy = y2 - y1;
-        if (dx == 0 && dy == 0) {
-            return Math.hypot(px - x1, py - y1);
-        }
-
-        double t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
-        t = Math.max(0, Math.min(1, t));
-
-        double projX = x1 + t * dx;
-        double projY = y1 + t * dy;
-        return Math.hypot(px - projX, py - projY);
     }
 
 
@@ -325,7 +304,6 @@ public class MainViewController implements Initializable {
                             // Aggiungi l'ellisse al contenitore del Canvas
                             Command cmd = new AddShapeCommand(drawingPane, ellipseShape);
                             undoManager.executeCommand(cmd);
-                            //drawingPane.getChildren().add(ellipseShape);
                             //shapeComboBox.setValue(null);
                             //makeDraggable(ellipseShape);
                             break;
@@ -348,7 +326,6 @@ public class MainViewController implements Initializable {
                                 lineShape.draw(points);
                                 Command cmd = new AddShapeCommand(drawingPane, lineShape);
                                 undoManager.executeCommand(cmd);
-                                //drawingPane.getChildren().add(lineShape);
                                 //shapeComboBox.setValue(null);
                                 //makeDraggable(lineShape);
                                 // Reset state variable
@@ -368,13 +345,11 @@ public class MainViewController implements Initializable {
                             rectangleShape.draw(x, y);
                             Command cmd = new AddShapeCommand(drawingPane, rectangleShape);
                             undoManager.executeCommand(cmd);
-                            //drawingPane.getChildren().add(rectangleShape);
                             //shapeComboBox.setValue(null);
                             //makeDraggable(rectangleShape);
                             break;
                         }
                     }
-
                 }
             }else {
                 contextMenu.hide();
@@ -386,12 +361,6 @@ public class MainViewController implements Initializable {
         AbstractShape rectangle = new RectangleCreator();
         rectangle.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
         return rectangle;
-    }
-
-    private AbstractShape createLine(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
-        AbstractShape line = new LineCreator();
-        line.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
-        return line;
     }
 
     private AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {

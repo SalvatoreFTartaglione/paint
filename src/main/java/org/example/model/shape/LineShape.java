@@ -2,12 +2,11 @@
 
 package org.example.model.shape;
 
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.layout.Pane;
-import javafx.scene.shape.Line;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Shape;
+import javafx.scene.shape.Line;
 import org.example.model.commands.UndoManager;
 
 
@@ -73,13 +72,38 @@ public class LineShape implements ShapeInterface{
     }
 
     @Override
-    public void getContextMenu(Pane drawingPane, ContextMenu contextMenu, UndoManager undoManager) {
+    public Node findShapeAt(double x, double y) {
+        double tolerance = 7.0;
 
+        double x1 = lineShape.getStartX();
+        double y1 = lineShape.getStartY();
+        double x2 = lineShape.getEndX();
+        double y2 = lineShape.getEndY();
+
+        // Calcolo distanza punto-linea
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+
+        double numerator = Math.abs(dy * x - dx * y + x2 * y1 - y2 * x1);
+        double denominator = Math.hypot(dx, dy);
+
+        double distance = numerator / denominator;
+
+        // Controlliamo anche che il punto sia nel segmento (bounding box)
+        Bounds bounds = lineShape.getBoundsInParent();
+
+        if (distance <= tolerance &&
+                x >= bounds.getMinX() - tolerance && x <= bounds.getMaxX() + tolerance &&
+                y >= bounds.getMinY() - tolerance && y <= bounds.getMaxY() + tolerance) {
+            return lineShape;
+        }
+
+        return null;
     }
 
     @Override
-    public Node findShapeAt(Pane drawingPane, double x, double y) {
-        return null;
+    public ContextMenu getContextMenu(UndoManager undoManager, Color colorFill, Color colorStroke, ShapeInterface shape) {
+        return ContextMenuCreator.getLineContextMenu(undoManager, colorStroke, shape);
     }
 
     @Override
@@ -176,7 +200,12 @@ public class LineShape implements ShapeInterface{
     @Override
     public String toString() {
         return "Line" + ";" + lineShape.getStroke() + ";" + lineShape.getEndX() + ";" + lineShape.getEndY() + ";"
-                + lineShape.getStartX() + ";" + lineShape.getStartY() + "\n";
+                + lineShape.getStartX() + ";" + lineShape.getStartY() + ";" + lineShape.getStrokeWidth()+ "\n";
+    }
+
+    @Override
+    public Node getNode() {
+        return this.lineShape;
     }
 
     /**

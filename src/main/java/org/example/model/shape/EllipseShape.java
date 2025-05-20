@@ -1,14 +1,14 @@
 package org.example.model.shape;
 
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 import org.example.model.commands.UndoManager;
 
 
-public class EllipseShape extends ContextMenuCreator implements ShapeInterface {
+public class EllipseShape implements ShapeInterface {
 
     private Ellipse ellipseShape;
 
@@ -34,6 +34,24 @@ public class EllipseShape extends ContextMenuCreator implements ShapeInterface {
     @Override
     public Color getStrokeColor() {
        return (Color) ellipseShape.getStroke();
+    }
+
+    @Override
+    public Node findShapeAt(double x, double y) {
+        Bounds bounds = ellipseShape.getBoundsInParent();
+        double tolerance = 5.0;
+
+        if (x >= bounds.getMinX() - tolerance && x <= bounds.getMaxX() + tolerance &&
+                y >= bounds.getMinY() - tolerance && y <= bounds.getMaxY() + tolerance) {
+            return ellipseShape;
+        }
+
+        return null;
+    }
+
+    @Override
+    public ContextMenu getContextMenu(UndoManager undoManager, Color colorFill, Color colorStroke, ShapeInterface shape) {
+        return ContextMenuCreator.getContextMenu(undoManager, colorFill, colorStroke, shape);
     }
 
     @Override
@@ -88,16 +106,6 @@ public class EllipseShape extends ContextMenuCreator implements ShapeInterface {
     }
 
     @Override
-    public void getContextMenu(Pane drawingPane, ContextMenu contextMenu, UndoManager undoManager) {
-        super.getContextMenu(drawingPane, contextMenu, undoManager, getFillColor(), getStrokeColor());
-    }
-
-    @Override
-    public Node findShapeAt(Pane drawingPane, double x, double y) {
-        return super.findShapeAt(drawingPane, x, y);
-    }
-
-    @Override
     public double getCustomStrokeWidth() {
         return ellipseShape.getStrokeWidth();
     }
@@ -109,7 +117,7 @@ public class EllipseShape extends ContextMenuCreator implements ShapeInterface {
 
     @Override
     public Node getNode() {
-        return ellipseShape;
+        return this.ellipseShape;
     }
 
     @Override
