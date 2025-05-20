@@ -132,20 +132,15 @@ public class MainViewController implements Initializable {
         // Cambia colori al volo se c'è una shape selezionata
         changeFillColorPicker.setOnAction(event -> {
             if (selectedShapeForContextMenu != null) {
-                Color newColor = changeFillColorPicker.getValue();
-                Command cmd = new ChangeFillColorCommand(selectedShapeForContextMenu, newColor);
+                Command cmd = new ChangeFillColorCommand(selectedShapeForContextMenu, changeFillColorPicker.getValue());
                 undoManager.executeCommand(cmd);
-
-                //selectedShapeForContextMenu.setFillColor(changeFillColorPicker.getValue());
             }
         });
 
         changeStrokeColorPicker.setOnAction(event -> {
             if (selectedShapeForContextMenu != null) {
-                Color newColor = changeStrokeColorPicker.getValue();
-                Command cmd = new ChangeStrokeColorCommand(selectedShapeForContextMenu, newColor);
+                Command cmd = new ChangeStrokeColorCommand(selectedShapeForContextMenu, changeStrokeColorPicker.getValue());
                 undoManager.executeCommand(cmd);
-                //selectedShapeForContextMenu.setStrokeColor(changeStrokeColorPicker.getValue());
             }
         });
 
@@ -183,22 +178,6 @@ public class MainViewController implements Initializable {
 
         changeStrokeColorPicker.setOnShowing(e -> contextMenu.setAutoHide(false));
         changeStrokeColorPicker.setOnHiding(e -> contextMenu.setAutoHide(true));
-
-        //qui
-        changeFillColorPicker.setOnAction(event -> {
-            if (selectedShapeForContextMenu != null) {
-                Color newColor = changeFillColorPicker.getValue();
-                Command cmd = new ChangeFillColorCommand(selectedShapeForContextMenu, newColor);
-                undoManager.executeCommand(cmd);
-            }
-        });
-
-        // REMOVE !!!!
-        scrollPane.setPannable(false);
-
-
-        //qui
-
 
     }
 
