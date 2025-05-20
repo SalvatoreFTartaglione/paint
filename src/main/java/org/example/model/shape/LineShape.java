@@ -2,6 +2,7 @@
 
 package org.example.model.shape;
 
+import javafx.scene.Node;
 import javafx.scene.shape.Line;
 import javafx.scene.paint.Color;
 
@@ -71,6 +72,11 @@ public class LineShape extends Line implements ShapeInterface{
     public void setStrokeColor(Color stroke) {
         this.strokeColor = stroke;
     }
+    /*@Override
+    public void setStrokeColor(Color color) {
+        this.strokeColor = color;
+        this.setStroke(color); // aggiorna visivamente
+    }*/
 
     /**
      * @return double
@@ -174,6 +180,11 @@ public class LineShape extends Line implements ShapeInterface{
     }
 
     @Override
+    public Node getNode() {
+        return this;
+    }
+
+    @Override
     public void setStrokeWidth(int strokeWidth) {
         this.strokeWidth = strokeWidth;
     }
@@ -192,6 +203,12 @@ public class LineShape extends Line implements ShapeInterface{
     public void setFillColor(Color fill) {
 
     }
+    /*@Override
+    public void setFillColor(Color fill) {
+        this.fillColor = fill;
+        this.setFill(fill);  // ✅ aggiorna graficamente la figura
+    }*/
+
 
 
 }

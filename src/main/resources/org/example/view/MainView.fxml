@@ -14,7 +14,7 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="325.0">
                      <children>
-                        <Button fx:id="undoButton" layoutX="14.0" layoutY="35.0">
+                        <Button fx:id="undoButton" onAction="#undoClicked" layoutX="14.0" layoutY="35.0">
                             <graphic>
                                 <ImageView fx:id="undoImageButton" fitHeight="30.0" fitWidth="30.0" preserveRatio="true">
                                     <image>

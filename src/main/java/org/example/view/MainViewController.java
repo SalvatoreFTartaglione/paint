@@ -24,8 +24,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.example.controller.ShapeOption;
-import org.example.model.commands.Load;
-import org.example.model.commands.Save;
+import org.example.model.commands.*;
 import org.example.model.shape.*;
 
 public class MainViewController implements Initializable {
@@ -80,7 +79,7 @@ public class MainViewController implements Initializable {
 
     private ShapeInterface selectedShapeForContextMenu = null;
     private ContextMenu contextMenu = new ContextMenu();
-
+    private UndoManager undoManager;
     /**
      * Initializes the controller class.
      */
@@ -103,6 +102,10 @@ public class MainViewController implements Initializable {
                 DrawOnCanvas(event);
             }
         });
+    }
+
+    public void setUndoManager(UndoManager undoManager) {
+        this.undoManager = undoManager;
     }
 
 
@@ -128,13 +131,20 @@ public class MainViewController implements Initializable {
         // Cambia colori al volo se c'è una shape selezionata
         changeFillColorPicker.setOnAction(event -> {
             if (selectedShapeForContextMenu != null) {
-                selectedShapeForContextMenu.setFillColor(changeFillColorPicker.getValue());
+                Color newColor = changeFillColorPicker.getValue();
+                Command cmd = new ChangeFillColorCommand(selectedShapeForContextMenu, newColor);
+                undoManager.executeCommand(cmd);
+
+                //selectedShapeForContextMenu.setFillColor(changeFillColorPicker.getValue());
             }
         });
 
         changeStrokeColorPicker.setOnAction(event -> {
             if (selectedShapeForContextMenu != null) {
-                selectedShapeForContextMenu.setStrokeColor(changeStrokeColorPicker.getValue());
+                Color newColor = changeStrokeColorPicker.getValue();
+                Command cmd = new ChangeStrokeColorCommand(selectedShapeForContextMenu, newColor);
+                undoManager.executeCommand(cmd);
+                //selectedShapeForContextMenu.setStrokeColor(changeStrokeColorPicker.getValue());
             }
         });
 
@@ -164,141 +174,25 @@ public class MainViewController implements Initializable {
         changeStrokeColorPicker.setOnShowing(e -> contextMenu.setAutoHide(false));
         changeStrokeColorPicker.setOnHiding(e -> contextMenu.setAutoHide(true));
 
+        //qui
         changeFillColorPicker.setOnAction(event -> {
             if (selectedShapeForContextMenu != null) {
-                // Rimuove la shape selezionata
-                /*((Shape) selectedShapeForContextMenu).setFill(changeFillColorPicker.getValue());*/
-                drawingPane.getChildren().remove(selectedShapeForContextMenu);
-
-                Color newFillColor = changeFillColorPicker.getValue();
-                selectedShapeForContextMenu.setFillColor(newFillColor);
-
-                String shapeName = selectedShapeForContextMenu.getClass().getSimpleName().replace("Shape", "");
-
-                AbstractShape abstractShape = null;
-
-                switch (shapeName) {
-                    case "Ellipse":
-                        abstractShape = createEllipse(
-                                selectedShapeForContextMenu.getStrokeColor(),
-                                newFillColor,
-                                selectedShapeForContextMenu.getCustomStrokeWidth(),
-                                selectedShapeForContextMenu.getWidth(),
-                                selectedShapeForContextMenu.getHeight()
-                        );
-                        break;
-                    case "Line":
-                        abstractShape = createLine(
-                                selectedShapeForContextMenu.getStrokeColor(),
-                                newFillColor,
-                                selectedShapeForContextMenu.getCustomStrokeWidth(),
-                                selectedShapeForContextMenu.getWidth(),
-                                selectedShapeForContextMenu.getHeight()
-                        );
-                        break;
-                    case "Rectangle":
-                        abstractShape = createRectangle(
-                                selectedShapeForContextMenu.getStrokeColor(),
-                                newFillColor,
-                                selectedShapeForContextMenu.getCustomStrokeWidth(),
-                                selectedShapeForContextMenu.getWidth(),
-                                selectedShapeForContextMenu.getHeight()
-                        );
-                        break;
-                    default:
-                        System.out.println("Forma non riconosciuta: " + shapeName);
-                }
-
-                if (abstractShape != null) {
-                    ShapeInterface shapeInterface = abstractShape.getShape();
-
-                    if (shapeInterface instanceof EllipseShape) {
-                        EllipseShape ellipse = (EllipseShape) shapeInterface;
-                        ellipse.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
-                        selectedShapeForContextMenu = ellipse;
-                        drawingPane.getChildren().add(ellipse);
-                    } else if (shapeInterface instanceof LineShape) {
-                        LineShape line = (LineShape) shapeInterface;
-                        line.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
-                        selectedShapeForContextMenu = line;
-                        drawingPane.getChildren().add(line);
-                    } else if (shapeInterface instanceof RectangleShape) {
-                        RectangleShape rectangle = (RectangleShape) shapeInterface;
-                        rectangle.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
-                        selectedShapeForContextMenu = rectangle;
-                        drawingPane.getChildren().add(rectangle);
-                    }
-                }
+                Color newColor = changeFillColorPicker.getValue();
+                Command cmd = new ChangeFillColorCommand(selectedShapeForContextMenu, newColor);
+                undoManager.executeCommand(cmd);
             }
         });
+
         // REMOVE !!!!
         scrollPane.setPannable(false);
 
 
+        //qui
         changeStrokeColorPicker.setOnAction(event -> {
-            /*((Ellipse) selectedShapeForContextMenu).setStroke(changeStrokeColorPicker.getValue());*/
             if (selectedShapeForContextMenu != null) {
-                drawingPane.getChildren().remove(selectedShapeForContextMenu);
-
-                Color newStrokeColor = changeStrokeColorPicker.getValue();
-                selectedShapeForContextMenu.setStrokeColor(newStrokeColor);
-
-                String shapeName = selectedShapeForContextMenu.getClass().getSimpleName().replace("Shape", "");
-
-                AbstractShape abstractShape = null;
-
-                switch (shapeName) {
-                    case "Ellipse":
-                        abstractShape = createEllipse(
-                                newStrokeColor,
-                                selectedShapeForContextMenu.getFillColor(),
-                                selectedShapeForContextMenu.getCustomStrokeWidth(),
-                                selectedShapeForContextMenu.getWidth(),
-                                selectedShapeForContextMenu.getHeight()
-                        );
-                        break;
-                    case "Line":
-                        abstractShape = createLine(
-                                newStrokeColor,
-                                selectedShapeForContextMenu.getFillColor(),
-                                selectedShapeForContextMenu.getCustomStrokeWidth(),
-                                selectedShapeForContextMenu.getWidth(),
-                                selectedShapeForContextMenu.getHeight()
-                        );
-                        break;
-                    case "Rectangle":
-                        abstractShape = createRectangle(
-                                newStrokeColor,
-                                selectedShapeForContextMenu.getFillColor(),
-                                selectedShapeForContextMenu.getCustomStrokeWidth(),
-                                selectedShapeForContextMenu.getWidth(),
-                                selectedShapeForContextMenu.getHeight()
-                        );
-                        break;
-                    default:
-                        System.out.println("Forma non riconosciuta: " + shapeName);
-                }
-
-                if (abstractShape != null) {
-                    ShapeInterface shapeInterface = abstractShape.getShape();
-
-                    if (shapeInterface instanceof EllipseShape) {
-                        EllipseShape ellipse = (EllipseShape) shapeInterface;
-                        ellipse.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
-                        selectedShapeForContextMenu = ellipse;
-                        drawingPane.getChildren().add(ellipse);
-                    } else if (shapeInterface instanceof LineShape) {
-                        LineShape line = (LineShape) shapeInterface;
-                        line.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
-                        selectedShapeForContextMenu = line;
-                        drawingPane.getChildren().add(line);
-                    } else if (shapeInterface instanceof RectangleShape) {
-                        RectangleShape rectangle = (RectangleShape) shapeInterface;
-                        rectangle.draw(selectedShapeForContextMenu.getX(), selectedShapeForContextMenu.getY());
-                        selectedShapeForContextMenu = rectangle;
-                        drawingPane.getChildren().add(rectangle);
-                    }
-                }
+                Color newColor = changeStrokeColorPicker.getValue();
+                Command cmd = new ChangeStrokeColorCommand(selectedShapeForContextMenu, newColor);
+                undoManager.executeCommand(cmd);
             }
         });
 
@@ -472,7 +366,9 @@ public class MainViewController implements Initializable {
                                 EllipseShape ellipseShape = (EllipseShape) shapeInterface;
                                 ellipseShape.draw(x, y);
                                 // Aggiungi l'ellisse al contenitore del Canvas
-                                drawingPane.getChildren().add(ellipseShape);
+                                Command cmd = new AddShapeCommand(drawingPane, ellipseShape);
+                                undoManager.executeCommand(cmd);
+                                //drawingPane.getChildren().add(ellipseShape);
                                 shapeComboBox.setValue(null);
                                 //makeDraggable(ellipseShape);
                             }
@@ -495,7 +391,9 @@ public class MainViewController implements Initializable {
                                 if (shapeInterface instanceof LineShape) {
                                     LineShape lineShape = (LineShape) shapeInterface;
                                     lineShape.draw(points);
-                                    drawingPane.getChildren().add(lineShape);
+                                    Command cmd = new AddShapeCommand(drawingPane, lineShape);
+                                    undoManager.executeCommand(cmd);
+                                    //drawingPane.getChildren().add(lineShape);
                                     shapeComboBox.setValue(null);
                                     //makeDraggable(lineShape);
                                 }
@@ -515,7 +413,9 @@ public class MainViewController implements Initializable {
                             if (shapeInterface instanceof RectangleShape) {
                                 RectangleShape rectangleShape = (RectangleShape) shapeInterface;
                                 rectangleShape.draw(x, y);
-                                drawingPane.getChildren().add(rectangleShape);
+                                Command cmd = new AddShapeCommand(drawingPane, rectangleShape);
+                                undoManager.executeCommand(cmd);
+                                //drawingPane.getChildren().add(rectangleShape);
                                 shapeComboBox.setValue(null);
                                 //makeDraggable(rectangleShape);
                             }
@@ -616,6 +516,10 @@ public class MainViewController implements Initializable {
         }
     }
 
+    @FXML
+    public void undoClicked(ActionEvent actionEvent) {
+        undoManager.undo();
+    }
 
 
     /*@FXML

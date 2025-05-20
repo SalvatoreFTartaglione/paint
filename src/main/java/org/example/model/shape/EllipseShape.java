@@ -1,5 +1,6 @@
 package org.example.model.shape;
 
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 
@@ -61,8 +62,9 @@ public class EllipseShape extends Ellipse implements ShapeInterface, FillableSha
      * Sets the border color of the shape
      */
     @Override
-    public void setStrokeColor(Color stroke) {
-        this.strokeColor = stroke;
+    public void setStrokeColor(Color color) {
+        this.strokeColor = color;
+        this.setStroke(color); // aggiorna visivamente
     }
 
 
@@ -163,9 +165,17 @@ public class EllipseShape extends Ellipse implements ShapeInterface, FillableSha
     }
 
     @Override
+    public Node getNode() {
+        return this;
+    }
+
+    @Override
     public void setFillColor(Color fill) {
         this.fillColor = fill;
+        this.setFill(fill);  //aggiorna graficamente la figura
     }
+
+
 
     @Override
     public void setStrokeWidth(int strokeWidth) {

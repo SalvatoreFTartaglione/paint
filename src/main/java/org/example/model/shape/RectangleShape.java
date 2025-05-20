@@ -1,5 +1,6 @@
     package org.example.model.shape;
 
+    import javafx.scene.Node;
     import javafx.scene.paint.Color;
     import javafx.scene.shape.Rectangle;
 
@@ -35,16 +36,26 @@
             return fillColor;
         }
 
-        public void setFillColor(Color fillColor) {
-            this.fillColor = fillColor;
+        @Override
+        public Node getNode() {
+            return this;
         }
+
+        @Override
+        public void setFillColor(Color fill) {
+            this.fillColor = fill;
+            this.setFill(fill);  // aggiorna graficamente la figura
+        }
+
 
         public Color getStrokeColor() {
             return strokeColor;
         }
 
-        public void setStrokeColor(Color strokeColor) {
-            this.strokeColor = strokeColor;
+        @Override
+        public void setStrokeColor(Color color) {
+            this.strokeColor = color;
+            this.setStroke(color); // aggiorna visivamente
         }
 
         @Override

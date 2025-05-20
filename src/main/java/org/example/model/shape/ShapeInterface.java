@@ -1,5 +1,6 @@
 package org.example.model.shape;
 
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
 public interface ShapeInterface {
@@ -32,4 +33,6 @@ public interface ShapeInterface {
     // CHECK!!!!!!
     void setFillColor(Color fill);
     Color getFillColor();
+
+    Node getNode();
 }

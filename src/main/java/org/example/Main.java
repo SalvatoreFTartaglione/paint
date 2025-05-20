@@ -5,6 +5,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.example.controller.MainController;
 import org.example.model.MessageModel;
+import org.example.model.commands.UndoManager;
 import org.example.model.shape.AbstractShape;
 import org.example.model.shape.EllipseCreator;
 import org.example.model.shape.LineCreator;
@@ -18,7 +19,8 @@ public class Main extends Application {
 
         MessageModel model = new MessageModel();
         MainController controller = new MainController(model);
-        MainView view = new MainView(controller);
+        UndoManager undoManager = new UndoManager(); // crea il gestore Undo
+        MainView view = new MainView(controller, undoManager);
         view.start(stage);
 /*
 
