@@ -1,14 +1,11 @@
 package org.example.model.shape;
 
-import javafx.scene.Node;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import org.example.model.commands.ChangeFillColorCommand;
 import org.example.model.commands.ChangeStrokeColorCommand;
 import org.example.model.commands.Command;

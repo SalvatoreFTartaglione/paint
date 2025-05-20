@@ -102,8 +102,8 @@ public class RectangleShape implements ShapeInterface {
 
     @Override
     public void setSize(double width, double height){
-        rectangleShape.setX(width);
-        rectangleShape.setY(height);
+        rectangleShape.setWidth(width);
+        rectangleShape.setHeight(height);
     }
 
     @Override

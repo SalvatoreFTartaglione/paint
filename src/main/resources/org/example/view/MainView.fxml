@@ -29,13 +29,13 @@
                               <Image url="@../images/genericShapes.png" />
                            </image>
                         </ImageView>
-                        <TextArea fx:id="textArea" layoutX="152.0" layoutY="49.0" prefHeight="33.0" prefWidth="152.0" />
-                        <ImageView fx:id="genericTextPhoto" fitHeight="29.0" fitWidth="30.0" layoutX="110.0" layoutY="53.0" pickOnBounds="true" preserveRatio="true">
+                        <!--<TextArea fx:id="textArea" layoutX="152.0" layoutY="49.0" prefHeight="33.0" prefWidth="152.0" />-->
+                        <!--<ImageView fx:id="genericTextPhoto" fitHeight="29.0" fitWidth="30.0" layoutX="110.0" layoutY="53.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../images/genericText.png" />
                            </image>
-                        </ImageView>
-                        <Button fx:id="enterTextButton" layoutX="310.0" layoutY="55.0" mnemonicParsing="false" text="Enter" />
+                        </ImageView>-->
+                        <!--<Button fx:id="enterTextButton" layoutX="310.0" layoutY="55.0" mnemonicParsing="false" text="Enter" />-->
                         <ColorPicker fx:id="fillColorPicker" editable="true" layoutX="466.0" layoutY="27.0">
                            <value>
                               <Color red="0.5986841917037964" green="0.5848257541656494" blue="0.5848257541656494" />
