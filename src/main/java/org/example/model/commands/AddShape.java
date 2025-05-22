@@ -1,9 +1,7 @@
 package org.example.model.commands;
 
-import javafx.scene.Node;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.AddToCanvas;
-import org.example.model.shape.ShapeInterface;
 
 public class AddShape implements CommandInterface {
 

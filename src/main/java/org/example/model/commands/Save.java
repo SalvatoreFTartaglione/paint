@@ -1,20 +1,11 @@
 package org.example.model.commands;
 
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.image.WritableImage;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
-import org.example.model.receivers.CanvasExporter;
-import org.example.model.shape.ShapeInterface;
-import javafx.scene.Node;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import org.example.model.receivers.CanvasExporter;
 
-import javax.imageio.ImageIO;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
 public class Save implements CommandInterface {
 

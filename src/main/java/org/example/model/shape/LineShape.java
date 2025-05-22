@@ -1,5 +1,3 @@
-
-
 package org.example.model.shape;
 
 import javafx.geometry.Bounds;

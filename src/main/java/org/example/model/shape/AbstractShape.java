@@ -1,4 +1,5 @@
 package org.example.model.shape;
+
 import javafx.scene.paint.Color;
 
 public abstract class AbstractShape {
