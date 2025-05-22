@@ -104,17 +104,11 @@ public class MainViewController implements Initializable {
                     Node found = shape.findShapeAt(x, y);
                     if (found != null) {
                         selectedShapeForContextMenu = shape;
-                        System.out.println("Cerco di aprire il context menu");
                         contextMenu = shape.getContextMenu(undoManager, shape.getFillColor(), shape.getStrokeColor(),shape);
                         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
                         break;
                     }
                 }
-            }
-            System.out.println(drawingPane.getChildren().size());
-            for (Node node : drawingPane.getChildren()) {
-                ShapeInterface shape = (ShapeInterface) node.getUserData();
-                System.out.println(shape.toString());
             }
         });
 
@@ -313,34 +307,13 @@ public class MainViewController implements Initializable {
     }
 
     private void setParameters(MouseEvent mouseEvent, ContextMenu contextMenu, ComboBox<ShapeOption> shapeComboBox, Pane drawingPane, Point2D startPoint, ColorPicker borderColorPicker, ColorPicker fillColorPicker) {
-        dto.setContextMenu(contextMenu);
-        dto.setMouseEvent(mouseEvent);
-        dto.setShapeComboBox(shapeComboBox);
         dto.setDrawingPane(drawingPane);
         dto.setStartPoint(startPoint);
-        dto.setBorderColorPicker(borderColorPicker);
-        dto.setFillColorPicker(fillColorPicker);
-    }
-
-    private AbstractShape createRectangle(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
-        AbstractShape rectangle = new RectangleCreator();
-        rectangle.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
-        return rectangle;
-    }
-
-    private AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
-        AbstractShape ellipse = new EllipseCreator();
-        ellipse.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
-        return ellipse;
-    }
-
-    public void onRightClick(MouseEvent mouseEvent) {
-    }
-
-    public void check(MouseEvent mouseEvent) {
-        if (mouseEvent.getButton() == MouseButton.SECONDARY) {
-            System.out.println(drawingPane.getChildren().size());
-        }
+        dto.setBorderColor(borderColorPicker.getValue());
+        dto.setFillColor(fillColorPicker.getValue());
+        dto.setSceneX(mouseEvent.getSceneX());
+        dto.setSceneY(mouseEvent.getSceneY());
+        dto.setShapeOption(shapeComboBox.getValue());
     }
 
     /**
