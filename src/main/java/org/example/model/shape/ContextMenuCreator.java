@@ -8,7 +8,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import org.example.model.commands.ChangeFillColorCommand;
 import org.example.model.commands.ChangeStrokeColorCommand;
-import org.example.model.commands.Command;
+import org.example.model.commands.CommandInterface;
 import org.example.model.commands.UndoManager;
 
 public class ContextMenuCreator {
@@ -30,12 +30,12 @@ public class ContextMenuCreator {
         contextMenu.getItems().addAll(fillColorItem, strokeColorItem);
 
         changeFillColorPicker.setOnAction(e -> {
-            Command cmd = new ChangeFillColorCommand(shape, changeFillColorPicker.getValue());
+            CommandInterface cmd = new ChangeFillColorCommand(shape, changeFillColorPicker.getValue());
             undoManager.executeCommand(cmd);
         });
 
         changeStrokeColorPicker.setOnAction(e -> {
-            Command cmd = new ChangeStrokeColorCommand(shape, changeStrokeColorPicker.getValue());
+            CommandInterface cmd = new ChangeStrokeColorCommand(shape, changeStrokeColorPicker.getValue());
             undoManager.executeCommand(cmd);
         });
         return contextMenu;
@@ -52,7 +52,7 @@ public class ContextMenuCreator {
         contextMenu.getItems().add(strokeColorItem);
 
         changeStrokeColorPicker.setOnAction(e -> {
-            Command cmd = new ChangeStrokeColorCommand(shape, changeStrokeColorPicker.getValue());
+            CommandInterface cmd = new ChangeStrokeColorCommand(shape, changeStrokeColorPicker.getValue());
             undoManager.executeCommand(cmd);
         });
 

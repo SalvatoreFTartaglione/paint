@@ -4,7 +4,7 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import org.example.model.shape.ShapeInterface;
 
-public class ChangeFillColorCommand implements Command {
+public class ChangeFillColorCommand implements CommandInterface {
     private final ShapeInterface shape;
     private final Color newColor;
     private Color oldColor;
@@ -24,7 +24,7 @@ public class ChangeFillColorCommand implements Command {
      * Applies the new fill color and saves the old one for undo.
      */
     @Override
-    public void execute() {
+    public void executeCommand() {
         oldColor = shape.getFillColor();  // salva il colore precedente
         shape.setFillColor(newColor);     // imposta il nuovo colore
     }
@@ -33,7 +33,7 @@ public class ChangeFillColorCommand implements Command {
      * Restores the previous fill color.
      */
     @Override
-    public void undo() {
+    public void undoCommand() {
         shape.setFillColor(oldColor);     // ripristina il colore precedente
     }
 }

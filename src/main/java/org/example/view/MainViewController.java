@@ -17,7 +17,6 @@ import javafx.scene.paint.Color;
 import org.example.controller.ShapeOption;
 import org.example.model.commands.*;
 import org.example.model.shape.*;
-
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -286,75 +285,12 @@ public class MainViewController implements Initializable {
      * @param mouseEvent the mouse event containing click coordinates
      */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
-        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
-            ShapeOption selectedShape = shapeComboBox.getValue();
-            if (!contextMenu.isShowing()) {
-                if (selectedShape != null) {
-                    switch (selectedShape.getName()) {
-                        case "Ellipse": {
-                            // coordinate locali del clic sul Canvas
-                            Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                            double x = localCoords.getX();
-                            double y = localCoords.getY();
-                            AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
-                            ShapeInterface shapeInterface = abstractEllipse.getShape();
-                            //controllo che la shape selezionata sia un'ellisse
-                            EllipseShape ellipseShape = (EllipseShape) shapeInterface;
-                            ellipseShape.draw(x, y);
-                            // Aggiungi l'ellisse al contenitore del Canvas
-                            Command cmd = new AddShapeCommand(drawingPane, ellipseShape);
-                            undoManager.executeCommand(cmd);
-                            //shapeComboBox.setValue(null);
-                            //makeDraggable(ellipseShape);
-                            break;
-                        }
-                        case "Line": {
-                            Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                            double x = localCoords.getX();
-                            double y = localCoords.getY();
-                            if (startPoint == null) {
-                                // first click: save starting point
-                                startPoint = new Point2D(x, y);
-                            } else {
-                                // second click: save end point
-                                LineCreator lineCreator = new LineCreator();
-                                lineCreator.creationOfShape(borderColorPicker.getValue(), null, 5, 0, 0);
-                                // Add line to container
-                                ShapeInterface shapeInterface = lineCreator.getShape();
-                                Double[] points = {x, y, startPoint.getX(), startPoint.getY()};
-                                LineShape lineShape = (LineShape) shapeInterface;
-                                lineShape.draw(points);
-                                Command cmd = new AddShapeCommand(drawingPane, lineShape);
-                                undoManager.executeCommand(cmd);
-                                //shapeComboBox.setValue(null);
-                                //makeDraggable(lineShape);
-                                // Reset state variable
-                                startPoint = null;
-
-                            }
-                            break;
-                        }
-                        case "Rectangle": {
-                            // coordinate locali del clic sul Canvas
-                            Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                            double x = localCoords.getX();
-                            double y = localCoords.getY();
-                            AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
-                            ShapeInterface shapeInterface = abstractRectangle.getShape();
-                            RectangleShape rectangleShape = (RectangleShape) shapeInterface;
-                            rectangleShape.draw(x, y);
-                            Command cmd = new AddShapeCommand(drawingPane, rectangleShape);
-                            undoManager.executeCommand(cmd);
-                            //shapeComboBox.setValue(null);
-                            //makeDraggable(rectangleShape);
-                            break;
-                        }
-                    }
-                }
-            }else {
-                contextMenu.hide();
-            }
-        }
+        AddShape addShape = new AddShape(mouseEvent, contextMenu, shapeComboBox, drawingPane, startPoint, borderColorPicker, fillColorPicker);
+        addShape.executeCommand();
+        shapeComboBox.setValue(null);
+        //MAKE DRAGGABLE CLASSS
+        //startPoint = null;
+        //undoManager.executeCommand(cmd);
     }
 
     private AbstractShape createRectangle(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
@@ -385,7 +321,7 @@ public class MainViewController implements Initializable {
     @FXML
     private void saveFile(ActionEvent event) {
         Save saveFile = new Save(drawingPane);
-        saveFile.executeCommand(null);
+        saveFile.executeCommand();
     }
 
 
@@ -412,19 +348,19 @@ public class MainViewController implements Initializable {
                 if (result.get().getText().equals("Yes")) {
                     // Saving file
                     Save saveFile = new Save(drawingPane);
-                    saveFile.executeCommand(null);
+                    saveFile.executeCommand();
                     // Clear workspace from older shapes
                     drawingPane.getChildren().clear();
                     // After saving execute load
                     Load loadFile = new Load(drawingPane);
-                    loadFile.executeCommand(null);
+                    loadFile.executeCommand();
 
                 } else if (result.get().getText().equals("No")) {
                     // Clear workspace from older shapes
                     drawingPane.getChildren().clear();
                     // Execute load
                     Load loadFile = new Load(drawingPane);
-                    loadFile.executeCommand(null);
+                    loadFile.executeCommand();
                 }
             }
         }
@@ -433,7 +369,7 @@ public class MainViewController implements Initializable {
             drawingPane.getChildren().clear();
             // Execute load
             Load loadFile = new Load(drawingPane);
-            loadFile.executeCommand(null);
+            loadFile.executeCommand();
         }
     }
 

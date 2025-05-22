@@ -4,7 +4,7 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import org.example.model.shape.ShapeInterface;
 
-public class ChangeStrokeColorCommand implements Command {
+public class ChangeStrokeColorCommand implements CommandInterface {
     private final ShapeInterface shape;
     private final Color newColor;
     private Color oldColor;
@@ -24,7 +24,7 @@ public class ChangeStrokeColorCommand implements Command {
      * Applies the new stroke color and saves the old one for undo.
      */
     @Override
-    public void execute() {
+    public void executeCommand() {
         oldColor = shape.getStrokeColor();
         shape.setStrokeColor(newColor);
     }
@@ -33,7 +33,7 @@ public class ChangeStrokeColorCommand implements Command {
      * Restores the previous stroke color.
      */
     @Override
-    public void undo() {
+    public void undoCommand() {
         shape.setStrokeColor(oldColor);
     }
 

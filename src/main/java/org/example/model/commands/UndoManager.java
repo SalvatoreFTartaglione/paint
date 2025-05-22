@@ -3,15 +3,15 @@ package org.example.model.commands;
 import java.util.Stack;
 
 public class UndoManager {
-    private final Stack<Command> history = new Stack<>();
+    private final Stack<CommandInterface> history = new Stack<>();
 
     /**
      * Executes a command and stores it for potential undo.
      *
      * @param cmd the command to execute
      */
-    public void executeCommand(Command cmd) {
-        cmd.execute();
+    public void executeCommand(CommandInterface cmd) {
+        cmd.executeCommand();
         history.push(cmd);
     }
 
@@ -20,7 +20,7 @@ public class UndoManager {
      */
     public void undo() {
         if (!history.isEmpty()) {
-            history.pop().undo();
+            history.pop().undoCommand();
         }
     }
 }
