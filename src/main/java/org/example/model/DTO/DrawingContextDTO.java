@@ -1,53 +1,18 @@
 package org.example.model.DTO;
 
 import javafx.geometry.Point2D;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import org.example.controller.ShapeOption;
 
 public class DrawingContextDTO {
-    private MouseEvent mouseEvent;
-    private ContextMenu contextMenu;
-    private ComboBox<ShapeOption> shapeComboBox;
     private Pane drawingPane;
     private Point2D startPoint;
-    private ColorPicker borderColorPicker;
-    private ColorPicker fillColorPicker;
-
-    public ColorPicker getFillColorPicker() {
-        return fillColorPicker;
-    }
-
-    public void setFillColorPicker(ColorPicker fillColorPicker) {
-        this.fillColorPicker = fillColorPicker;
-    }
-
-    public MouseEvent getMouseEvent() {
-        return mouseEvent;
-    }
-
-    public void setMouseEvent(MouseEvent mouseEvent) {
-        this.mouseEvent = mouseEvent;
-    }
-
-    public ContextMenu getContextMenu() {
-        return contextMenu;
-    }
-
-    public void setContextMenu(ContextMenu contextMenu) {
-        this.contextMenu = contextMenu;
-    }
-
-    public ComboBox<ShapeOption> getShapeComboBox() {
-        return shapeComboBox;
-    }
-
-    public void setShapeComboBox(ComboBox<ShapeOption> shapeComboBox) {
-        this.shapeComboBox = shapeComboBox;
-    }
+    private double sceneX;
+    private double sceneY;
+    private ShapeOption shapeOption;
+    private Color borderColor;
+    private Color fillColor;
 
     public Pane getDrawingPane() {
         return drawingPane;
@@ -65,11 +30,43 @@ public class DrawingContextDTO {
         this.startPoint = startPoint;
     }
 
-    public ColorPicker getBorderColorPicker() {
-        return borderColorPicker;
+    public double getSceneX() {
+        return sceneX;
     }
 
-    public void setBorderColorPicker(ColorPicker borderColorPicker) {
-        this.borderColorPicker = borderColorPicker;
+    public void setSceneX(double sceneX) {
+        this.sceneX = sceneX;
+    }
+
+    public double getSceneY() {
+        return sceneY;
+    }
+
+    public void setSceneY(double sceneY) {
+        this.sceneY = sceneY;
+    }
+
+    public ShapeOption getShapeOption() {
+        return shapeOption;
+    }
+
+    public void setShapeOption(ShapeOption shapeOption) {
+        this.shapeOption = shapeOption;
+    }
+
+    public Color getBorderColor() {
+        return borderColor;
+    }
+
+    public void setBorderColor(Color borderColor) {
+        this.borderColor = borderColor;
+    }
+
+    public Color getFillColor() {
+        return fillColor;
+    }
+
+    public void setFillColor(Color fillColor) {
+        this.fillColor = fillColor;
     }
 }
