@@ -13,7 +13,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import org.example.controller.ShapeOption;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.*;
@@ -110,6 +109,8 @@ public class MainViewController implements Initializable {
                     }
                 }
             }
+
+            System.out.println(drawingPane.getChildren().size());
         });
 
         mainCanvasContainer.setOnMousePressed(event -> {
@@ -295,10 +296,16 @@ public class MainViewController implements Initializable {
      * @param mouseEvent the mouse event containing click coordinates
      */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
+
         if (shapeComboBox.getValue() != null) {
-            setParameters(mouseEvent, contextMenu, shapeComboBox, drawingPane, dto.getStartPoint(), borderColorPicker, fillColorPicker);
-            AddShape addShape = new AddShape(dto);
-            undoManager.executeCommand(addShape);
+            if (contextMenu.isShowing()) {
+                contextMenu.hide();
+            }else {
+                setParameters(mouseEvent, contextMenu, shapeComboBox, drawingPane, dto.getStartPoint(), borderColorPicker, fillColorPicker);
+                AddShape addShape = new AddShape(dto);
+                undoManager.executeCommand(addShape);
+            }
+
         }
         //shapeComboBox.setValue(null);
         //MAKE DRAGGABLE CLASSS
@@ -323,7 +330,7 @@ public class MainViewController implements Initializable {
     @FXML
     private void saveFile(ActionEvent event) {
         Save saveFile = new Save(drawingPane);
-        saveFile.executeCommand();
+        undoManager.executeSaveCommand(saveFile);
     }
 
 
@@ -343,7 +350,7 @@ public class MainViewController implements Initializable {
             drawingPane.getChildren().clear();
             // Execute load
             Load loadFile = new Load(drawingPane);
-            loadFile.executeCommand();
+            undoManager.executeLoadCommand(loadFile);
         }
     }
 
@@ -363,19 +370,19 @@ public class MainViewController implements Initializable {
             if (result.get().getText().equals("Yes")) {
                 // Saving file
                 Save saveFile = new Save(drawingPane);
-                saveFile.executeCommand();
+                undoManager.executeSaveCommand(saveFile);
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // After saving execute load
                 Load loadFile = new Load(drawingPane);
-                loadFile.executeCommand();
+                undoManager.executeLoadCommand(loadFile);
 
             } else if (result.get().getText().equals("No")) {
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // Execute load
                 Load loadFile = new Load(drawingPane);
-                loadFile.executeCommand();
+                undoManager.executeLoadCommand(loadFile);
             }
         }
     }

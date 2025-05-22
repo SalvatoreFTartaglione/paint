@@ -14,6 +14,15 @@ public class UndoManager {
         history.push(cmd);
     }
 
+    public void executeLoadCommand(CommandInterface cmd) {
+        cmd.executeCommand();
+        history.clear();
+    }
+
+    public void executeSaveCommand(CommandInterface cmd) {
+        cmd.executeCommand();
+    }
+
     /**
      * Undoes the last executed command, if available.
      */
