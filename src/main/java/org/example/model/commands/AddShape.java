@@ -7,85 +7,75 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import org.example.controller.ShapeOption;
+import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.shape.*;
 
 public class AddShape implements CommandInterface {
 
-    private MouseEvent mouseEvent;
-    private ContextMenu contextMenu;
-    private ComboBox<ShapeOption> shapeComboBox;
-    private Pane drawingPane;
-    private Point2D startPoint;
-    private ColorPicker borderColorPicker;
-    private ColorPicker fillColorPicker;
+    private DrawingContextDTO dto;
 
-    public AddShape(MouseEvent mouseEvent, ContextMenu contextMenu, ComboBox<ShapeOption> shapeComboBox, Pane drawingPane, Point2D startPoint, ColorPicker borderColorPicker, ColorPicker fillColorPicker) {
-        this.mouseEvent = mouseEvent;
-        this.contextMenu = contextMenu;
-        this.shapeComboBox = shapeComboBox;
-        this.drawingPane = drawingPane;
-        this.startPoint = startPoint;
-        this.borderColorPicker = borderColorPicker;
-        this.fillColorPicker = fillColorPicker;
+    public AddShape(DrawingContextDTO context) {
+        dto = context;
     }
 
     public void executeCommand() {
-        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
-            ShapeOption selectedShape = shapeComboBox.getValue();
-            if (!contextMenu.isShowing()) {
-                if (selectedShape != null) {
-                    switch (selectedShape.getName()) {
-                        case "Ellipse": {
-                            // coordinate locali del clic sul Canvas
-                            Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                            double x = localCoords.getX();
-                            double y = localCoords.getY();
-                            AbstractShape abstractEllipse = createEllipse(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
-                            ShapeInterface shapeInterface = abstractEllipse.getShape();
-                            //controllo che la shape selezionata sia un'ellisse
-                            EllipseShape ellipseShape = (EllipseShape) shapeInterface;
-                            ellipseShape.draw(x, y);
-                            // Add ellipse to Canvas
-                            drawingPane.getChildren().add(ellipseShape.getNode());
-                            break;
+        if (dto.getMouseEvent().getButton() == MouseButton.PRIMARY) {
+            ShapeOption selectedShape = dto.getShapeComboBox().getValue();
+            if (selectedShape != null) {
+                switch (selectedShape.getName()) {
+                    case "Ellipse": {
+                        // coordinate locali del clic sul Canvas
+                        Point2D localCoords = dto.getDrawingPane().sceneToLocal(dto.getMouseEvent().getSceneX(), dto.getMouseEvent().getSceneY());
+                        double x = localCoords.getX();
+                        double y = localCoords.getY();
+                        AbstractShape abstractEllipse = createEllipse(dto.getBorderColorPicker().getValue(), dto.getFillColorPicker().getValue(), 4, 80, 40);
+                        ShapeInterface shapeInterface = abstractEllipse.getShape();
+                        //controllo che la shape selezionata sia un'ellisse
+                        EllipseShape ellipseShape = (EllipseShape) shapeInterface;
+                        ellipseShape.draw(x, y);
+                        // Add ellipse to Canvas
+                        ellipseShape.getNode().setUserData(shapeInterface);
+                        dto.getDrawingPane().getChildren().add(ellipseShape.getNode());
+                        break;
+                    }
+                    case "Line": {
+                        Point2D localCoords = dto.getDrawingPane().sceneToLocal(dto.getMouseEvent().getSceneX(), dto.getMouseEvent().getSceneY());
+                        double x = localCoords.getX();
+                        double y = localCoords.getY();
+                        if (dto.getStartPoint() == null) {
+                            // first click: save starting point
+                            dto.setStartPoint(localCoords);
+
+                        } else {
+                            // second click: save end point
+                            LineCreator lineCreator = new LineCreator();
+                            lineCreator.creationOfShape(dto.getBorderColorPicker().getValue(), null, 5, 0, 0);
+                            // Add line to container
+                            ShapeInterface shapeInterface = lineCreator.getShape();
+                            Double[] points = {x, y, dto.getStartPoint().getX(), dto.getStartPoint().getY()};
+                            LineShape lineShape = (LineShape) shapeInterface;
+                            lineShape.draw(points);
+                            lineShape.getNode().setUserData(shapeInterface);
+                            dto.getDrawingPane().getChildren().add(lineShape.getNode());
+                            dto.setStartPoint(null);
                         }
-                        case "Line": {
-                            Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                            double x = localCoords.getX();
-                            double y = localCoords.getY();
-                            if (startPoint == null) {
-                                // first click: save starting point
-                                startPoint = new Point2D(x, y);
-                            } else {
-                                // second click: save end point
-                                LineCreator lineCreator = new LineCreator();
-                                lineCreator.creationOfShape(borderColorPicker.getValue(), null, 5, 0, 0);
-                                // Add line to container
-                                ShapeInterface shapeInterface = lineCreator.getShape();
-                                Double[] points = {x, y, startPoint.getX(), startPoint.getY()};
-                                LineShape lineShape = (LineShape) shapeInterface;
-                                lineShape.draw(points);
-                                drawingPane.getChildren().add(lineShape.getNode());
-                            }
-                            break;
-                        }
-                        case "Rectangle": {
-                            // coordinate locali del clic sul Canvas
-                            Point2D localCoords = drawingPane.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-                            double x = localCoords.getX();
-                            double y = localCoords.getY();
-                            AbstractShape abstractRectangle = createRectangle(borderColorPicker.getValue(), fillColorPicker.getValue(), 4, 80, 40);
-                            ShapeInterface shapeInterface = abstractRectangle.getShape();
-                            RectangleShape rectangleShape = (RectangleShape) shapeInterface;
-                            rectangleShape.draw(x, y);
-                            drawingPane.getChildren().add(rectangleShape.getNode());
-                            break;
-                        }
+                        break;
+                    }
+                    case "Rectangle": {
+                        // coordinate locali del clic sul Canvas
+                        Point2D localCoords = dto.getDrawingPane().sceneToLocal(dto.getMouseEvent().getSceneX(), dto.getMouseEvent().getSceneY());
+                        double x = localCoords.getX();
+                        double y = localCoords.getY();
+                        AbstractShape abstractRectangle = createRectangle(dto.getBorderColorPicker().getValue(), dto.getFillColorPicker().getValue(), 4, 80, 40);
+                        ShapeInterface shapeInterface = abstractRectangle.getShape();
+                        RectangleShape rectangleShape = (RectangleShape) shapeInterface;
+                        rectangleShape.draw(x, y);
+                        rectangleShape.getNode().setUserData(shapeInterface);
+                        dto.getDrawingPane().getChildren().add(rectangleShape.getNode());
+                        break;
                     }
                 }
-            }/*else {
-                contextMenu.hide();
-            }*/
+            }
         }
 
     }

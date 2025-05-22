@@ -27,7 +27,7 @@ public class CanvasExporter {
             for (Node node : canvas.getChildren()) {
                 Object userData = node.getUserData();
                 if (userData instanceof ShapeInterface) {
-                    writer.write(userData.toString());
+                    writer.write(node.toString());
                     writer.newLine();
                 }
             }

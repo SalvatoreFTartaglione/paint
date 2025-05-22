@@ -15,6 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import org.example.controller.ShapeOption;
+import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.*;
 import org.example.model.shape.*;
 import java.net.URL;
@@ -75,6 +76,8 @@ public class MainViewController implements Initializable {
     private ShapeInterface selectedShapeForContextMenu = null;
     private UndoManager undoManager;
     private ContextMenu contextMenu = new ContextMenu();
+    private Point2D localStartPoint = null;
+    private DrawingContextDTO dto = new DrawingContextDTO();
 
     /**
      * Initializes the controller after the root element has been completely processed.
@@ -108,6 +111,11 @@ public class MainViewController implements Initializable {
                     }
                 }
             }
+            System.out.println(drawingPane.getChildren().size());
+            for (Node node : drawingPane.getChildren()) {
+                ShapeInterface shape = (ShapeInterface) node.getUserData();
+                System.out.println(shape.toString());
+            }
         });
 
         mainCanvasContainer.setOnMousePressed(event -> {
@@ -132,6 +140,14 @@ public class MainViewController implements Initializable {
      */
     public void setUndoManager(UndoManager undoManager) {
         this.undoManager = undoManager;
+    }
+
+    public void setLocalStartPoint(Point2D localStartPoint) {
+        this.localStartPoint = localStartPoint;
+    }
+
+    public Point2D getLocalStartPoint() {
+        return localStartPoint;
     }
 
 
@@ -285,12 +301,25 @@ public class MainViewController implements Initializable {
      * @param mouseEvent the mouse event containing click coordinates
      */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
-        AddShape addShape = new AddShape(mouseEvent, contextMenu, shapeComboBox, drawingPane, startPoint, borderColorPicker, fillColorPicker);
-        addShape.executeCommand();
-        shapeComboBox.setValue(null);
+        if (shapeComboBox.getValue() != null) {
+            setParameters(mouseEvent, contextMenu, shapeComboBox, drawingPane, dto.getStartPoint(), borderColorPicker, fillColorPicker);
+            AddShape addShape = new AddShape(dto);
+            undoManager.executeCommand(addShape);
+        }
+        //shapeComboBox.setValue(null);
         //MAKE DRAGGABLE CLASSS
         //startPoint = null;
         //undoManager.executeCommand(cmd);
+    }
+
+    private void setParameters(MouseEvent mouseEvent, ContextMenu contextMenu, ComboBox<ShapeOption> shapeComboBox, Pane drawingPane, Point2D startPoint, ColorPicker borderColorPicker, ColorPicker fillColorPicker) {
+        dto.setContextMenu(contextMenu);
+        dto.setMouseEvent(mouseEvent);
+        dto.setShapeComboBox(shapeComboBox);
+        dto.setDrawingPane(drawingPane);
+        dto.setStartPoint(startPoint);
+        dto.setBorderColorPicker(borderColorPicker);
+        dto.setFillColorPicker(fillColorPicker);
     }
 
     private AbstractShape createRectangle(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
