@@ -34,6 +34,7 @@ public class Save implements CommandInterface {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text File (*.txt)", "*.txt"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png"));
         File file = fileChooser.showSaveDialog(null);
+
         canvasExporter = new CanvasExporter(drawingPane);
         if (file != null) {
             try {

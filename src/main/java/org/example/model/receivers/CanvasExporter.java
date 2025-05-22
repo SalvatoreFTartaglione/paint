@@ -27,8 +27,7 @@ public class CanvasExporter {
             for (Node node : canvas.getChildren()) {
                 Object userData = node.getUserData();
                 if (userData instanceof ShapeInterface) {
-                    writer.write(node.toString());
-                    writer.newLine();
+                    writer.write(userData.toString());
                 }
             }
         }
@@ -41,7 +40,6 @@ public class CanvasExporter {
 
         WritableImage image = canvas.snapshot(new SnapshotParameters(), null);
         ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-
         canvas.setBackground(originalBackground);
     }
 }

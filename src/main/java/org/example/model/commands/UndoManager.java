@@ -6,8 +6,7 @@ public class UndoManager {
     private final Stack<CommandInterface> history = new Stack<>();
 
     /**
-     * Executes a command and stores it for potential undo.
-     *
+     * Executes a command and stores it for potentia.
      * @param cmd the command to execute
      */
     public void executeCommand(CommandInterface cmd) {

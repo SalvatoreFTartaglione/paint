@@ -363,35 +363,7 @@ public class MainViewController implements Initializable {
     private void loadFile(ActionEvent event) {
         // Check if canvas is empty
         if ( ! drawingPane.getChildren().isEmpty() ) {
-            // Confirmation alert
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Save Workspace");
-            alert.setHeaderText("Canvas is not empty.");
-            alert.setContentText("Save current workspace?");
-            ButtonType saveButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-            ButtonType dontSaveButton = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
-            alert.getButtonTypes().setAll(saveButton, dontSaveButton);
-            Optional<ButtonType> result = alert.showAndWait();
-
-            if (result.isPresent()) {
-                if (result.get().getText().equals("Yes")) {
-                    // Saving file
-                    Save saveFile = new Save(drawingPane);
-                    saveFile.executeCommand();
-                    // Clear workspace from older shapes
-                    drawingPane.getChildren().clear();
-                    // After saving execute load
-                    Load loadFile = new Load(drawingPane);
-                    loadFile.executeCommand();
-
-                } else if (result.get().getText().equals("No")) {
-                    // Clear workspace from older shapes
-                    drawingPane.getChildren().clear();
-                    // Execute load
-                    Load loadFile = new Load(drawingPane);
-                    loadFile.executeCommand();
-                }
-            }
+            loadManager(drawingPane);
         }
         else {
             // Clear workspace from older shapes
@@ -401,6 +373,40 @@ public class MainViewController implements Initializable {
             loadFile.executeCommand();
         }
     }
+
+
+    private void loadManager(Pane drawingPane){
+        // Confirmation alert
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Save Workspace");
+        alert.setHeaderText("Canvas is not empty.");
+        alert.setContentText("Save current workspace?");
+        ButtonType saveButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+        ButtonType dontSaveButton = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(saveButton, dontSaveButton);
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent()) {
+            if (result.get().getText().equals("Yes")) {
+                // Saving file
+                Save saveFile = new Save(drawingPane);
+                saveFile.executeCommand();
+                // Clear workspace from older shapes
+                drawingPane.getChildren().clear();
+                // After saving execute load
+                Load loadFile = new Load(drawingPane);
+                loadFile.executeCommand();
+
+            } else if (result.get().getText().equals("No")) {
+                // Clear workspace from older shapes
+                drawingPane.getChildren().clear();
+                // Execute load
+                Load loadFile = new Load(drawingPane);
+                loadFile.executeCommand();
+            }
+        }
+    }
+
 
     /**
      * Handles the Undo button action to undo the last executed command.
