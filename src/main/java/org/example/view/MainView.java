@@ -4,18 +4,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.example.controller.MainController;
+import org.example.controller.MainViewController;
 import org.example.model.commands.UndoManager;
 
 import java.io.IOException;
 
 public class MainView {
-    private final MainController controller;
     private final UndoManager undoManager;
     private MainViewController mainViewController;
 
-    public MainView(MainController controller, UndoManager undoManager) {
-        this.controller = controller;
+    public MainView(MainViewController controller, UndoManager undoManager) {
+        this.mainViewController = controller;
         this.undoManager = undoManager;
     }
 
@@ -37,9 +36,5 @@ public class MainView {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public MainViewController getMainViewController() {
-        return mainViewController;
     }
 }

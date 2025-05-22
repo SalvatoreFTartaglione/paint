@@ -1,4 +1,4 @@
-package org.example.view;
+package org.example.controller;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -13,7 +13,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import org.example.controller.ShapeOption;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.*;
 import org.example.model.shape.*;
@@ -135,14 +134,6 @@ public class MainViewController implements Initializable {
      */
     public void setUndoManager(UndoManager undoManager) {
         this.undoManager = undoManager;
-    }
-
-    public void setLocalStartPoint(Point2D localStartPoint) {
-        this.localStartPoint = localStartPoint;
-    }
-
-    public Point2D getLocalStartPoint() {
-        return localStartPoint;
     }
 
 

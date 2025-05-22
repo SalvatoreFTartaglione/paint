@@ -6,7 +6,7 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<SplitPane fx:id="splitPane" dividerPositions="0.3" orientation="VERTICAL" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.view.MainViewController">
+<SplitPane fx:id="splitPane" dividerPositions="0.3" orientation="VERTICAL" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.MainViewController">
   <items>
       <TabPane fx:id="tabPane" prefHeight="151.0" prefWidth="799.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
