@@ -13,6 +13,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import org.example.controller.ShapeOption;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.*;
 import org.example.model.shape.*;
@@ -108,8 +109,6 @@ public class MainViewController implements Initializable {
                     }
                 }
             }
-
-            System.out.println(drawingPane.getChildren().size());
         });
 
         mainCanvasContainer.setOnMousePressed(event -> {
@@ -134,6 +133,14 @@ public class MainViewController implements Initializable {
      */
     public void setUndoManager(UndoManager undoManager) {
         this.undoManager = undoManager;
+    }
+
+    public void setLocalStartPoint(Point2D localStartPoint) {
+        this.localStartPoint = localStartPoint;
+    }
+
+    public Point2D getLocalStartPoint() {
+        return localStartPoint;
     }
 
 
@@ -287,7 +294,6 @@ public class MainViewController implements Initializable {
      * @param mouseEvent the mouse event containing click coordinates
      */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
-
         if (shapeComboBox.getValue() != null) {
             if (contextMenu.isShowing()) {
                 contextMenu.hide();
@@ -340,8 +346,8 @@ public class MainViewController implements Initializable {
             // Clear workspace from older shapes
             drawingPane.getChildren().clear();
             // Execute load
-            Load loadFile = new Load(drawingPane);
-            undoManager.executeLoadCommand(loadFile);
+            LoadCommand load = new LoadCommand(drawingPane);
+            undoManager.executeLoadCommand(load);
         }
     }
 
@@ -365,15 +371,15 @@ public class MainViewController implements Initializable {
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // After saving execute load
-                Load loadFile = new Load(drawingPane);
-                undoManager.executeLoadCommand(loadFile);
+                LoadCommand load = new LoadCommand(drawingPane);
+                undoManager.executeLoadCommand(load);
 
             } else if (result.get().getText().equals("No")) {
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // Execute load
-                Load loadFile = new Load(drawingPane);
-                undoManager.executeLoadCommand(loadFile);
+                LoadCommand load = new LoadCommand(drawingPane);
+                undoManager.executeLoadCommand(load);
             }
         }
     }

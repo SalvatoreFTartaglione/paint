@@ -7,13 +7,13 @@ import org.example.model.receivers.CanvasImporter;
 import java.io.File;
 import java.io.IOException;
 
-public class Load implements CommandInterface {
+public class LoadCommand implements CommandInterface {
 
-    private final Pane pane;
+    private CanvasImporter canvasImporter;
 
 
-    public Load(Pane pane) {
-        this.pane = pane;
+    public LoadCommand(Pane pane) {
+        this.canvasImporter = new CanvasImporter(pane);
     }
 
     @Override
@@ -21,9 +21,7 @@ public class Load implements CommandInterface {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"));
         File file = fileChooser.showOpenDialog(null);
-
         if (file != null) {
-            CanvasImporter canvasImporter = new CanvasImporter(pane);
             try {
                 canvasImporter.importAsText(file);
             } catch (IOException e) {
