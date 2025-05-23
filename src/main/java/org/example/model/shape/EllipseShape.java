@@ -2,15 +2,14 @@ package org.example.model.shape;
 
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
-import org.example.model.commands.UndoManager;
 
 
 public class EllipseShape implements ShapeInterface {
 
     private Ellipse ellipseShape;
+    private ContextMenuCreator contextMenuCreator;
 
     public EllipseShape(Color stroke, Color fill, double strokeWidth, double width, double height) {
         this.ellipseShape = new Ellipse();
@@ -19,6 +18,7 @@ public class EllipseShape implements ShapeInterface {
         ellipseShape.setRadiusX(width);
         ellipseShape.setRadiusY(height);
         ellipseShape.setStrokeWidth(strokeWidth);
+        contextMenuCreator = new ContextMenuCreator();
     }
 
     public void draw(double x, double y) {
@@ -50,8 +50,8 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
-    public ContextMenu getContextMenu(UndoManager undoManager, Color colorFill, Color colorStroke, ShapeInterface shape) {
-        return ContextMenuCreator.getContextMenu(undoManager, colorFill, colorStroke, shape);
+    public ContextMenuCreator.ContextMenuWithPickers createContextMenu(Color fillColor, Color strokeColor) {
+        return contextMenuCreator.create(fillColor, strokeColor);
     }
 
     @Override

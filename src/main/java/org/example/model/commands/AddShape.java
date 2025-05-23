@@ -5,12 +5,13 @@ import org.example.model.receivers.AddToCanvas;
 
 public class AddShape implements CommandInterface {
 
-    private final AddToCanvas addToCanvas;
-    private DrawingContextDTO drawingDTO;
 
-    public AddShape(DrawingContextDTO context) {
+    private DrawingContextDTO drawingDTO;
+    private AddToCanvas addToCanvas;
+
+    public AddShape(DrawingContextDTO context, AddToCanvas addToCanvas) {
         this.drawingDTO = context;
-        addToCanvas = new AddToCanvas(context);
+        this.addToCanvas = addToCanvas;
     }
 
     public void executeCommand() {

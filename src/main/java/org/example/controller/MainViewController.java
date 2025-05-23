@@ -13,10 +13,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import org.example.controller.ShapeOption;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.*;
-import org.example.model.shape.*;
+import org.example.model.receivers.AddToCanvas;
+import org.example.model.receivers.ChangesOnShapeReceiver;
+import org.example.model.shape.ContextMenuCreator;
+import org.example.model.shape.ShapeInterface;
+
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -75,8 +78,9 @@ public class MainViewController implements Initializable {
     private ShapeInterface selectedShapeForContextMenu = null;
     private UndoManager undoManager;
     private ContextMenu contextMenu = new ContextMenu();
-    private Point2D localStartPoint = null;
-    private DrawingContextDTO dto = new DrawingContextDTO();
+    private final DrawingContextDTO contextDTO = new DrawingContextDTO();
+    private AddToCanvas addToCanvas = null;
+    private ChangesOnShapeReceiver changesOnShapeReceiver = new ChangesOnShapeReceiver();
 
     /**
      * Initializes the controller after the root element has been completely processed.
@@ -90,21 +94,41 @@ public class MainViewController implements Initializable {
         initializeShapeChoiceBox();
 
         mainCanvasContainer.setOnContextMenuRequested(event -> {
-            if (contextMenu.isShowing()) {
+            if (contextMenu != null && contextMenu.isShowing()) {
                 contextMenu.hide();
             }
+
             double x = event.getX();
             double y = event.getY();
 
             for (Node node : drawingPane.getChildren()) {
                 Object userData = node.getUserData();
                 if (userData instanceof ShapeInterface) {
-                    ShapeInterface shape = (ShapeInterface) userData; // cast esplicito
+                    ShapeInterface shape = (ShapeInterface) userData;
                     Node found = shape.findShapeAt(x, y);
+
                     if (found != null) {
                         selectedShapeForContextMenu = shape;
-                        contextMenu = shape.getContextMenu(undoManager, shape.getFillColor(), shape.getStrokeColor(),shape);
+
+                        ContextMenuCreator.ContextMenuWithPickers menuWithPickers =
+                                shape.createContextMenu(shape.getFillColor(), shape.getStrokeColor());
+
+                        contextMenu = menuWithPickers.contextMenu;
+
+                        if(menuWithPickers.fillColorPicker != null) {
+                            menuWithPickers.fillColorPicker.setOnAction(e -> {
+                                CommandInterface cmd = new ChangeFillColorCommand(shape, menuWithPickers.fillColorPicker.getValue(), changesOnShapeReceiver);
+                                undoManager.executeCommand(cmd);
+                            });
+                        }
+
+                        menuWithPickers.strokeColorPicker.setOnAction(e -> {
+                            CommandInterface cmd = new ChangeStrokeColorCommand(shape, menuWithPickers.strokeColorPicker.getValue(), changesOnShapeReceiver);
+                            undoManager.executeCommand(cmd);
+                        });
+
                         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+
                         break;
                     }
                 }
@@ -133,14 +157,6 @@ public class MainViewController implements Initializable {
      */
     public void setUndoManager(UndoManager undoManager) {
         this.undoManager = undoManager;
-    }
-
-    public void setLocalStartPoint(Point2D localStartPoint) {
-        this.localStartPoint = localStartPoint;
-    }
-
-    public Point2D getLocalStartPoint() {
-        return localStartPoint;
     }
 
 
@@ -298,26 +314,26 @@ public class MainViewController implements Initializable {
             if (contextMenu.isShowing()) {
                 contextMenu.hide();
             }else {
-                setParameters(mouseEvent, contextMenu, shapeComboBox, drawingPane, dto.getStartPoint(), borderColorPicker, fillColorPicker);
-                AddShape addShape = new AddShape(dto);
+                setParameters(mouseEvent, contextMenu, shapeComboBox, drawingPane, contextDTO.getStartPoint(), borderColorPicker, fillColorPicker);
+                addToCanvas = new AddToCanvas(contextDTO);
+                CommandInterface addShape = new AddShape(contextDTO, addToCanvas);
                 undoManager.executeCommand(addShape);
             }
-
         }
         //shapeComboBox.setValue(null);
-        //MAKE DRAGGABLE CLASSS
+        //MAKE DRAGGABLE CLASS
         //startPoint = null;
         //undoManager.executeCommand(cmd);
     }
 
     private void setParameters(MouseEvent mouseEvent, ContextMenu contextMenu, ComboBox<ShapeOption> shapeComboBox, Pane drawingPane, Point2D startPoint, ColorPicker borderColorPicker, ColorPicker fillColorPicker) {
-        dto.setDrawingPane(drawingPane);
-        dto.setStartPoint(startPoint);
-        dto.setBorderColor(borderColorPicker.getValue());
-        dto.setFillColor(fillColorPicker.getValue());
-        dto.setSceneX(mouseEvent.getSceneX());
-        dto.setSceneY(mouseEvent.getSceneY());
-        dto.setShapeOption(shapeComboBox.getValue());
+        contextDTO.setDrawingPane(drawingPane);
+        contextDTO.setStartPoint(startPoint);
+        contextDTO.setBorderColor(borderColorPicker.getValue());
+        contextDTO.setFillColor(fillColorPicker.getValue());
+        contextDTO.setSceneX(mouseEvent.getSceneX());
+        contextDTO.setSceneY(mouseEvent.getSceneY());
+        contextDTO.setShapeOption(shapeComboBox.getValue());
     }
 
     /**

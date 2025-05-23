@@ -1,5 +1,7 @@
 package org.example.model.commands;
 
+import org.example.model.receivers.AddToCanvas;
+
 import java.util.Stack;
 
 public class UndoManager {

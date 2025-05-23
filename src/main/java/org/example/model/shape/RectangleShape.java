@@ -19,6 +19,7 @@ public class RectangleShape implements ShapeInterface {
         rectangleShape.setWidth(width);
         rectangleShape.setHeight(height);
         rectangleShape.setStrokeWidth(strokeWidth);
+        contextMenuCreator = new ContextMenuCreator();
     }
 
     @Override
@@ -51,8 +52,8 @@ public class RectangleShape implements ShapeInterface {
     }
 
     @Override
-    public ContextMenu getContextMenu(UndoManager undoManager, Color colorFill, Color colorStroke, ShapeInterface shape) {
-        return ContextMenuCreator.getContextMenu(undoManager, colorFill, colorStroke, shape);
+    public ContextMenuCreator.ContextMenuWithPickers createContextMenu(Color fillColor, Color strokeColor) {
+        return contextMenuCreator.create(fillColor, strokeColor);
     }
 
     @Override

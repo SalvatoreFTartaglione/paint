@@ -9,7 +9,7 @@ public interface ShapeInterface {
 
     // utils method
     Node findShapeAt(double x, double y);
-    ContextMenu getContextMenu(UndoManager undoManager, Color colorFill, Color colorStroke, ShapeInterface shape);
+    ContextMenuCreator.ContextMenuWithPickers createContextMenu(Color fillColor, Color strokeColor);
 
 
     // Shape color management
