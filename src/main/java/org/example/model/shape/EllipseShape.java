@@ -11,7 +11,6 @@ import javafx.scene.shape.Rectangle;
 public class EllipseShape implements ShapeInterface {
 
     private Ellipse ellipseShape;
-    private ContextMenuCreator contextMenuCreator;
 
     public EllipseShape(Color stroke, Color fill, double strokeWidth, double width, double height) {
         this.ellipseShape = new Ellipse();
@@ -20,7 +19,6 @@ public class EllipseShape implements ShapeInterface {
         ellipseShape.setRadiusX(width);
         ellipseShape.setRadiusY(height);
         ellipseShape.setStrokeWidth(strokeWidth);
-        contextMenuCreator = new ContextMenuCreator();
     }
 
     public void draw(double x, double y) {
@@ -36,11 +34,6 @@ public class EllipseShape implements ShapeInterface {
     @Override
     public Color getStrokeColor() {
        return (Color) ellipseShape.getStroke();
-    }
-
-    @Override
-    public ContextMenuCreator.ContextMenuWithPickers createContextMenu(Color fillColor, Color strokeColor) {
-        return contextMenuCreator.createContextMenu(fillColor, strokeColor);
     }
 
     @Override

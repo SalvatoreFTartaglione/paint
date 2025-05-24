@@ -14,14 +14,12 @@ public class LineShape implements ShapeInterface{
 
     private Line lineShape;
     private Double[] points;
-    private ContextMenuCreator contextMenuCreator;
 
 
     public LineShape(Color stroke, double strokeWidth) {
         lineShape = new Line();
         lineShape.setStroke(stroke);
         lineShape.setStrokeWidth(strokeWidth);
-        contextMenuCreator = new ContextMenuCreator();
     }
 
 
@@ -72,12 +70,6 @@ public class LineShape implements ShapeInterface{
     public void setCustomStrokeWidth(double strokeWidth) {
 
     }
-
-    @Override
-    public ContextMenuCreator.ContextMenuWithPickers createContextMenu(Color fillColor, Color strokeColor) {
-        return contextMenuCreator.createContextMenu(null, strokeColor);
-    }
-
 
     @Override
     public void setStrokeColor(Color stroke) {

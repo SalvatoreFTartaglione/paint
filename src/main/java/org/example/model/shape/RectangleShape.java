@@ -11,7 +11,6 @@ import org.example.model.commands.UndoManager;
 public class RectangleShape implements ShapeInterface {
 
     private Rectangle rectangleShape;
-    private ContextMenuCreator contextMenuCreator;
 
     public RectangleShape(Color stroke, Color fill, double width, double height, int strokeWidth) {
         rectangleShape = new Rectangle();
@@ -20,7 +19,6 @@ public class RectangleShape implements ShapeInterface {
         rectangleShape.setWidth(width);
         rectangleShape.setHeight(height);
         rectangleShape.setStrokeWidth(strokeWidth);
-        contextMenuCreator = new ContextMenuCreator();
     }
 
     @Override
@@ -37,11 +35,6 @@ public class RectangleShape implements ShapeInterface {
     @Override
     public Color getStrokeColor() {
         return (Color) rectangleShape.getStroke();
-    }
-
-    @Override
-    public ContextMenuCreator.ContextMenuWithPickers createContextMenu(Color fillColor, Color strokeColor) {
-        return contextMenuCreator.createContextMenu(fillColor, strokeColor);
     }
 
     @Override

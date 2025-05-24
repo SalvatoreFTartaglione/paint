@@ -16,11 +16,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.*;
 import org.example.model.receivers.AddToCanvas;
 import org.example.model.receivers.ChangesOnShapeReceiver;
-import org.example.model.shape.ContextMenuCreator;
+import org.example.model.shape.ContextMenuActions;
+import org.example.model.shape.ShapeContextMenuManager;
 import org.example.model.shape.ShapeInterface;
 
 import java.net.URL;
@@ -147,38 +149,37 @@ public class MainViewController implements Initializable {
      * Show context menu for selected shape
      */
     private void showContextMenuForShape(ShapeInterface shape, MouseEvent event) {
+
+        // Create context menu actions
+        ContextMenuActions actions = new ContextMenuActions() {
+            @Override
+            public void onFillColorChanged(Color newColor) {
+                CommandInterface cmd = new ChangeFillColorCommand(shape, newColor, changesOnShapeReceiver);
+                undoManager.executeCommand(cmd);
+            }
+
+            @Override
+            public void onStrokeColorChanged(Color newColor) {
+                CommandInterface cmd = new ChangeStrokeColorCommand(shape, newColor, changesOnShapeReceiver);
+                undoManager.executeCommand(cmd);
+            }
+
+            @Override
+            public void onSendToBack() {
+                CommandInterface cmd = new SendBackwardCommand(shape.getNode(), drawingPane);
+                undoManager.executeCommand(cmd);
+            }
+
+            @Override
+            public void onBringToFront() {
+                CommandInterface cmd = new BringForwardCommand(shape.getNode(), drawingPane);
+                undoManager.executeCommand(cmd);
+            }
+        };
+
         // Create context menu
-        ContextMenuCreator.ContextMenuWithPickers menuWithPickers = shape.createContextMenu(shape.getFillColor(), shape.getStrokeColor());
-
-        contextMenu = menuWithPickers.contextMenu;
-
-        // ChangeFillColorCommand
-        if (menuWithPickers.fillColorPicker != null) {
-            menuWithPickers.fillColorPicker.setOnAction(e -> {
-                CommandInterface cmd = new ChangeFillColorCommand( shape, menuWithPickers.fillColorPicker.getValue(), changesOnShapeReceiver);
-                undoManager.executeCommand(cmd);
-            });
-        }
-
-        // ChangeStrokeColorCommand
-        if (menuWithPickers.strokeColorPicker != null) {
-            menuWithPickers.strokeColorPicker.setOnAction(e -> {
-                CommandInterface cmd = new ChangeStrokeColorCommand( shape, menuWithPickers.strokeColorPicker.getValue(), changesOnShapeReceiver);
-                undoManager.executeCommand(cmd);
-            });
-        }
-
-        // SendBackwardCommand
-        menuWithPickers.sendToBackItem.setOnAction(e -> {
-            CommandInterface cmd = new SendBackwardCommand(shape.getNode(), drawingPane);
-            undoManager.executeCommand(cmd);
-        });
-
-        // BringForwardCommand
-        menuWithPickers.bringToFrontItem.setOnAction(e -> {
-            CommandInterface cmd = new BringForwardCommand(shape.getNode(), drawingPane);
-            undoManager.executeCommand(cmd);
-        });
+        ShapeContextMenuManager.MenuComponents menuComponents = ShapeContextMenuManager.createContextMenu(shape, actions);
+        contextMenu = menuComponents.contextMenu;
 
         // Show context menu
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());

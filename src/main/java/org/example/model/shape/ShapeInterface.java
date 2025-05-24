@@ -8,9 +8,6 @@ import org.example.model.commands.UndoManager;
 
 public interface ShapeInterface {
 
-    // utils method
-    ContextMenuCreator.ContextMenuWithPickers createContextMenu(Color fillColor, Color strokeColor);
-
     // Shape color management
     void setStrokeColor(Color color);
     Color getStrokeColor();
