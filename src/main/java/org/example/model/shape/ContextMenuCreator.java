@@ -10,26 +10,36 @@ import javafx.scene.paint.Color;
 public class ContextMenuCreator {
 
     public static class ContextMenuWithPickers {
+
         public final ContextMenu contextMenu;
         public final ColorPicker fillColorPicker;
         public final ColorPicker strokeColorPicker;
+        public final CustomMenuItem sendToBackItem;
+        public final CustomMenuItem bringToFrontItem;
 
-        public ContextMenuWithPickers(ContextMenu contextMenu, ColorPicker fillColorPicker, ColorPicker strokeColorPicker) {
+        public ContextMenuWithPickers(ContextMenu contextMenu, ColorPicker fillColorPicker, ColorPicker strokeColorPicker, CustomMenuItem sendToBackItem, CustomMenuItem bringToFrontItem) {
             this.contextMenu = contextMenu;
             this.fillColorPicker = fillColorPicker;
             this.strokeColorPicker = strokeColorPicker;
+            this.sendToBackItem = sendToBackItem;
+            this.bringToFrontItem = bringToFrontItem;
         }
     }
 
-    public ContextMenuWithPickers create(Color fillColor, Color strokeColor) {
-        ContextMenu contextMenu = new ContextMenu();
+    public ContextMenuWithPickers createContextMenu(Color fillColor, Color strokeColor) {
 
-        // Fill Color
-        ColorPicker fillPicker = new ColorPicker(fillColor);
-        Label fillLabel = new Label("Change Fill Color:");
-        HBox fillBox = new HBox(10, fillLabel, fillPicker);
-        CustomMenuItem fillColorItem = new CustomMenuItem(fillBox);
-        fillColorItem.setHideOnClick(false);
+        ContextMenu contextMenu = new ContextMenu();
+        ColorPicker fillPicker = null;
+        CustomMenuItem fillColorItem = null;
+
+        // Fill Color (for line must be null)
+        if (fillColor != null) {
+            fillPicker = new ColorPicker(fillColor);
+            Label fillLabel = new Label("Change Fill Color:");
+            HBox fillBox = new HBox(10, fillLabel, fillPicker);
+            fillColorItem = new CustomMenuItem(fillBox);
+            fillColorItem.setHideOnClick(false);
+        }
 
         // Stroke Color
         ColorPicker strokePicker = new ColorPicker(strokeColor);
@@ -38,23 +48,22 @@ public class ContextMenuCreator {
         CustomMenuItem strokeColorItem = new CustomMenuItem(strokeBox);
         strokeColorItem.setHideOnClick(false);
 
-        contextMenu.getItems().addAll(fillColorItem, strokeColorItem);
+        // Send to Back
+        CustomMenuItem sendToBackItem = new CustomMenuItem(new Label("Send to Back"));
 
-        return new ContextMenuWithPickers(contextMenu, fillPicker, strokePicker);
+        // Bring to Front
+        CustomMenuItem bringToFrontItem = new CustomMenuItem(new Label("Bring to Front"));
+
+        if (fillColor != null) {
+            // Add items to menu
+            contextMenu.getItems().addAll(fillColorItem, strokeColorItem, sendToBackItem, bringToFrontItem);
+            return new ContextMenuWithPickers(contextMenu, fillPicker, strokePicker, sendToBackItem, bringToFrontItem);
+        }
+        // Add items to menu
+        contextMenu.getItems().addAll(strokeColorItem, sendToBackItem, bringToFrontItem);
+        return new ContextMenuWithPickers(contextMenu, null, strokePicker, sendToBackItem, bringToFrontItem);
     }
 
-    public ContextMenuWithPickers createLineContextMenu(Color strokeColor) {
-        ContextMenu contextMenu = new ContextMenu();
-
-        Label borderLabel = new Label("Change Border Color:");
-        ColorPicker strokePicker = new ColorPicker(strokeColor);
-        HBox borderBox = new HBox(10, borderLabel, strokePicker);
-        CustomMenuItem strokeItem = new CustomMenuItem(borderBox);
-        strokeItem.setHideOnClick(false);
-
-        contextMenu.getItems().add(strokeItem);
-
-        return new ContextMenuWithPickers(contextMenu, null, strokePicker);
-    }
 
 }
+

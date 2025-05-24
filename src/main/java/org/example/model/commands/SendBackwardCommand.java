@@ -4,14 +4,14 @@ import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import org.example.model.receivers.IndexingManager;
 
-public class BringBackwardCommand implements CommandInterface{
+public class SendBackwardCommand implements CommandInterface{
 
     private IndexingManager indexingManager ;
     private final Node node;
     private Pane drawingPane;
     private int oldIndex;
 
-    public BringBackwardCommand(Node node, Pane drawingPane){
+    public SendBackwardCommand(Node node, Pane drawingPane){
         this.node = node;
         indexingManager  = new IndexingManager(node);
     }

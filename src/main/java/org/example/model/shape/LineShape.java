@@ -1,10 +1,12 @@
 package org.example.model.shape;
 
+import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import org.example.model.commands.UndoManager;
 
 
@@ -72,38 +74,8 @@ public class LineShape implements ShapeInterface{
     }
 
     @Override
-    public Node findShapeAt(double x, double y) {
-        double tolerance = 7.0;
-
-        double x1 = lineShape.getStartX();
-        double y1 = lineShape.getStartY();
-        double x2 = lineShape.getEndX();
-        double y2 = lineShape.getEndY();
-
-        // Calcolo distanza punto-linea
-        double dx = x2 - x1;
-        double dy = y2 - y1;
-
-        double numerator = Math.abs(dy * x - dx * y + x2 * y1 - y2 * x1);
-        double denominator = Math.hypot(dx, dy);
-
-        double distance = numerator / denominator;
-
-        // Controlliamo anche che il punto sia nel segmento (bounding box)
-        Bounds bounds = lineShape.getBoundsInParent();
-
-        if (distance <= tolerance &&
-                x >= bounds.getMinX() - tolerance && x <= bounds.getMaxX() + tolerance &&
-                y >= bounds.getMinY() - tolerance && y <= bounds.getMaxY() + tolerance) {
-            return lineShape;
-        }
-
-        return null;
-    }
-
-    @Override
     public ContextMenuCreator.ContextMenuWithPickers createContextMenu(Color fillColor, Color strokeColor) {
-        return contextMenuCreator.createLineContextMenu(strokeColor);
+        return contextMenuCreator.createContextMenu(null, strokeColor);
     }
 
 

@@ -1,9 +1,11 @@
 package org.example.model.shape;
 
+import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
+import javafx.scene.shape.Rectangle;
 
 
 public class EllipseShape implements ShapeInterface {
@@ -37,21 +39,8 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
-    public Node findShapeAt(double x, double y) {
-        Bounds bounds = ellipseShape.getBoundsInParent();
-        double tolerance = 5.0;
-
-        if (x >= bounds.getMinX() - tolerance && x <= bounds.getMaxX() + tolerance &&
-                y >= bounds.getMinY() - tolerance && y <= bounds.getMaxY() + tolerance) {
-            return ellipseShape;
-        }
-
-        return null;
-    }
-
-    @Override
     public ContextMenuCreator.ContextMenuWithPickers createContextMenu(Color fillColor, Color strokeColor) {
-        return contextMenuCreator.create(fillColor, strokeColor);
+        return contextMenuCreator.createContextMenu(fillColor, strokeColor);
     }
 
     @Override

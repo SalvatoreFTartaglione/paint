@@ -1,9 +1,12 @@
 package org.example.controller;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -74,13 +77,13 @@ public class MainViewController implements Initializable {
 
     private boolean isDragging = false;
     private Point2D startPoint = null;
-
     private ShapeInterface selectedShapeForContextMenu = null;
     private UndoManager undoManager;
     private ContextMenu contextMenu = new ContextMenu();
     private final DrawingContextDTO contextDTO = new DrawingContextDTO();
     private AddToCanvas addToCanvas = null;
     private ChangesOnShapeReceiver changesOnShapeReceiver = new ChangesOnShapeReceiver();
+
 
     /**
      * Initializes the controller after the root element has been completely processed.
@@ -92,48 +95,6 @@ public class MainViewController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         initializeSplitPane();
         initializeShapeChoiceBox();
-
-        mainCanvasContainer.setOnContextMenuRequested(event -> {
-            if (contextMenu != null && contextMenu.isShowing()) {
-                contextMenu.hide();
-            }
-
-            double x = event.getX();
-            double y = event.getY();
-
-            for (Node node : drawingPane.getChildren()) {
-                Object userData = node.getUserData();
-                if (userData instanceof ShapeInterface) {
-                    ShapeInterface shape = (ShapeInterface) userData;
-                    Node found = shape.findShapeAt(x, y);
-
-                    if (found != null) {
-                        selectedShapeForContextMenu = shape;
-
-                        ContextMenuCreator.ContextMenuWithPickers menuWithPickers =
-                                shape.createContextMenu(shape.getFillColor(), shape.getStrokeColor());
-
-                        contextMenu = menuWithPickers.contextMenu;
-
-                        if(menuWithPickers.fillColorPicker != null) {
-                            menuWithPickers.fillColorPicker.setOnAction(e -> {
-                                CommandInterface cmd = new ChangeFillColorCommand(shape, menuWithPickers.fillColorPicker.getValue(), changesOnShapeReceiver);
-                                undoManager.executeCommand(cmd);
-                            });
-                        }
-
-                        menuWithPickers.strokeColorPicker.setOnAction(e -> {
-                            CommandInterface cmd = new ChangeStrokeColorCommand(shape, menuWithPickers.strokeColorPicker.getValue(), changesOnShapeReceiver);
-                            undoManager.executeCommand(cmd);
-                        });
-
-                        contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
-
-                        break;
-                    }
-                }
-            }
-        });
 
         mainCanvasContainer.setOnMousePressed(event -> {
             isDragging = false;
@@ -149,6 +110,81 @@ public class MainViewController implements Initializable {
             }
         });
     }
+
+
+    /**
+     * NUOVO METODO: Assegna event handler diretti alla forma appena creata
+     */
+    private void attachEventHandlersToShape(Node shapeNode) {
+        // Assegna l'event handler per il click del mouse
+        shapeNode.setOnMouseClicked(event -> {
+            // Nascondi eventuali menu contestuali aperti
+            if (contextMenu != null && contextMenu.isShowing()) {
+                contextMenu.hide();
+            }
+
+            // Ottieni la ShapeInterface dal userData del nodo
+            Object userData = shapeNode.getUserData();
+            if (userData instanceof ShapeInterface) {
+                ShapeInterface shape = (ShapeInterface) userData;
+                selectedShapeForContextMenu = shape;
+
+                // Se è click destro, mostra il menu contestuale
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    showContextMenuForShape(shape, event);
+                }
+            }
+
+            // Consuma l'evento per evitare che si propaghi al container
+            event.consume();
+        });
+
+        // Opzionale: Rendi la forma draggable
+        // makeDraggable(shapeNode);
+    }
+
+    /**
+     * Show context menu for selected shape
+     */
+    private void showContextMenuForShape(ShapeInterface shape, MouseEvent event) {
+        // Create context menu
+        ContextMenuCreator.ContextMenuWithPickers menuWithPickers = shape.createContextMenu(shape.getFillColor(), shape.getStrokeColor());
+
+        contextMenu = menuWithPickers.contextMenu;
+
+        // ChangeFillColorCommand
+        if (menuWithPickers.fillColorPicker != null) {
+            menuWithPickers.fillColorPicker.setOnAction(e -> {
+                CommandInterface cmd = new ChangeFillColorCommand( shape, menuWithPickers.fillColorPicker.getValue(), changesOnShapeReceiver);
+                undoManager.executeCommand(cmd);
+            });
+        }
+
+        // ChangeStrokeColorCommand
+        if (menuWithPickers.strokeColorPicker != null) {
+            menuWithPickers.strokeColorPicker.setOnAction(e -> {
+                CommandInterface cmd = new ChangeStrokeColorCommand( shape, menuWithPickers.strokeColorPicker.getValue(), changesOnShapeReceiver);
+                undoManager.executeCommand(cmd);
+            });
+        }
+
+        // SendBackwardCommand
+        menuWithPickers.sendToBackItem.setOnAction(e -> {
+            CommandInterface cmd = new SendBackwardCommand(shape.getNode(), drawingPane);
+            undoManager.executeCommand(cmd);
+        });
+
+        // BringForwardCommand
+        menuWithPickers.bringToFrontItem.setOnAction(e -> {
+            CommandInterface cmd = new BringForwardCommand(shape.getNode(), drawingPane);
+            undoManager.executeCommand(cmd);
+        });
+
+        // Show context menu
+        contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+    }
+
+
 
     /**
      * Sets the undo manager for this controller.
@@ -238,8 +274,6 @@ public class MainViewController implements Initializable {
 
     }
 
-
-
     private void initializeSplitPane() {
         Platform.runLater(() -> {
             // Cerca il divider DOPO che la scena è stata caricata
@@ -318,12 +352,16 @@ public class MainViewController implements Initializable {
                 addToCanvas = new AddToCanvas(contextDTO);
                 CommandInterface addShape = new AddShape(contextDTO, addToCanvas);
                 undoManager.executeCommand(addShape);
+                // Assign event handlers to newly created shape
+                // Assuming AddShape adds the shape as the last element of the drawingPan
+                if (!drawingPane.getChildren().isEmpty()) {
+                    Node lastAddedShape = drawingPane.getChildren().get(drawingPane.getChildren().size() - 1);
+                    attachEventHandlersToShape(lastAddedShape);
+                }
             }
         }
         //shapeComboBox.setValue(null);
-        //MAKE DRAGGABLE CLASS
-        //startPoint = null;
-        //undoManager.executeCommand(cmd);
+        //MAKE DRAGGABLE
     }
 
     private void setParameters(MouseEvent mouseEvent, ContextMenu contextMenu, ComboBox<ShapeOption> shapeComboBox, Pane drawingPane, Point2D startPoint, ColorPicker borderColorPicker, ColorPicker fillColorPicker) {
@@ -347,7 +385,6 @@ public class MainViewController implements Initializable {
     }
 
 
-
     /**
      * @param event
      * Calls the function to load a file
@@ -357,6 +394,8 @@ public class MainViewController implements Initializable {
         // Check if canvas is empty
         if ( ! drawingPane.getChildren().isEmpty() ) {
             loadManager(drawingPane);
+            // Assign event handlers to all loaded shapes
+            attachEventHandlersToAllShapes();
         }
         else {
             // Clear workspace from older shapes
@@ -364,6 +403,17 @@ public class MainViewController implements Initializable {
             // Execute load
             LoadCommand load = new LoadCommand(drawingPane);
             undoManager.executeLoadCommand(load);
+            // Assign event handlers to all loaded shapes
+            attachEventHandlersToAllShapes();
+        }
+    }
+
+    /**
+     * Assign event handlers to all shapes in the drawingPane
+     */
+    private void attachEventHandlersToAllShapes() {
+        for (Node node : drawingPane.getChildren()) {
+            attachEventHandlersToShape(node);
         }
     }
 

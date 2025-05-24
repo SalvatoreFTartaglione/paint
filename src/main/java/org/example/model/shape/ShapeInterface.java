@@ -1,5 +1,6 @@
 package org.example.model.shape;
 
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.paint.Color;
@@ -8,9 +9,7 @@ import org.example.model.commands.UndoManager;
 public interface ShapeInterface {
 
     // utils method
-    Node findShapeAt(double x, double y);
     ContextMenuCreator.ContextMenuWithPickers createContextMenu(Color fillColor, Color strokeColor);
-
 
     // Shape color management
     void setStrokeColor(Color color);
