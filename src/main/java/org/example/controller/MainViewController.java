@@ -185,6 +185,30 @@ public class MainViewController implements Initializable {
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
     }
 
+    /*
+    // 6. Versione alternativa con Lambda (ancora più concisa)
+    private void showContextMenuForShape(ShapeInterface shape, MouseEvent event) {
+        ShapeContextMenuManager.MenuComponents menuComponents =
+            ShapeContextMenuManager.createContextMenu(shape, new ContextMenuActions() {
+                public void onFillColorChanged(Color c) {
+                    undoManager.executeCommand(new ChangeFillColorCommand(shape, c, changesOnShapeReceiver));
+                }
+                public void onStrokeColorChanged(Color c) {
+                    undoManager.executeCommand(new ChangeStrokeColorCommand(shape, c, changesOnShapeReceiver));
+                }
+                public void onSendToBack() {
+                    undoManager.executeCommand(new SendBackwardCommand(shape.getNode(), drawingPane));
+                }
+                public void onBringToFront() {
+                    undoManager.executeCommand(new BringForwardCommand(shape.getNode(), drawingPane));
+                }
+            });
+
+        contextMenu = menuComponents.contextMenu;
+        contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+    }
+     */
+
 
 
     /**
