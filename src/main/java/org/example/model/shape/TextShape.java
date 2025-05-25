@@ -1,11 +1,13 @@
 package org.example.model.shape;
 
 import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-public class TextShape implements ShapeInterface {
+class TextShape implements ShapeInterface {
 
     private final Text textNode;
     private double strokeWidth = 1.0;
@@ -121,6 +123,31 @@ public class TextShape implements ShapeInterface {
     @Override
     public Node getNode() {
         return textNode;
+    }
+
+    @Override
+    public double getEffectiveSize() {
+        return getFontSize();
+    }
+
+    @Override
+    public void scaleToSize(double scale) {
+        textNode.setFont(Font.font(scale));
+    }
+
+    @Override
+    public double getMaxSliderSize() {
+        return Math.max(72, getEffectiveSize() * 3); // Max 72pt o 3x corrente
+    }
+
+    @Override
+    public double getMinSliderSize() {
+        return Math.max(8, getEffectiveSize() * 0.3); // Min 8pt o 30% corrente
+    }
+
+    @Override
+    public String getSliderLabel(double value) {
+        return String.format("%.0f pt", value);
     }
 
     @Override

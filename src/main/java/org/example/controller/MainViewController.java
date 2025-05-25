@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -18,10 +19,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.*;
-import org.example.model.receivers.AddToCanvas;
-import org.example.model.receivers.ChangesOnShapeReceiver;
-import org.example.model.receivers.DraggingReceiver;
-import org.example.model.receivers.ShapeReceiver;
+import org.example.model.receivers.*;
 import org.example.model.shape.ContextMenuActions;
 import org.example.model.shape.ContextMenuManager;
 import org.example.model.shape.ShapeInterface;
@@ -93,6 +91,7 @@ public class MainViewController implements Initializable {
     private AddToCanvas addToCanvas = null;
     private ChangesOnShapeReceiver changesOnShapeReceiver = new ChangesOnShapeReceiver();
     private DraggingReceiver draggingReceiver = new DraggingReceiver() {};
+    private PoistionManagerReceiver poistionManagerReceiver;
     // State flag to understand if user is dragging and avoid accidentally adding new shapes to the canvas
     private boolean isDragging0 = false;
     private boolean hasDragged = false;
@@ -143,8 +142,6 @@ public class MainViewController implements Initializable {
 
         // stops dragging with mouse of the drawing pane
         scrollPane.setPannable(false);
-
-
     }
 
     private void initializeZoomControls() {
@@ -194,21 +191,26 @@ public class MainViewController implements Initializable {
      * NUOVO METODO: Assegna event handler diretti alla forma appena creata
      */
     private void attachEventHandlersToShape(Node shapeNode) {
+        // Assegna l'event handler per il click del mouse
         shapeNode.setOnMouseClicked(event -> {
+            // Nascondi eventuali menu contestuali aperti
             if (contextMenu != null && contextMenu.isShowing()) {
                 contextMenu.hide();
             }
 
+            // Ottieni la ShapeInterface dal userData del nodo
             Object userData = shapeNode.getUserData();
             if (userData instanceof ShapeInterface) {
                 ShapeInterface shape = (ShapeInterface) userData;
                 selectedShapeForContextMenu = shape;
 
+                // Se è click destro, mostra il menu contestuale
                 if (event.getButton() == MouseButton.SECONDARY) {
-                    showContextMenuForShape(shape, event);
+                    showContextMenu(shape, event);
                 }
             }
 
+            // Consuma l'evento per evitare che si propaghi al container
             event.consume();
         });
     }
@@ -216,10 +218,15 @@ public class MainViewController implements Initializable {
     /**
      * Show context menu for selected shape
      */
-    private void showContextMenuForShape(ShapeInterface shape, MouseEvent event) {
+    private void showContextMenu(ShapeInterface shape, MouseEvent event) {
+
+
 
         // Create context menu actions
         ContextMenuActions actions = new ContextMenuActions() {
+            double oldWidth = shape.getWidth();
+            double oldHeight = shape.getHeight();
+
             @Override
             public void onFillColorChanged(Color newColor) {
                 CommandInterface cmd = new ChangeFillColorCommand(shape, newColor, changesOnShapeReceiver);
@@ -234,15 +241,25 @@ public class MainViewController implements Initializable {
 
             @Override
             public void onSendToBack() {
-                CommandInterface cmd = new SendBackwardCommand(shape.getNode(), drawingPane);
+                poistionManagerReceiver = new PoistionManagerReceiver(shape);
+                CommandInterface cmd = new SendBackwardCommand(poistionManagerReceiver);
                 undoManager.executeCommand(cmd);
             }
 
             @Override
             public void onBringToFront() {
-                CommandInterface cmd = new BringForwardCommand(shape.getNode(), drawingPane);
+                poistionManagerReceiver = new PoistionManagerReceiver(shape);
+                CommandInterface cmd = new BringForwardCommand(poistionManagerReceiver);
                 undoManager.executeCommand(cmd);
             }
+
+            @Override
+            public void onResize(double newWidth, double newHeight) {
+                poistionManagerReceiver = new PoistionManagerReceiver(shape);
+                CommandInterface cmd = new ResizeCommand(poistionManagerReceiver, newWidth, newHeight, oldWidth, oldHeight);
+                undoManager.executeCommand(cmd);
+            }
+
 
             @Override
             public void onCopy() {
@@ -308,33 +325,6 @@ public class MainViewController implements Initializable {
         // Mostra il menu nella posizione cliccata
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
     }
-
-
-
-    /*
-    // 6. Versione alternativa con Lambda (ancora più concisa)
-    private void showContextMenuForShape(ShapeInterface shape, MouseEvent event) {
-        ShapeContextMenuManager.MenuComponents menuComponents =
-            ShapeContextMenuManager.createContextMenu(shape, new ContextMenuActions() {
-                public void onFillColorChanged(Color c) {
-                    undoManager.executeCommand(new ChangeFillColorCommand(shape, c, changesOnShapeReceiver));
-                }
-                public void onStrokeColorChanged(Color c) {
-                    undoManager.executeCommand(new ChangeStrokeColorCommand(shape, c, changesOnShapeReceiver));
-                }
-                public void onSendToBack() {
-                    undoManager.executeCommand(new SendBackwardCommand(shape.getNode(), drawingPane));
-                }
-                public void onBringToFront() {
-                    undoManager.executeCommand(new BringForwardCommand(shape.getNode(), drawingPane));
-                }
-            });
-
-        contextMenu = menuComponents.contextMenu;
-        contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
-    }
-     */
-
 
 
     /**
@@ -530,6 +520,7 @@ public class MainViewController implements Initializable {
      * @param mouseEvent the mouse event containing click coordinates
      */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
+        // Ignore the click if we just finished dragging
         if (hasDragged) {
             return;
         }
@@ -541,6 +532,8 @@ public class MainViewController implements Initializable {
                 addToCanvas = new AddToCanvas(contextDTO);
                 CommandInterface addShape = new AddShapeCommand(contextDTO, addToCanvas);
                 undoManager.executeCommand(addShape);
+                // Assign event handlers to newly created shape
+                // Assuming AddShapeCommand adds the shape as the last element of the drawingPane
                 if (!drawingPane.getChildren().isEmpty()) {
                     Node lastAddedShape = drawingPane.getChildren().get(drawingPane.getChildren().size() - 1);
                     attachEventHandlersToShape(lastAddedShape);

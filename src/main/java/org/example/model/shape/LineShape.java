@@ -141,23 +141,49 @@ public class LineShape implements ShapeInterface{
 
     @Override
     public double getWidth() {
+        // Restituisce la differenza lungo l'asse X
         return lineShape.getEndX() - lineShape.getStartX();
     }
 
     @Override
     public double getHeight() {
+        // Restituisce la differenza lungo l'asse Y
         return lineShape.getEndY() - lineShape.getStartY();
     }
-    /**
-     * @param x
-     * @param y
-     * Set the size of the shape
-     */
+
     @Override
-    public void setSize(double x, double y) {
-        lineShape.setStartX(x);
-        lineShape.setStartY(y);
+    public void setSize(double width, double height) {
+        // Calcola il vettore corrente (dx, dy)
+        double currentDx = getWidth();
+        double currentDy = getHeight();
+
+        // Calcola la lunghezza attuale della linea
+        double currentLength = Math.hypot(currentDx, currentDy);
+
+        // Calcola la lunghezza desiderata dal nuovo (width, height)
+        double desiredLength = Math.hypot(width, height);
+
+        // Se la linea è "degenerata" (lunghezza zero) impostiamo un orientamento predefinito, per esempio orizzontale
+        if (currentLength == 0) {
+            lineShape.setEndX(lineShape.getStartX() + desiredLength);
+            lineShape.setEndY(lineShape.getStartY());
+            return;
+        }
+
+        // Calcola il fattore di scala in modo da mantenere l'orientamento
+        double scale = desiredLength / currentLength;
+
+        // Nuove componenti della differenza mantenendo l'orientamento esistente
+        double newDx = currentDx * scale;
+        double newDy = currentDy * scale;
+
+        // Aggiorna il punto finale della linea mantenendo invariato il punto di partenza
+        lineShape.setEndX(lineShape.getStartX() + newDx);
+        lineShape.setEndY(lineShape.getStartY() + newDy);
     }
+
+
+
 
     @Override
     public double getCustomStrokeWidth() {
@@ -195,6 +221,53 @@ public class LineShape implements ShapeInterface{
      */
     private void setPoints(Double[] points){
         this.points = points;
+    }
+
+    @Override
+    public double getEffectiveSize() {
+        // Per le linee, la dimensione effettiva è la lunghezza
+        double length = Math.hypot(getWidth(), getHeight());
+        return length > 0 ? length : 50; // Default se la linea è degenerata
+    }
+
+    @Override
+    public double getMaxSliderSize() {
+        return Math.max(300, getEffectiveSize() * 3);
+    }
+
+    @Override
+    public double getMinSliderSize() {
+        return 10; // Lunghezza minima per una linea
+    }
+
+    @Override
+    public void scaleToSize(double newSize) {
+        double currentLength = Math.hypot(getWidth(), getHeight());
+
+        if (currentLength <= 0) {
+            // Se la linea è degenerata, crea una linea orizzontale
+            lineShape.setEndX(lineShape.getStartX() + newSize);
+            lineShape.setEndY(lineShape.getStartY());
+        } else {
+            // Scala mantenendo l'orientamento
+            double scale = newSize / currentLength;
+            double newDx = getWidth() * scale;
+            double newDy = getHeight() * scale;
+
+            lineShape.setEndX(lineShape.getStartX() + newDx);
+            lineShape.setEndY(lineShape.getStartY() + newDy);
+        }
+
+        // Aggiorna l'array dei punti se esiste
+        if (this.points != null && this.points.length >= 4) {
+            this.points[2] = lineShape.getEndX();
+            this.points[3] = lineShape.getEndY();
+        }
+    }
+
+    @Override
+    public String getSliderLabel(double value) {
+        return String.format("Length: %.1f", value);
     }
 
 
