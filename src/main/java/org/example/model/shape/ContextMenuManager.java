@@ -20,14 +20,25 @@ public class ContextMenuManager {
     }
 
     /*
-    * Creates a complitely configured context menu with event handlers
+     * Creates a complitely configured context menu with event handlers
      */
     public static MenuComponents createContextMenu(ShapeInterface shape, ContextMenuActions actions) {
 
         ContextMenu contextMenu = new ContextMenu();
 
+        // Color Management
         ColorPicker fillPicker = null;
         ColorPicker strokePicker = new ColorPicker(shape.getStrokeColor());
+
+        // Resize mode buttons
+        MenuItem numeric = new MenuItem("Resize Numerically");
+        MenuItem visual  = new MenuItem("Resize Visually");
+
+        // Resize panels (initially hidden)
+        CustomMenuItem numericPanel = createResizeNumericItem(shape, actions::onResize);
+        CustomMenuItem visualPanel  = createResizeVisualItem(shape, actions::onResize);
+        numericPanel.setVisible(false);
+        visualPanel.setVisible(false);
 
         // Fill Color (for line must be null)
         if (shape.getFillColor() != null) {
@@ -57,7 +68,26 @@ public class ContextMenuManager {
         MenuItem pasteItem = new MenuItem("Paste");
         pasteItem.setOnAction(e -> actions.onPaste());
 
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, copyItem, cutItem, pasteItem);
+        // Toggle visibility of respective panels
+        Label numericLabel = new Label("Numerical Resize");
+        CustomMenuItem numericBtn = new CustomMenuItem(numericLabel);
+        numericBtn.setHideOnClick(false);
+        numericBtn.setOnAction(e -> {
+            numericPanel.setVisible(true);
+            visualPanel.setVisible(false);
+        });
+
+        Label visualLabel = new Label("Visual Resize");
+        CustomMenuItem visualBtn = new CustomMenuItem(visualLabel);
+        visualBtn.setHideOnClick(false);
+        visualBtn.setOnAction(e -> {
+            numericPanel.setVisible(false);
+            visualPanel.setVisible(true);
+        });
+
+        // Add items
+        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, copyItem, pasteItem);
+        contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }
@@ -80,5 +110,76 @@ public class ContextMenuManager {
         void onColorChanged(Color color);
     }
 
-}
+    @FunctionalInterface
+    public interface ResizeHandler {
+        void onResize(double newWidth, double newHeight);
+    }
 
+    private static CustomMenuItem createResizeNumericItem(ShapeInterface shape, ResizeHandler resizeHandler) {
+        TextField w = new TextField(String.format("%.1f", shape.getWidth()));
+        TextField h = new TextField(String.format("%.1f", shape.getHeight()));
+        w.setPrefWidth(60); h.setPrefWidth(60);
+
+        Button applyBtn = new Button("Apply");
+        applyBtn.setPrefWidth(60);
+
+        HBox box = new HBox(10, new Label("W:"), w, new Label("H:"), h, applyBtn);
+        CustomMenuItem item = new CustomMenuItem(box);
+        item.setHideOnClick(false);
+
+        Runnable apply = () -> {
+            try {
+                double nw = Double.parseDouble(w.getText());
+                double nh = Double.parseDouble(h.getText());
+
+                // Reset border in case of valid input
+                w.setStyle("");
+                h.setStyle("");
+
+                resizeHandler.onResize(nw, nh);
+            } catch (NumberFormatException e) {
+                // Red border to signal error
+                w.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
+                h.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
+            }
+        };
+
+        // Apply only when button is clicked
+        applyBtn.setOnAction(e -> apply.run());
+
+        return item;
+    }
+
+    private static CustomMenuItem createResizeVisualItem(ShapeInterface shape, ResizeHandler resizeHandler) {
+        double currentSize = shape.getEffectiveSize();
+        double minSize = shape.getMinSliderSize();
+        double maxSize = shape.getMaxSliderSize();
+
+        Slider slider = new Slider(minSize, maxSize, currentSize);
+        Label valLabel = new Label(shape.getSliderLabel(slider.getValue()));
+
+        Button applyBtn = new Button("Apply");
+        applyBtn.setPrefWidth(60);
+
+        slider.setPrefWidth(150);
+        slider.setShowTickLabels(true);
+
+        // Only update label, no visual changes to shape
+        slider.valueProperty().addListener((obs, oldV, newV) -> {
+            double newSize = newV.doubleValue();
+            valLabel.setText(shape.getSliderLabel(newSize));
+        });
+
+        // Apply changes only when Apply button is clicked
+        applyBtn.setOnAction(e -> {
+            double finalSize = slider.getValue();
+            shape.scaleToSize(finalSize);
+            resizeHandler.onResize(shape.getWidth(), shape.getHeight());
+        });
+
+        HBox box = new HBox(10, slider, valLabel, applyBtn);
+        CustomMenuItem item = new CustomMenuItem(box);
+        item.setHideOnClick(false);
+        return item;
+    }
+}

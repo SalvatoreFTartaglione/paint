@@ -90,4 +90,5 @@ public class ShapeReceiver {
     public boolean hasShape() {
         return shape != null;
     }
+
 }

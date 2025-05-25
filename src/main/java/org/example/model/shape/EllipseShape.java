@@ -119,6 +119,29 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
+    public double getEffectiveSize() {
+        // Per i cerchi/ellissi, usa il diametro maggiore
+        return Math.max(getWidth(), getHeight());
+    }
+
+    @Override
+    public void scaleToSize(double newSize) {
+        // Mantieni l'aspect ratio dell'ellisse
+        double currentMax = Math.max(getWidth(), getHeight());
+        if (currentMax > 0) {
+            double scale = newSize / currentMax;
+            setSize(getWidth() * scale, getHeight() * scale);
+        } else {
+            setSize(newSize, newSize);
+        }
+    }
+
+    @Override
+    public String getSliderLabel(double value) {
+        return String.format("Diameter: %.1f", value);
+    }
+
+    @Override
     public String toString() {
         return "Ellipse" + ";" + ellipseShape.getStroke() + ";" + ellipseShape.getFill() + ";" + ellipseShape.getStrokeWidth() + ";"
                 + ellipseShape.getRadiusX() + ";" + ellipseShape.getRadiusY() + ";" + ellipseShape.getCenterX() + ";" + ellipseShape.getCenterY() + "\n";

@@ -120,6 +120,32 @@ public class RectangleShape implements ShapeInterface {
     }
 
     @Override
+    public double getEffectiveSize() {
+        // Per i rettangoli, usa la dimensione maggiore
+        return Math.max(getWidth(), getHeight());
+    }
+
+    @Override
+    public void scaleToSize(double newSize) {
+        // Per i rettangoli, mantieni l'aspect ratio
+        double currentMax = Math.max(getWidth(), getHeight());
+        if (currentMax > 0) {
+            double scale = newSize / currentMax;
+            double newWidth = getWidth() * scale;
+            double newHeight = getHeight() * scale;
+            setSize(newWidth, newHeight);
+        } else {
+            // Se degenerato, crea un quadrato
+            setSize(newSize, newSize);
+        }
+    }
+
+    @Override
+    public String getSliderLabel(double value) {
+        return String.format("Dimension: %.1f", value);
+    }
+
+    @Override
     public String toString() {
         return "Rectangle" + ";" + rectangleShape.getStroke() + ";" + rectangleShape.getFill() + ";"
                 + rectangleShape.getStrokeWidth() + ";" + rectangleShape.getWidth() + ";"
