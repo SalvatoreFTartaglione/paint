@@ -5,6 +5,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -72,9 +73,15 @@ public class MainViewController implements Initializable {
     @FXML
     private ScrollPane scrollPane;
     @FXML
-    private Pane mainCanvasContainer;
+    private Group mainCanvasContainer;
     @FXML
     private ContextMenu scrollPaneContextMenu;
+    @FXML
+    private Slider zoomSlider;
+    @FXML
+    private Label zoomValueLabel;
+    @FXML
+    private Button resetZoomButton;
 
     private boolean isDragging = false;
     private Point2D startPoint = null;
@@ -90,6 +97,7 @@ public class MainViewController implements Initializable {
     private boolean hasDragged = false;
 
     private ShapeReceiver shapeReceiver = new ShapeReceiver();
+    private double currentZoom = 1.0;
 
     /**
      * Initializes the controller after the root element has been completely processed.
@@ -101,6 +109,7 @@ public class MainViewController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         initializeSplitPane();
         initializeShapeChoiceBox();
+        initializeZoomControls();
 
         mainCanvasContainer.setOnMousePressed(event -> {
             isDragging = false;
@@ -110,7 +119,7 @@ public class MainViewController implements Initializable {
             isDragging = true;
         });
 
-        mainCanvasContainer.setOnMouseReleased(event -> {
+        scrollPane.setOnMouseReleased(event -> {
             if (!isDragging && event.getButton() == MouseButton.PRIMARY) {
                 // Se clic sinistro, disegna
                 DrawOnCanvas(event);
@@ -137,31 +146,68 @@ public class MainViewController implements Initializable {
 
     }
 
+    private void initializeZoomControls() {
+        zoomSlider.setMin(0.1);  // 10%
+        zoomSlider.setMax(2.0);  // 200%
+        zoomSlider.setValue(1.0); // 100%
+
+        zoomSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            double zoomLevel = newValue.doubleValue();
+            applyZoom(zoomLevel);
+            updateZoomLabel(zoomLevel);
+        });
+
+        updateZoomLabel(1.0);
+    }
+
+    private void applyZoom(double zoomLevel) {
+        currentZoom = zoomLevel;
+
+        double hValue = scrollPane.getHvalue();
+        double vValue = scrollPane.getVvalue();
+
+        drawingPane.setScaleX(zoomLevel);
+        drawingPane.setScaleY(zoomLevel);
+
+        double originalWidth = 1500.0;
+        double originalHeight = 1500.0;
+
+        Platform.runLater(() -> {
+            scrollPane.setHvalue(hValue);
+            scrollPane.setVvalue(vValue);
+        });
+    }
+
+    private void updateZoomLabel(double zoomLevel) {
+        int percentage = (int) Math.round(zoomLevel * 100);
+        zoomValueLabel.setText(percentage + "%");
+    }
+
+    @FXML
+    private void resetZoom(ActionEvent event) {
+        zoomSlider.setValue(1.0);
+    }
+
 
     /**
      * NUOVO METODO: Assegna event handler diretti alla forma appena creata
      */
     private void attachEventHandlersToShape(Node shapeNode) {
-        // Assegna l'event handler per il click del mouse
         shapeNode.setOnMouseClicked(event -> {
-            // Nascondi eventuali menu contestuali aperti
             if (contextMenu != null && contextMenu.isShowing()) {
                 contextMenu.hide();
             }
 
-            // Ottieni la ShapeInterface dal userData del nodo
             Object userData = shapeNode.getUserData();
             if (userData instanceof ShapeInterface) {
                 ShapeInterface shape = (ShapeInterface) userData;
                 selectedShapeForContextMenu = shape;
 
-                // Se è click destro, mostra il menu contestuale
                 if (event.getButton() == MouseButton.SECONDARY) {
                     showContextMenuForShape(shape, event);
                 }
             }
 
-            // Consuma l'evento per evitare che si propaghi al container
             event.consume();
         });
     }
@@ -448,7 +494,6 @@ public class MainViewController implements Initializable {
      * @param mouseEvent the mouse event containing click coordinates
      */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
-        // Ignore the click if we just finished dragging
         if (hasDragged) {
             return;
         }
@@ -460,8 +505,6 @@ public class MainViewController implements Initializable {
                 addToCanvas = new AddToCanvas(contextDTO);
                 CommandInterface addShape = new AddShapeCommand(contextDTO, addToCanvas);
                 undoManager.executeCommand(addShape);
-                // Assign event handlers to newly created shape
-                // Assuming AddShapeCommand adds the shape as the last element of the drawingPane
                 if (!drawingPane.getChildren().isEmpty()) {
                     Node lastAddedShape = drawingPane.getChildren().get(drawingPane.getChildren().size() - 1);
                     attachEventHandlersToShape(lastAddedShape);

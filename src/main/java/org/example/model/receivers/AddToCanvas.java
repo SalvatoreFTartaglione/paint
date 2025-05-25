@@ -19,32 +19,30 @@ public class AddToCanvas {
 
         switch (selectedShape.getName()) {
             case "Ellipse": {
-                // coordinate locali del clic sul Canvas
-                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                Point2D sceneCoords = new Point2D(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(sceneCoords);
+
                 double x = localCoords.getX();
                 double y = localCoords.getY();
+
                 AbstractShape abstractEllipse = createEllipse(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40);
                 ShapeInterface shapeInterface = abstractEllipse.getShape();
-                //controllo che la shape selezionata sia un'ellisse
                 EllipseShape ellipseShape = (EllipseShape) shapeInterface;
                 ellipseShape.draw(x, y);
-                // Add ellipse to Canvas
                 ellipseShape.getNode().setUserData(shapeInterface);
                 drawingDTO.getDrawingPane().getChildren().add(ellipseShape.getNode());
                 break;
             }
             case "Line": {
-                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                Point2D sceneCoords = new Point2D(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(sceneCoords);
                 double x = localCoords.getX();
                 double y = localCoords.getY();
                 if (drawingDTO.getStartPoint() == null) {
-                    // first click: save starting point
                     drawingDTO.setStartPoint(localCoords);
                 } else {
-                    // second click: save end point
                     LineCreator lineCreator = new LineCreator();
                     lineCreator.creationOfShape(drawingDTO.getBorderColor(), null, 5, 0, 0);
-                    // Add line to container
                     ShapeInterface shapeInterface = lineCreator.getShape();
                     Double[] points = {x, y, drawingDTO.getStartPoint().getX(), drawingDTO.getStartPoint().getY()};
                     LineShape lineShape = (LineShape) shapeInterface;
@@ -56,8 +54,8 @@ public class AddToCanvas {
                 break;
             }
             case "Rectangle": {
-                // coordinate locali del clic sul Canvas
-                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                Point2D sceneCoords = new Point2D(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(sceneCoords);
                 double x = localCoords.getX();
                 double y = localCoords.getY();
                 AbstractShape abstractRectangle = createRectangle(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40);
