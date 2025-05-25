@@ -32,6 +32,12 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
+    public void moveBy(double deltaX, double deltaY) {
+        ellipseShape.setCenterX(ellipseShape.getCenterX() + deltaX);
+        ellipseShape.setCenterY(ellipseShape.getCenterY() + deltaY);
+    }
+
+    @Override
     public Color getStrokeColor() {
        return (Color) ellipseShape.getStroke();
     }

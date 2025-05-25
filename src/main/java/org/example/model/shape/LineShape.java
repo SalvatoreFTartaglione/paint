@@ -39,9 +39,6 @@ public class LineShape implements ShapeInterface{
         lineShape.setStartY(this.points[1]);
         lineShape.setEndX(this.points[2]);
         lineShape.setEndY(this.points[3]);
-
-        //this.setStroke(this.getStrokeColor());
-        //this.setStrokeWidth(this.getCustomStrokeWidth());
     }
 
 
@@ -52,13 +49,19 @@ public class LineShape implements ShapeInterface{
      */
     @Override
     public void draw(Double[] points) {
-        //this.setStroke(this.getStrokeColor());
         lineShape.setStartX(points[0]);
         lineShape.setStartY(points[1]);
         lineShape.setEndX(points[2]);
         lineShape.setEndY(points[3]);
-        //this.setStrokeWidth(this.getCustomStrokeWidth());
         this.setPoints(points);
+    }
+
+    public void moveBy(double deltaX, double deltaY) {
+        // Moves both points of the line
+        lineShape.setStartX(lineShape.getStartX() + deltaX);
+        lineShape.setStartY(lineShape.getStartY() + deltaY);
+        lineShape.setEndX(lineShape.getEndX() + deltaX);
+        lineShape.setEndY(lineShape.getEndY() + deltaY);
     }
 
     @Override
@@ -114,24 +117,15 @@ public class LineShape implements ShapeInterface{
 
     }
 
-    /**
-     * @return double
-     * Returns the heigth of the shape
-     */
-    @Override
-    public double getHeight() {
-        return lineShape.getEndY();
-    }
-
-    /**
-     * @return double
-     * Returns the width of the shape
-     */
     @Override
     public double getWidth() {
-        return lineShape.getEndX();
+        return lineShape.getEndX() - lineShape.getStartX();
     }
 
+    @Override
+    public double getHeight() {
+        return lineShape.getEndY() - lineShape.getStartY();
+    }
     /**
      * @param x
      * @param y

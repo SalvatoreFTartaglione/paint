@@ -33,5 +33,10 @@ public interface ShapeInterface {
 
     // Simplified serialization
     String toString();
+
+    // Get access to the Node of the Shape
     Node getNode();
+
+    // Dragging support
+    void moveBy(double deltaX, double deltaY);
 }

@@ -1,12 +1,9 @@
 package org.example.controller;
 
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -21,8 +18,9 @@ import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.*;
 import org.example.model.receivers.AddToCanvas;
 import org.example.model.receivers.ChangesOnShapeReceiver;
+import org.example.model.receivers.DraggingReceiver;
 import org.example.model.shape.ContextMenuActions;
-import org.example.model.shape.ShapeContextMenuManager;
+import org.example.model.shape.ContextMenuManager;
 import org.example.model.shape.ShapeInterface;
 
 import java.net.URL;
@@ -85,6 +83,10 @@ public class MainViewController implements Initializable {
     private final DrawingContextDTO contextDTO = new DrawingContextDTO();
     private AddToCanvas addToCanvas = null;
     private ChangesOnShapeReceiver changesOnShapeReceiver = new ChangesOnShapeReceiver();
+    private DraggingReceiver draggingReceiver = new DraggingReceiver() {};
+    // State flag to understand if user is dragging and avoid accidentally adding new shapes to the canvas
+    private boolean isDragging0 = false;
+    private boolean hasDragged = false;
 
 
     /**
@@ -111,6 +113,11 @@ public class MainViewController implements Initializable {
                 DrawOnCanvas(event);
             }
         });
+
+        // stops dragging with mouse of the drawing pane
+        scrollPane.setPannable(false);
+
+
     }
 
 
@@ -140,9 +147,6 @@ public class MainViewController implements Initializable {
             // Consuma l'evento per evitare che si propaghi al container
             event.consume();
         });
-
-        // Opzionale: Rendi la forma draggable
-        // makeDraggable(shapeNode);
     }
 
     /**
@@ -178,37 +182,12 @@ public class MainViewController implements Initializable {
         };
 
         // Create context menu
-        ShapeContextMenuManager.MenuComponents menuComponents = ShapeContextMenuManager.createContextMenu(shape, actions);
+        ContextMenuManager.MenuComponents menuComponents = ContextMenuManager.createContextMenu(shape, actions);
         contextMenu = menuComponents.contextMenu;
 
         // Show context menu
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
     }
-
-    /*
-    // 6. Versione alternativa con Lambda (ancora più concisa)
-    private void showContextMenuForShape(ShapeInterface shape, MouseEvent event) {
-        ShapeContextMenuManager.MenuComponents menuComponents =
-            ShapeContextMenuManager.createContextMenu(shape, new ContextMenuActions() {
-                public void onFillColorChanged(Color c) {
-                    undoManager.executeCommand(new ChangeFillColorCommand(shape, c, changesOnShapeReceiver));
-                }
-                public void onStrokeColorChanged(Color c) {
-                    undoManager.executeCommand(new ChangeStrokeColorCommand(shape, c, changesOnShapeReceiver));
-                }
-                public void onSendToBack() {
-                    undoManager.executeCommand(new SendBackwardCommand(shape.getNode(), drawingPane));
-                }
-                public void onBringToFront() {
-                    undoManager.executeCommand(new BringForwardCommand(shape.getNode(), drawingPane));
-                }
-            });
-
-        contextMenu = menuComponents.contextMenu;
-        contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
-    }
-     */
-
 
 
     /**
@@ -321,46 +300,56 @@ public class MainViewController implements Initializable {
             });
         });
     }
-/*
 
-    private void makeDraggable(Node shape) {
-        final Point2D[] dragDelta = new Point2D[1];
 
-        shape.setOnMousePressed(event -> {
-            dragDelta[0] = new Point2D(event.getSceneX(), event.getSceneY());
+    private void makeDraggable(ShapeInterface shape) {
+        final Point2D[] dragStart = new Point2D[1];
+        final Point2D[] shapeStartPosition = new Point2D[1];
+        Node node = shape.getNode();
+
+        node.setOnMousePressed(event -> {
+            dragStart[0] = new Point2D(event.getX(), event.getY());
+            shapeStartPosition[0] = new Point2D(shape.getX(), shape.getY());
             event.consume();
         });
 
-        shape.setOnMouseDragged(event -> {
-            // Convert scene coords to local coords
-            Parent parent = shape.getParent();
-            if (parent == null) return;
-
-            Point2D currentScene = new Point2D(event.getSceneX(), event.getSceneY());
-            Point2D currentLocal = parent.sceneToLocal(currentScene);
-            Point2D previousLocal = parent.sceneToLocal(dragDelta[0]);
-
-            double deltaX = currentLocal.getX() - previousLocal.getX();
-            double deltaY = currentLocal.getY() - previousLocal.getY();
-
-            if (shape instanceof LineShape) {
-                LineShape line = (LineShape) shape;
-                line.setStartX(line.getStartX() + deltaX);
-                line.setStartY(line.getStartY() + deltaY);
-                line.setEndX(line.getEndX() + deltaX);
-                line.setEndY(line.getEndY() + deltaY);
-            } else {
-                shape.setLayoutX(shape.getLayoutX() + deltaX);
-                shape.setLayoutY(shape.getLayoutY() + deltaY);
+        node.setOnMouseDragged(event -> {
+            if (!isDragging0) {
+                isDragging0 = true;
             }
+            hasDragged = true;
+            // Get Coordinates
+            double deltaX = event.getX() - dragStart[0].getX();
+            double deltaY = event.getY() - dragStart[0].getY();
+            //Real-time movement (without command)
+            shape.moveBy(deltaX, deltaY);
+            dragStart[0] = new Point2D(event.getX(), event.getY());
+            event.consume();
+        });
 
-            dragDelta[0] = currentScene;
+        node.setOnMouseReleased(event -> {
+            if (hasDragged) {
+                // Compute total displacement
+                Point2D currentPosition = new Point2D(shape.getX(), shape.getY());
+                double totalDeltaX = currentPosition.getX() - shapeStartPosition[0].getX();
+                double totalDeltaY = currentPosition.getY() - shapeStartPosition[0].getY();
+                //If there was actually a displacement, create the command
+                if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
+                    // Reset starting position
+                    shape.moveBy(-totalDeltaX, -totalDeltaY);
+                    // Create and execute DragCommand
+                    DragCommand dragCommand = new DragCommand(shape, totalDeltaX, totalDeltaY, draggingReceiver);
+                    undoManager.executeCommand(dragCommand);
+                }
+                // Delay to avoid interference with others clicks
+                Platform.runLater(() -> {
+                    isDragging0 = false;
+                    hasDragged = false;
+                });
+            }
             event.consume();
         });
     }
-
-*/
-
 
     /**
      * Handles the primary mouse click to draw the selected shape on the canvas.
@@ -369,24 +358,27 @@ public class MainViewController implements Initializable {
      * @param mouseEvent the mouse event containing click coordinates
      */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
+        // Ignore the click if we just finished dragging
+        if (hasDragged) {
+            return;
+        }
         if (shapeComboBox.getValue() != null) {
             if (contextMenu.isShowing()) {
                 contextMenu.hide();
-            }else {
+            } else {
                 setParameters(mouseEvent, contextMenu, shapeComboBox, drawingPane, contextDTO.getStartPoint(), borderColorPicker, fillColorPicker);
                 addToCanvas = new AddToCanvas(contextDTO);
-                CommandInterface addShape = new AddShape(contextDTO, addToCanvas);
+                CommandInterface addShape = new AddShapeCommand(contextDTO, addToCanvas);
                 undoManager.executeCommand(addShape);
                 // Assign event handlers to newly created shape
-                // Assuming AddShape adds the shape as the last element of the drawingPan
+                // Assuming AddShapeCommand adds the shape as the last element of the drawingPane
                 if (!drawingPane.getChildren().isEmpty()) {
                     Node lastAddedShape = drawingPane.getChildren().get(drawingPane.getChildren().size() - 1);
                     attachEventHandlersToShape(lastAddedShape);
+                    makeDraggable((ShapeInterface) lastAddedShape.getUserData());
                 }
             }
         }
-        //shapeComboBox.setValue(null);
-        //MAKE DRAGGABLE
     }
 
     private void setParameters(MouseEvent mouseEvent, ContextMenu contextMenu, ComboBox<ShapeOption> shapeComboBox, Pane drawingPane, Point2D startPoint, ColorPicker borderColorPicker, ColorPicker fillColorPicker) {
@@ -405,8 +397,8 @@ public class MainViewController implements Initializable {
      */
     @FXML
     private void saveFile(ActionEvent event) {
-        Save saveFile = new Save(drawingPane);
-        undoManager.executeSaveCommand(saveFile);
+        SaveCommand saveCommandFile = new SaveCommand(drawingPane);
+        undoManager.executeSaveCommand(saveCommandFile);
     }
 
 
@@ -428,17 +420,18 @@ public class MainViewController implements Initializable {
             // Execute load
             LoadCommand load = new LoadCommand(drawingPane);
             undoManager.executeLoadCommand(load);
-            // Assign event handlers to all loaded shapes
+            // Assign event handlers to all loaded shapes and make nodes draggable
             attachEventHandlersToAllShapes();
         }
     }
 
     /**
-     * Assign event handlers to all shapes in the drawingPane
+     * Assign event handlers to all shapes in the drawingPane and make nodes draggable
      */
     private void attachEventHandlersToAllShapes() {
         for (Node node : drawingPane.getChildren()) {
             attachEventHandlersToShape(node);
+            makeDraggable((ShapeInterface) node.getUserData());
         }
     }
 
@@ -446,9 +439,9 @@ public class MainViewController implements Initializable {
     private void loadManager(Pane drawingPane){
         // Confirmation alert
         Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Save Workspace");
+        alert.setTitle("SaveCommand Workspace");
         alert.setHeaderText("Canvas is not empty.");
-        alert.setContentText("Save current workspace?");
+        alert.setContentText("SaveCommand current workspace?");
         ButtonType saveButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
         ButtonType dontSaveButton = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
         alert.getButtonTypes().setAll(saveButton, dontSaveButton);
@@ -457,8 +450,8 @@ public class MainViewController implements Initializable {
         if (result.isPresent()) {
             if (result.get().getText().equals("Yes")) {
                 // Saving file
-                Save saveFile = new Save(drawingPane);
-                undoManager.executeSaveCommand(saveFile);
+                SaveCommand saveCommandFile = new SaveCommand(drawingPane);
+                undoManager.executeSaveCommand(saveCommandFile);
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // After saving execute load

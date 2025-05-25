@@ -3,13 +3,13 @@ package org.example.model.commands;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.AddToCanvas;
 
-public class AddShape implements CommandInterface {
+public class AddShapeCommand implements CommandInterface {
 
 
     private DrawingContextDTO drawingDTO;
     private AddToCanvas addToCanvas;
 
-    public AddShape(DrawingContextDTO context, AddToCanvas addToCanvas) {
+    public AddShapeCommand(DrawingContextDTO context, AddToCanvas addToCanvas) {
         this.drawingDTO = context;
         this.addToCanvas = addToCanvas;
     }

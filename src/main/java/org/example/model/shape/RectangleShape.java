@@ -33,6 +33,12 @@ public class RectangleShape implements ShapeInterface {
     }
 
     @Override
+    public void moveBy(double deltaX, double deltaY) {
+        rectangleShape.setX(rectangleShape.getX() + deltaX);
+        rectangleShape.setY(rectangleShape.getY() + deltaY);
+    }
+
+    @Override
     public Color getStrokeColor() {
         return (Color) rectangleShape.getStroke();
     }

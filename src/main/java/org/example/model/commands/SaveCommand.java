@@ -7,11 +7,11 @@ import org.example.model.receivers.CanvasExporter;
 import java.io.File;
 import java.io.IOException;
 
-public class Save implements CommandInterface {
+public class SaveCommand implements CommandInterface {
 
     private CanvasExporter canvasExporter;
 
-    public Save(Pane drawingPane) {
+    public SaveCommand(Pane drawingPane) {
         canvasExporter = new CanvasExporter(drawingPane);
     }
 
@@ -19,7 +19,7 @@ public class Save implements CommandInterface {
     @Override
     public void executeCommand() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save");
+        fileChooser.setTitle("SaveCommand");
         fileChooser.setInitialFileName("drawing");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text File (*.txt)", "*.txt"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png"));

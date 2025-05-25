@@ -1,11 +1,15 @@
 package org.example.view;
 
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.example.controller.MainViewController;
 import org.example.model.commands.UndoManager;
+import org.example.model.shape.ShapeInterface;
 
 import java.io.IOException;
 
