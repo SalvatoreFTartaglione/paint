@@ -27,7 +27,7 @@ public class PasteCommand implements CommandInterface {
         //System.out.println(shapeToPaste.toString());
         if (shapeToPaste != null) {
             pastedShape = shapeToPaste;
-            System.out.println(pastedShape.toString());
+
             // Calcola coordinate locali dal click destro
             Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(
                     drawingDTO.getSceneX(), drawingDTO.getSceneY());
@@ -41,21 +41,22 @@ public class PasteCommand implements CommandInterface {
                     return;
                 }
 
-                // Baricentro della linea originale
+                // Centro geometrico della linea originale
                 double centerX = (oldPoints[0] + oldPoints[2]) / 2.0;
                 double centerY = (oldPoints[1] + oldPoints[3]) / 2.0;
 
-                // Delta tra centro originale e punto cliccato
+                // Delta tra il centro della linea e il punto cliccato
                 double deltaX = x - centerX;
                 double deltaY = y - centerY;
 
                 // Nuovi punti traslati
-                Double[] newPoints = new Double[]{
+                Double[] newPoints = new Double[] {
                         oldPoints[0] + deltaX, oldPoints[1] + deltaY,
                         oldPoints[2] + deltaX, oldPoints[3] + deltaY
                 };
 
                 pastedShape.draw(newPoints);
+
             } else {
                 // Per forme non-lineari (centro ben definito)
                 pastedShape.draw(x, y);
@@ -67,8 +68,6 @@ public class PasteCommand implements CommandInterface {
             drawingDTO.setDrawingPane(drawingDTO.getDrawingPane());
             drawingDTO.setBorderColor(pastedShape.getStrokeColor());
             drawingDTO.setFillColor(pastedShape.getFillColor());
-
-
 
             // Aggiunta tramite AddToCanvas
             AddToCanvas addToCanvas = new AddToCanvas(drawingDTO);

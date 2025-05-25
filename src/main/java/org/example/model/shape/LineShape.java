@@ -71,7 +71,19 @@ public class LineShape implements ShapeInterface{
 
     @Override
     public ShapeInterface cloneShape() {
-        return new LineShape(this.getStrokeColor(), this.getCustomStrokeWidth());
+        LineShape cloned = new LineShape(this.getStrokeColor(), this.getCustomStrokeWidth());
+
+        if (this.points != null && this.points.length == 4) {
+            // Copia profonda dell'array dei punti
+            Double[] copiedPoints = new Double[] {
+                    this.points[0], this.points[1],
+                    this.points[2], this.points[3]
+            };
+
+            cloned.draw(copiedPoints);  // inizializza il nodo grafico e setta anche cloned.points
+        }
+
+        return cloned;
     }
 
     @Override
