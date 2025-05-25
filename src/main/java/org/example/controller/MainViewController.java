@@ -1,5 +1,6 @@
 package org.example.controller;
 
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -446,6 +447,31 @@ public class MainViewController implements Initializable {
             });
         });
     }
+
+    @FXML
+    private void handleEnterText(ActionEvent event) {
+        String text = textArea.getText();
+        if (text == null || text.trim().isEmpty()) return;
+
+        Point2D defaultPosition = new Point2D(100, 100); // oppure dove preferisci
+        contextDTO.setText(text);
+        contextDTO.setSceneX(defaultPosition.getX());
+        contextDTO.setSceneY(defaultPosition.getY());
+        contextDTO.setBorderColor(borderColorPicker.getValue());
+        contextDTO.setFillColor(fillColorPicker.getValue());
+        contextDTO.setDrawingPane(drawingPane);
+        contextDTO.setShapeOption(new ShapeOption("Text", ""));  // Stringa coerente con il case di AddToCanvas
+
+        addToCanvas = new AddToCanvas(contextDTO);
+        CommandInterface addTextCommand = new AddShapeCommand(contextDTO, addToCanvas);
+        undoManager.executeCommand(addTextCommand);
+
+        // Gestione degli handler
+        Node lastNode = drawingPane.getChildren().get(drawingPane.getChildren().size() - 1);
+        attachEventHandlersToShape(lastNode);
+        makeDraggable((ShapeInterface) lastNode.getUserData());
+    }
+
 
 
     private void makeDraggable(ShapeInterface shape) {

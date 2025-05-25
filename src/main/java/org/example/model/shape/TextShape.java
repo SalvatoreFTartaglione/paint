@@ -1,4 +1,4 @@
-/*package org.example.model.shape;
+package org.example.model.shape;
 
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -139,4 +139,4 @@ public class TextShape implements ShapeInterface {
     public double getFontSize() {
         return textNode.getFont().getSize();
     }
-}*/
+}

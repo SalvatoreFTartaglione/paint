@@ -14,7 +14,7 @@ public class DrawingContextDTO {
     private ShapeOption shapeOption;
     private Color borderColor;
     private Color fillColor;
-    //private String textContent;
+    private String textContent;
 
     public Pane getDrawingPane() {
         return drawingPane;
@@ -71,13 +71,16 @@ public class DrawingContextDTO {
     public void setFillColor(Color fillColor) {
         this.fillColor = fillColor;
     }
-}
-/*
-    public String getTextContent() {
+
+    public String getText() {
         return textContent;
     }
 
     public void setTextContent(String textContent) {
         this.textContent = textContent;
     }
-}*/
+
+    public void setText(String textContent){
+        this.textContent = textContent;
+    }
+}
