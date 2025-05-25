@@ -8,6 +8,7 @@
 <?import javafx.scene.Group?>
 
 
+<?import javafx.scene.canvas.Canvas?>
 <SplitPane fx:id="splitPane" dividerPositions="0.3" orientation="VERTICAL" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.MainViewController">
     <items>
         <TabPane fx:id="tabPane" prefHeight="151.0" prefWidth="799.0" tabClosingPolicy="UNAVAILABLE">
@@ -38,6 +39,7 @@
                                    </image>
                                 </ImageView>
                                 <Button fx:id="enterTextButton" onAction="#handleEnterText" layoutX="310.0" layoutY="55.0" mnemonicParsing="false" text="Enter" />
+                                <CheckBox fx:id="gridButton" layoutX="310.0" layoutY="95.0" mnemonicParsing="false" text="Show Grid" />
                                 <ColorPicker fx:id="fillColorPicker" editable="true" layoutX="466.0" layoutY="27.0">
                                     <value>
                                         <Color red="0.5986841917037964" green="0.5848257541656494" blue="0.5848257541656494" />
@@ -99,6 +101,7 @@
         </TabPane>
         <ScrollPane fx:id="scrollPane" pannable="true" prefHeight="357.0" prefWidth="793.0">
             <Group fx:id="mainCanvasContainer">
+                <Canvas fx:id="gridCanvas" width="1500.0" height="1500.0" mouseTransparent="true"/>
                 <Pane fx:id="drawingPane" prefHeight="1500.0" prefWidth="1500.0"/>
             </Group>
         </ScrollPane>

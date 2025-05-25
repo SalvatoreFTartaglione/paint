@@ -8,6 +8,8 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -83,6 +85,8 @@ public class MainViewController implements Initializable {
     private Label zoomValueLabel;
     @FXML
     private Button resetZoomButton;
+    @FXML
+    private Canvas gridCanvas;
 
     private boolean isDragging = false;
     private Point2D startPoint = null;
@@ -111,6 +115,14 @@ public class MainViewController implements Initializable {
         initializeSplitPane();
         initializeShapeChoiceBox();
         initializeZoomControls();
+        gridButton.setOnAction(e -> {
+            if (gridButton.isSelected()) {
+                gridCanvas.setVisible(true);
+                drawGrid();
+            } else {
+                gridCanvas.setVisible(false);
+            }
+        });
 
         mainCanvasContainer.setOnMousePressed(event -> {
             isDragging = false;
@@ -159,6 +171,23 @@ public class MainViewController implements Initializable {
         });
 
         updateZoomLabel(1.0);
+    }
+
+    private void drawGrid() {
+        GraphicsContext gc = gridCanvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
+
+        double cellSize = 50;
+        gc.setStroke(Color.LIGHTGRAY);
+        gc.setLineWidth(0.5);
+
+        for (double x = 0; x <= gridCanvas.getWidth(); x += cellSize) {
+            gc.strokeLine(x, 0, x, gridCanvas.getHeight());
+        }
+
+        for (double y = 0; y <= gridCanvas.getHeight(); y += cellSize) {
+            gc.strokeLine(0, y, gridCanvas.getWidth(), y);
+        }
     }
 
     private void applyZoom(double zoomLevel) {
