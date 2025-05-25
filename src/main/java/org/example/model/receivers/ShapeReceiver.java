@@ -1,14 +1,28 @@
 package org.example.model.receivers;
 
 import javafx.geometry.Point2D;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.shape.Shape;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.shape.LineShape;
 import org.example.model.shape.ShapeInterface;
 
+import java.util.Stack;
+
 public class ShapeReceiver {
     private ShapeInterface shape;
     private boolean isCutted = false;
+    private DrawingContextDTO drawingDTO;
+
+    public ShapeReceiver(DrawingContextDTO drawingDTO) {
+        if (drawingDTO != null) {
+            this.drawingDTO = drawingDTO;
+        }
+    }
+
+    // Stack for deleted shapes (Undo task)
+    private final Stack<ShapeInterface> deletedShapesStack = new Stack<>();
 
     public void copy(ShapeInterface shape) {
         this.shape = shape.cloneShape();
@@ -74,7 +88,7 @@ public class ShapeReceiver {
             drawingContextDTO.setFillColor(shape.getFillColor());
 
             // Aggiunta tramite AddToCanvas
-            AddToCanvas addToCanvas = new AddToCanvas(drawingContextDTO);
+            AddToCanvasReceiver addToCanvas = new AddToCanvasReceiver(drawingContextDTO);
             addToCanvas.addClonedShape(shape);
 
             if(this.hasCutted()){
@@ -89,6 +103,48 @@ public class ShapeReceiver {
 
     public boolean hasShape() {
         return shape != null;
+    }
+
+    // deletedShapes section:
+    public void delete(DrawingContextDTO drawingDTO, ShapeInterface shape) {
+        this.deletedShapesStack.push(shape);
+
+        int indexNodeToDelete = drawingDTO.getDrawingPane().getChildren().indexOf(shape.getNode());
+        if (indexNodeToDelete != -1) {
+            drawingDTO.getDrawingPane().getChildren().remove(indexNodeToDelete);
+        }
+
+    }
+
+    public void undoDelete(DrawingContextDTO drawingDTO) {
+        if (!deletedShapesStack.isEmpty()) {
+            ShapeInterface restoredShape = deletedShapesStack.pop();
+
+            if (restoredShape != null) {
+
+                double x = restoredShape.getX();
+                System.out.println("X: " + x);
+                double y = restoredShape.getY();
+                System.out.println("Y: " + y);
+
+                if (restoredShape instanceof LineShape) {
+                    restoredShape.draw(restoredShape.getPoints());
+                } else {
+                    restoredShape.draw(x, y);
+                }
+
+//                // Inserisci la forma nel DTO
+//                drawingDTO.setStartPoint(null); // reset per sicurezza
+//                drawingDTO.setDrawingPane(drawingDTO.getDrawingPane());
+//                drawingDTO.setBorderColor(restoredShape.getStrokeColor());
+//                drawingDTO.setFillColor(restoredShape.getFillColor());
+
+                 //AddToCanvasReceiver addToCanvasReceiver = new AddToCanvasReceiver(drawingDTO);
+//                addToCanvasReceiver.addClonedShape(restoredShape);
+                drawingDTO.getDrawingPane().getChildren().add(restoredShape.getNode());
+            }
+
+        }
     }
 
 }

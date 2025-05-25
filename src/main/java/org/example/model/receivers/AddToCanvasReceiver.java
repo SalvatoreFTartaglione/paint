@@ -6,11 +6,11 @@ import org.example.controller.ShapeOption;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.shape.*;
 
-public class AddToCanvas {
+public class AddToCanvasReceiver {
 
     private final DrawingContextDTO drawingDTO;
 
-    public AddToCanvas(DrawingContextDTO drawingDTO) {
+    public AddToCanvasReceiver(DrawingContextDTO drawingDTO) {
         this.drawingDTO = drawingDTO;
     }
 

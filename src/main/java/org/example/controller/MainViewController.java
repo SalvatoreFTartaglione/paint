@@ -22,6 +22,10 @@ import javafx.scene.paint.Color;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.*;
 import org.example.model.receivers.*;
+import org.example.model.receivers.AddToCanvasReceiver;
+import org.example.model.receivers.ChangesOnShapeReceiver;
+import org.example.model.receivers.DraggingReceiver;
+import org.example.model.receivers.ShapeReceiver;
 import org.example.model.shape.ContextMenuActions;
 import org.example.model.shape.ContextMenuManager;
 import org.example.model.shape.ShapeInterface;
@@ -92,7 +96,7 @@ public class MainViewController implements Initializable {
     private UndoManager undoManager;
     private ContextMenu contextMenu = new ContextMenu();
     private final DrawingContextDTO contextDTO = new DrawingContextDTO();
-    private AddToCanvas addToCanvas = null;
+    private AddToCanvasReceiver addToCanvasReceiver = null;
     private ChangesOnShapeReceiver changesOnShapeReceiver = new ChangesOnShapeReceiver();
     private DraggingReceiver draggingReceiver = new DraggingReceiver() {};
     private PoistionManagerReceiver poistionManagerReceiver;
@@ -100,7 +104,7 @@ public class MainViewController implements Initializable {
     private boolean isDragging0 = false;
     private boolean hasDragged = false;
 
-    private ShapeReceiver shapeReceiver = new ShapeReceiver();
+    private ShapeReceiver shapeReceiver = new ShapeReceiver(null);
     private double currentZoom = 1.0;
 
     /**
@@ -292,7 +296,7 @@ public class MainViewController implements Initializable {
 
             @Override
             public void onCopy() {
-                CommandInterface cmd = new CopyComand(shape, shapeReceiver);
+                CommandInterface cmd = new CopyCommand(shape, shapeReceiver);
                 undoManager.executeCommand(cmd);
             }
 
@@ -309,6 +313,12 @@ public class MainViewController implements Initializable {
                 contextDTO.setSceneY(event.getSceneY());
                 CommandInterface cmd = new PasteCommand(shapeReceiver, contextDTO);
                 //undoManager.removeCommandFinished();
+                undoManager.executeCommand(cmd);
+            }
+
+            @Override
+            public void onDelete() {
+                CommandInterface cmd = new DeleteCommand(contextDTO, shape, shapeReceiver);
                 undoManager.executeCommand(cmd);
             }
         };
@@ -354,6 +364,33 @@ public class MainViewController implements Initializable {
         // Mostra il menu nella posizione cliccata
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
     }
+
+
+
+    /*
+    // 6. Versione alternativa con Lambda (ancora più concisa)
+    private void showContextMenuForShape(ShapeInterface shape, MouseEvent event) {
+        ShapeContextMenuManager.MenuComponents menuComponents =
+            ShapeContextMenuManager.createContextMenu(shape, new ContextMenuActions() {
+                public void onFillColorChanged(Color c) {
+                    undoManager.executeCommand(new ChangeFillColorCommand(shape, c, changesOnShapeReceiver));
+                }
+                public void onStrokeColorChanged(Color c) {
+                    undoManager.executeCommand(new ChangeStrokeColorCommand(shape, c, changesOnShapeReceiver));
+                }
+                public void onSendToBack() {
+                    undoManager.executeCommand(new SendBackwardCommand(shape.getNode(), drawingPane));
+                }
+                public void onBringToFront() {
+                    undoManager.executeCommand(new BringForwardCommand(shape.getNode(), drawingPane));
+                }
+            });
+
+        contextMenu = menuComponents.contextMenu;
+        contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+    }
+     */
+
 
 
     /**
@@ -481,8 +518,8 @@ public class MainViewController implements Initializable {
         contextDTO.setDrawingPane(drawingPane);
         contextDTO.setShapeOption(new ShapeOption("Text", ""));  // Stringa coerente con il case di AddToCanvas
 
-        addToCanvas = new AddToCanvas(contextDTO);
-        CommandInterface addTextCommand = new AddShapeCommand(contextDTO, addToCanvas);
+        addToCanvasReceiver = new AddToCanvasReceiver(contextDTO);
+        CommandInterface addTextCommand = new AddShapeCommand(contextDTO, addToCanvasReceiver);
         undoManager.executeCommand(addTextCommand);
 
         // Gestione degli handler
@@ -558,8 +595,8 @@ public class MainViewController implements Initializable {
                 contextMenu.hide();
             } else {
                 setParameters(mouseEvent, contextMenu, shapeComboBox, drawingPane, contextDTO.getStartPoint(), borderColorPicker, fillColorPicker);
-                addToCanvas = new AddToCanvas(contextDTO);
-                CommandInterface addShape = new AddShapeCommand(contextDTO, addToCanvas);
+                addToCanvasReceiver = new AddToCanvasReceiver(contextDTO);
+                CommandInterface addShape = new AddShapeCommand(contextDTO, addToCanvasReceiver);
                 undoManager.executeCommand(addShape);
                 // Assign event handlers to newly created shape
                 // Assuming AddShapeCommand adds the shape as the last element of the drawingPane

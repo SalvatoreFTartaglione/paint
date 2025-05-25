@@ -1,7 +1,5 @@
 package org.example.model.commands;
 
-import org.example.model.receivers.AddToCanvas;
-
 import java.util.Stack;
 
 public class UndoManager {
@@ -15,6 +13,7 @@ public class UndoManager {
     public void executeCommand(CommandInterface cmd) {
         cmd.executeCommand();
         history.push(cmd);
+        printStack("After EXECUTE");
     }
 
     public void executeLoadCommand(CommandInterface cmd) {
@@ -32,6 +31,15 @@ public class UndoManager {
     public void undo() {
         if (!history.isEmpty()) {
             history.pop().undoCommand();
+            printStack("After UNDO");
         }
+    }
+
+    private void printStack(String title) {
+        System.out.println("==== " + title + " ====");
+        for (int i = history.size() - 1; i >= 0; i--) {
+            System.out.println("[" + i + "] " + history.get(i).getClass().getSimpleName());
+        }
+        System.out.println("=====================");
     }
 }

@@ -8,7 +8,8 @@ import org.example.model.commands.UndoManager;
 public interface ShapeInterface {
 
     // utils method
-    ShapeInterface cloneShape();
+    ShapeInterface
+    cloneShape();
 
     // Shape color management
     void setStrokeColor(Color color);

@@ -1,21 +1,21 @@
 package org.example.model.commands;
 
 import org.example.model.DTO.DrawingContextDTO;
-import org.example.model.receivers.AddToCanvas;
+import org.example.model.receivers.AddToCanvasReceiver;
 
 public class AddShapeCommand implements CommandInterface {
 
 
     private DrawingContextDTO drawingDTO;
-    private AddToCanvas addToCanvas;
+    private AddToCanvasReceiver addToCanvasReceiver;
 
-    public AddShapeCommand(DrawingContextDTO context, AddToCanvas addToCanvas) {
+    public AddShapeCommand(DrawingContextDTO context, AddToCanvasReceiver addToCanvasReceiver) {
         this.drawingDTO = context;
-        this.addToCanvas = addToCanvas;
+        this.addToCanvasReceiver = addToCanvasReceiver;
     }
 
     public void executeCommand() {
-        addToCanvas.add();
+        addToCanvasReceiver.add();
     }
 
     public void undoCommand() {

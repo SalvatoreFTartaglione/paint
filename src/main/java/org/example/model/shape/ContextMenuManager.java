@@ -88,6 +88,11 @@ public class ContextMenuManager {
         // Add items
         contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, copyItem, pasteItem);
         contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
+        //Delete shape
+        MenuItem deleteItem = new MenuItem("Delete");
+        deleteItem.setOnAction(e -> actions.onDelete());
+
+        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, copyItem, pasteItem, deleteItem);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }

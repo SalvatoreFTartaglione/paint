@@ -34,8 +34,19 @@ public class RectangleShape implements ShapeInterface {
 
     @Override
     public ShapeInterface cloneShape() {
-        return new RectangleShape(this.getStrokeColor(), this.getFillColor(), this.getWidth(), this.getHeight(), this.getCustomStrokeWidth());
+        RectangleShape clone = new RectangleShape(
+                this.getStrokeColor(),
+                this.getFillColor(),
+                this.getWidth(),
+                this.getHeight(),
+                this.getCustomStrokeWidth()
+        );
+
+        clone.setX(this.getX());
+        clone.setY(this.getY());
+        return clone;
     }
+
 
     @Override
     public void moveBy(double deltaX, double deltaY) {

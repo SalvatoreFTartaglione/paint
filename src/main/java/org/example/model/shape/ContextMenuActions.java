@@ -10,5 +10,6 @@ public interface ContextMenuActions {
     void onCopy();
     void onCut();
     void onPaste();
+    void onDelete();
     void onResize(double newWidth, double newHeight);
 }
