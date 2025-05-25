@@ -7,4 +7,6 @@ public interface ContextMenuActions {
     void onStrokeColorChanged(Color newColor);
     void onSendToBack();
     void onBringToFront();
+    void onCopy();
+    void onPaste();
 }

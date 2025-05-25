@@ -71,6 +71,11 @@ public class AddToCanvas {
         }
     }
 
+    public void addClonedShape(ShapeInterface shape) {
+        shape.getNode().setUserData(shape); // Serve per il context menu
+        drawingDTO.getDrawingPane().getChildren().add(shape.getNode()); // Aggiunge la shape al canvas
+    }
+
     private static AbstractShape createRectangle(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
         AbstractShape rectangle = new RectangleCreator();
         rectangle.creationOfShape(strokeColor, fillColor, borderWidth, width, height);

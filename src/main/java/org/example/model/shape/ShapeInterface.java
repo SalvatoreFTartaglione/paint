@@ -1,12 +1,15 @@
 package org.example.model.shape;
 
-import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.paint.Color;
 import org.example.model.commands.UndoManager;
 
 public interface ShapeInterface {
+
+    // utils method
+    ShapeInterface cloneShape();
+
 
     // Shape color management
     void setStrokeColor(Color color);
@@ -26,7 +29,7 @@ public interface ShapeInterface {
     double getY();
     void setX(double X);
     void setY(double Y);
-
+    Double[] getPoints();
     // Draws the shape
     void draw(double X, double Y);
     void draw(Double[] points);

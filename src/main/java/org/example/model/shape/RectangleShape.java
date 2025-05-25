@@ -12,7 +12,7 @@ public class RectangleShape implements ShapeInterface {
 
     private Rectangle rectangleShape;
 
-    public RectangleShape(Color stroke, Color fill, double width, double height, int strokeWidth) {
+    public RectangleShape(Color stroke, Color fill, double width, double height, double strokeWidth) {
         rectangleShape = new Rectangle();
         rectangleShape.setStroke(stroke);
         rectangleShape.setFill(fill);
@@ -30,6 +30,11 @@ public class RectangleShape implements ShapeInterface {
     @Override
     public void draw(Double[] points) {
         throw new UnsupportedOperationException("The following feature is not supported");
+    }
+
+    @Override
+    public ShapeInterface cloneShape() {
+        return new RectangleShape(this.getStrokeColor(), this.getFillColor(), this.getWidth(), this.getHeight(), this.getCustomStrokeWidth());
     }
 
     @Override
@@ -97,6 +102,11 @@ public class RectangleShape implements ShapeInterface {
     @Override
     public double getCustomStrokeWidth() {
         return rectangleShape.getStrokeWidth();
+    }
+
+    @Override
+    public Double[] getPoints(){
+        return null;
     }
 
     @Override

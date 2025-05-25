@@ -19,6 +19,7 @@ import org.example.model.commands.*;
 import org.example.model.receivers.AddToCanvas;
 import org.example.model.receivers.ChangesOnShapeReceiver;
 import org.example.model.receivers.DraggingReceiver;
+import org.example.model.receivers.ShapeReceiver;
 import org.example.model.shape.ContextMenuActions;
 import org.example.model.shape.ContextMenuManager;
 import org.example.model.shape.ShapeInterface;
@@ -88,6 +89,7 @@ public class MainViewController implements Initializable {
     private boolean isDragging0 = false;
     private boolean hasDragged = false;
 
+    private ShapeReceiver shapeReceiver = new ShapeReceiver();
 
     /**
      * Initializes the controller after the root element has been completely processed.
@@ -110,7 +112,22 @@ public class MainViewController implements Initializable {
 
         mainCanvasContainer.setOnMouseReleased(event -> {
             if (!isDragging && event.getButton() == MouseButton.PRIMARY) {
+                // Se clic sinistro, disegna
                 DrawOnCanvas(event);
+            } else if (event.getButton() == MouseButton.SECONDARY) {
+                // Se clic destro, verifica se hai cliccato uno shape
+                boolean clickedOnShape = false;
+
+                for (Node node : drawingPane.getChildren()) {
+                    if (node.contains(node.sceneToLocal(event.getSceneX(), event.getSceneY()))) {
+                        clickedOnShape = true;
+                        break;
+                    }
+                }
+
+                if (!clickedOnShape) {
+                    showPasteOnlyContextMenu(event);
+                }
             }
         });
 
@@ -179,6 +196,20 @@ public class MainViewController implements Initializable {
                 CommandInterface cmd = new BringForwardCommand(shape.getNode(), drawingPane);
                 undoManager.executeCommand(cmd);
             }
+
+            @Override
+            public void onCopy() {
+                CommandInterface cmd = new CopyComand(shape, shapeReceiver);
+                undoManager.executeCommand(cmd);
+            }
+
+            @Override
+            public void onPaste() {
+                contextDTO.setSceneX(event.getSceneX());
+                contextDTO.setSceneY(event.getSceneY());
+                CommandInterface cmd = new PasteCommand(shapeReceiver, contextDTO);
+                undoManager.executeCommand(cmd);
+            }
         };
 
         // Create context menu
@@ -188,6 +219,65 @@ public class MainViewController implements Initializable {
         // Show context menu
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
     }
+
+    private void showPasteOnlyContextMenu(MouseEvent event){
+        // Chiude eventuale menu già aperto
+        if (contextMenu != null && contextMenu.isShowing()) {
+            contextMenu.hide();
+        }
+        // Aggiorna il contesto di disegno con le coordinate cliccate
+        contextDTO.setSceneX(event.getSceneX());
+        contextDTO.setSceneY(event.getSceneY());
+
+        // Crea il nuovo menu contestuale
+        contextMenu = new ContextMenu();
+
+        // Crea l'azione di incolla
+        MenuItem pasteItem = new MenuItem("Paste");
+        pasteItem.setOnAction(e -> {
+            PasteCommand pasteCmd = new PasteCommand(shapeReceiver, contextDTO);
+            undoManager.executeCommand(pasteCmd);
+
+            // Recupera la shape incollata, perchè senza questo non posso aprire il contextMenu su una figura incollata
+            ShapeInterface pastedShape = pasteCmd.getPastedShape();
+            if (pastedShape != null && pastedShape.getNode() != null) {
+                attachEventHandlersToShape(pastedShape.getNode());
+            }
+        });
+
+        // Aggiunge al menu
+        contextMenu.getItems().add(pasteItem);
+
+        // Mostra il menu nella posizione cliccata
+        contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+    }
+
+
+
+    /*
+    // 6. Versione alternativa con Lambda (ancora più concisa)
+    private void showContextMenuForShape(ShapeInterface shape, MouseEvent event) {
+        ShapeContextMenuManager.MenuComponents menuComponents =
+            ShapeContextMenuManager.createContextMenu(shape, new ContextMenuActions() {
+                public void onFillColorChanged(Color c) {
+                    undoManager.executeCommand(new ChangeFillColorCommand(shape, c, changesOnShapeReceiver));
+                }
+                public void onStrokeColorChanged(Color c) {
+                    undoManager.executeCommand(new ChangeStrokeColorCommand(shape, c, changesOnShapeReceiver));
+                }
+                public void onSendToBack() {
+                    undoManager.executeCommand(new SendBackwardCommand(shape.getNode(), drawingPane));
+                }
+                public void onBringToFront() {
+                    undoManager.executeCommand(new BringForwardCommand(shape.getNode(), drawingPane));
+                }
+            });
+
+        contextMenu = menuComponents.contextMenu;
+        contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+    }
+     */
+
 
 
     /**

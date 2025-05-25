@@ -32,6 +32,11 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
+    public ShapeInterface cloneShape() {
+        return new EllipseShape(this.getStrokeColor(), this.getFillColor(), this.getCustomStrokeWidth(), this.getWidth(), this.getHeight());
+    }
+
+    @Override
     public void moveBy(double deltaX, double deltaY) {
         ellipseShape.setCenterX(ellipseShape.getCenterX() + deltaX);
         ellipseShape.setCenterY(ellipseShape.getCenterY() + deltaY);
@@ -101,6 +106,11 @@ public class EllipseShape implements ShapeInterface {
     @Override
     public void setCustomStrokeWidth(double strokeWidth) {
         ellipseShape.setStrokeWidth(strokeWidth);
+    }
+
+    @Override
+    public Double[] getPoints(){
+        return null;
     }
 
     @Override

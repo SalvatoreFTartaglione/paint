@@ -1,9 +1,6 @@
 package org.example.model.shape;
 
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.CustomMenuItem;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
@@ -48,7 +45,15 @@ public class ContextMenuManager {
         CustomMenuItem bringToFrontItem = new CustomMenuItem(new Label("Bring to Front"));
         bringToFrontItem.setOnAction(e -> actions.onBringToFront());
 
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem);
+        //Copy shape
+        MenuItem copyItem = new MenuItem("Copy");
+        copyItem.setOnAction(e -> actions.onCopy());
+
+        //Paste shape
+        MenuItem pasteItem = new MenuItem("Paste");
+        pasteItem.setOnAction(e -> actions.onPaste());
+
+        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, copyItem, pasteItem);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }

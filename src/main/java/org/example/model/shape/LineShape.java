@@ -56,12 +56,22 @@ public class LineShape implements ShapeInterface{
         this.setPoints(points);
     }
 
+    @Override
+    public Double[] getPoints(){
+        return this.points;
+    }
+
     public void moveBy(double deltaX, double deltaY) {
         // Moves both points of the line
         lineShape.setStartX(lineShape.getStartX() + deltaX);
         lineShape.setStartY(lineShape.getStartY() + deltaY);
         lineShape.setEndX(lineShape.getEndX() + deltaX);
         lineShape.setEndY(lineShape.getEndY() + deltaY);
+    }
+
+    @Override
+    public ShapeInterface cloneShape() {
+        return new LineShape(this.getStrokeColor(), this.getCustomStrokeWidth());
     }
 
     @Override
