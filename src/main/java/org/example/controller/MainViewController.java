@@ -250,10 +250,18 @@ public class MainViewController implements Initializable {
             }
 
             @Override
+            public void onCut() {
+                CommandInterface cmd = new CutCommand(shape, shapeReceiver);
+                undoManager.executeCommand(cmd);
+            }
+
+
+            @Override
             public void onPaste() {
                 contextDTO.setSceneX(event.getSceneX());
                 contextDTO.setSceneY(event.getSceneY());
                 CommandInterface cmd = new PasteCommand(shapeReceiver, contextDTO);
+                //undoManager.removeCommandFinished();
                 undoManager.executeCommand(cmd);
             }
         };
@@ -281,13 +289,15 @@ public class MainViewController implements Initializable {
         // Crea l'azione di incolla
         MenuItem pasteItem = new MenuItem("Paste");
         pasteItem.setOnAction(e -> {
-            PasteCommand pasteCmd = new PasteCommand(shapeReceiver, contextDTO);
-            undoManager.executeCommand(pasteCmd);
+            CommandInterface cmd = new PasteCommand(shapeReceiver, contextDTO);
+            //undoManager.removeCommandFinished();
+            undoManager.executeCommand(cmd);
 
             // Recupera la shape incollata, perchè senza questo non posso aprire il contextMenu su una figura incollata
-            ShapeInterface pastedShape = pasteCmd.getPastedShape();
+            ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
             if (pastedShape != null && pastedShape.getNode() != null) {
                 attachEventHandlersToShape(pastedShape.getNode());
+                makeDraggable(pastedShape);
             }
         });
 

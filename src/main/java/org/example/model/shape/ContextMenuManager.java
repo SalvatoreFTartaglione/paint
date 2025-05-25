@@ -49,11 +49,15 @@ public class ContextMenuManager {
         MenuItem copyItem = new MenuItem("Copy");
         copyItem.setOnAction(e -> actions.onCopy());
 
+        //Cut shape
+        MenuItem cutItem = new MenuItem("Cut");
+        cutItem.setOnAction(e -> actions.onCut());
+
         //Paste shape
         MenuItem pasteItem = new MenuItem("Paste");
         pasteItem.setOnAction(e -> actions.onPaste());
 
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, copyItem, pasteItem);
+        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, copyItem, cutItem, pasteItem);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }

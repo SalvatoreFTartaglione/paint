@@ -9,6 +9,7 @@ public class UndoManager {
 
     /**
      * Executes a command and stores it for potentia.
+     *
      * @param cmd the command to execute
      */
     public void executeCommand(CommandInterface cmd) {

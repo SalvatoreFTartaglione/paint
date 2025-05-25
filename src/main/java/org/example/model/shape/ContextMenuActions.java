@@ -8,5 +8,6 @@ public interface ContextMenuActions {
     void onSendToBack();
     void onBringToFront();
     void onCopy();
+    void onCut();
     void onPaste();
 }
