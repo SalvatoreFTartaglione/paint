@@ -2,10 +2,11 @@ package org.example.model.commands;
 
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.AddToCanvasReceiver;
+import org.example.model.shape.ShapeInterface;
 
 public class AddShapeCommand implements CommandInterface {
 
-
+    private ShapeInterface shape;
     private DrawingContextDTO drawingDTO;
     private AddToCanvasReceiver addToCanvasReceiver;
 
@@ -15,15 +16,17 @@ public class AddShapeCommand implements CommandInterface {
     }
 
     public void executeCommand() {
-        addToCanvasReceiver.add();
+        shape = addToCanvasReceiver.addShape();
     }
 
+
     public void undoCommand() {
-        int indexOfLastShape = drawingDTO.getDrawingPane().getChildren().size()-1;
+        //int indexOfLastShape = drawingDTO.getDrawingPane().getChildren().size()-1;
         if (!drawingDTO.getDrawingPane().getChildren().isEmpty()) {
-            drawingDTO.getDrawingPane().getChildren().remove(indexOfLastShape);
+            drawingDTO.getDrawingPane().getChildren().remove(shape.getNode());
         }
     }
+
 
 
 }
