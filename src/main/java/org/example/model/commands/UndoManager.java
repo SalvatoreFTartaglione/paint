@@ -16,6 +16,10 @@ public class UndoManager {
         printStack("After EXECUTE");
     }
 
+    public void executeCopyCommand(CommandInterface cmd){
+        cmd.executeCommand();
+    }
+
     public void executeLoadCommand(CommandInterface cmd) {
         cmd.executeCommand();
         history.clear();

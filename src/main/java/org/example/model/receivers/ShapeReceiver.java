@@ -14,15 +14,14 @@ public class ShapeReceiver {
     private ShapeInterface shape;
     private boolean isCutted = false;
     private DrawingContextDTO drawingDTO;
+    // Stack for deleted shapes (Undo task)
+    private final Stack<ShapeInterface> deletedShapesStack = new Stack<>();
 
     public ShapeReceiver(DrawingContextDTO drawingDTO) {
         if (drawingDTO != null) {
             this.drawingDTO = drawingDTO;
         }
     }
-
-    // Stack for deleted shapes (Undo task)
-    private final Stack<ShapeInterface> deletedShapesStack = new Stack<>();
 
     public void copy(ShapeInterface shape) {
         this.shape = shape.cloneShape();
@@ -32,16 +31,15 @@ public class ShapeReceiver {
         return shape == null ? null : shape.cloneShape();
     }
 
-    public void clear() {
+    public void undoCopy() {
         shape = null;
         isCutted = false;
     }
 
-    public void cut(ShapeInterface shape){
+    public void cut(ShapeInterface shape, DrawingContextDTO contextDTO){
         this.shape = shape.cloneShape();
         this.isCutted = true;
-
-        //Parte di delete, in cui bisogna rimuovere la figura tagliata
+        this.delete(contextDTO, shape);
     }
 
     public void paste(ShapeInterface shape, DrawingContextDTO drawingContextDTO){
@@ -92,7 +90,7 @@ public class ShapeReceiver {
             addToCanvas.addClonedShape(shape);
 
             if(this.hasCutted()){
-                this.clear();
+                this.undoCopy();
             }
         }
     }
@@ -102,7 +100,12 @@ public class ShapeReceiver {
     }
 
     public boolean hasShape() {
-        return shape != null;
+        if(shape == null){
+            return false;
+        }
+        else{
+            return true;
+        }
     }
 
     // deletedShapes section:

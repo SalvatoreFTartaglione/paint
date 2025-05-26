@@ -68,6 +68,10 @@ public class ContextMenuManager {
         MenuItem pasteItem = new MenuItem("Paste");
         pasteItem.setOnAction(e -> actions.onPaste());
 
+        //Delete shape
+        MenuItem deleteItem = new MenuItem("Delete");
+        deleteItem.setOnAction(e -> actions.onDelete());
+
         // Toggle visibility of respective panels
         Label numericLabel = new Label("Numerical Resize");
         CustomMenuItem numericBtn = new CustomMenuItem(numericLabel);
@@ -86,13 +90,8 @@ public class ContextMenuManager {
         });
 
         // Add items
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, copyItem, pasteItem);
         contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
-        //Delete shape
-        MenuItem deleteItem = new MenuItem("Delete");
-        deleteItem.setOnAction(e -> actions.onDelete());
-
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, copyItem, pasteItem, deleteItem);
+        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }
