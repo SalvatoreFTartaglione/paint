@@ -14,7 +14,7 @@ class TextShape implements ShapeInterface {
 
     private Double[] points = new Double[2]; // X, Y
 
-    public TextShape(String content, Color strokeColor, double fontSize) {
+    public TextShape(String content, Color strokeColor, int fontSize) {
         this.textNode = new Text(content);
         this.textNode.setFill(strokeColor);
         this.textNode.setFont(Font.font(fontSize));
@@ -60,12 +60,12 @@ class TextShape implements ShapeInterface {
 
     @Override
     public Color getFillColor() {
-        return null;
+        return (Color) textNode.getFill();
     }
 
     @Override
     public void setFillColor(Color fill) {
-        throw new UnsupportedOperationException("TextShape non supporta il riempimento");
+        textNode.setFill(fill);
     }
 
     @Override
@@ -112,12 +112,12 @@ class TextShape implements ShapeInterface {
 
     @Override
     public double getCustomStrokeWidth() {
-        return strokeWidth;
+        return textNode.getFont().getSize();
     }
 
     @Override
     public void setCustomStrokeWidth(double strokeWidth) {
-        this.strokeWidth = strokeWidth;
+        textNode.setFont(Font.font(strokeWidth));
     }
 
     @Override
@@ -163,7 +163,7 @@ class TextShape implements ShapeInterface {
         textNode.setText(content);
     }
 
-    public double getFontSize() {
-        return textNode.getFont().getSize();
+    public int getFontSize() {
+        return (int) textNode.getFont().getSize();
     }
 }

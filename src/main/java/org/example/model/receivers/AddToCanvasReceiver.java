@@ -90,7 +90,9 @@ public ShapeInterface addShape() {
         case "Text": {
             Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
             String content = drawingDTO.getText();
-            AbstractShape abstractText = createText(drawingDTO.getBorderColor(), 2, 80, 40, content);
+            int fontSize = drawingDTO.getFontSize();
+
+            AbstractShape abstractText = createText(drawingDTO.getBorderColor(), 2, 80, 40, content, fontSize);
             shape = abstractText.getShape();
             shape.draw(localCoords.getX(), localCoords.getY());
             break;
@@ -158,8 +160,8 @@ public ShapeInterface addShape() {
         return ellipse;
     }
 
-    private static AbstractShape createText(Color strokeColor, int borderWidth, double width, double height, String content) {
-        AbstractShape textCreator = new TextShapeCreator(content);
+    private static AbstractShape createText(Color strokeColor, int borderWidth, double width, double height, String content, int fontSize) {
+        AbstractShape textCreator = new TextShapeCreator(content, fontSize);    //
         textCreator.creationOfShape(strokeColor, null, borderWidth, width, height);
         return textCreator;
     }

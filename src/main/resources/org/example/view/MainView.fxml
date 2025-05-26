@@ -9,6 +9,8 @@
 
 
 <?import javafx.scene.canvas.Canvas?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.Integer?>
 <SplitPane fx:id="splitPane" dividerPositions="0.3" orientation="VERTICAL" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.MainViewController">
     <items>
         <TabPane fx:id="tabPane" prefHeight="151.0" prefWidth="799.0" tabClosingPolicy="UNAVAILABLE">
@@ -38,7 +40,21 @@
                                       <Image url="@../images/genericText.png" />
                                    </image>
                                 </ImageView>
-                                <Button fx:id="enterTextButton" onAction="#handleEnterText" layoutX="310.0" layoutY="55.0" mnemonicParsing="false" text="Enter" />
+                                <ComboBox fx:id="fontSizeComboBox" layoutX="310.0" layoutY="49.0" prefWidth="70.0" promptText="Font">
+                                    <items>
+                                        <FXCollections fx:factory="observableArrayList">
+                                            <Integer fx:value="10"/>
+                                            <Integer fx:value="12"/>
+                                            <Integer fx:value="14"/>
+                                            <Integer fx:value="16"/>
+                                            <Integer fx:value="18"/>
+                                            <Integer fx:value="24"/>
+                                            <Integer fx:value="32"/>
+                                            <Integer fx:value="48"/>
+                                        </FXCollections>
+                                    </items>
+                                </ComboBox>
+                                <Button fx:id="enterTextButton" onAction="#handleEnterText" layoutX="200.0" layoutY="90.0" mnemonicParsing="false" text="Enter" />
                                 <CheckBox fx:id="gridButton" layoutX="310.0" layoutY="95.0" mnemonicParsing="false" text="Show Grid" />
                                 <ColorPicker fx:id="fillColorPicker" editable="true" layoutX="466.0" layoutY="27.0">
                                     <value>

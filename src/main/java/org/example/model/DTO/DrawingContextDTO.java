@@ -15,6 +15,7 @@ public class DrawingContextDTO {
     private Color borderColor;
     private Color fillColor;
     private String textContent;
+    private int fontSize;
 
     public Pane getDrawingPane() {
         return drawingPane;
@@ -82,5 +83,13 @@ public class DrawingContextDTO {
 
     public void setText(String textContent){
         this.textContent = textContent;
+    }
+
+    public int getFontSize() {
+        return fontSize;
+    }
+
+    public void setFontSize(int fontSize) {
+        this.fontSize = fontSize;
     }
 }

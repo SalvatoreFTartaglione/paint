@@ -38,6 +38,8 @@ import java.util.ResourceBundle;
 public class MainViewController implements Initializable {
 
     @FXML
+    private ComboBox<Integer> fontSizeComboBox;
+    @FXML
     private CheckBox gridButton;
     @FXML
     private Pane drawingPane;
@@ -90,6 +92,7 @@ public class MainViewController implements Initializable {
     @FXML
     private Canvas gridCanvas;
 
+
     private boolean isDragging = false;
     private Point2D startPoint = null;
     private ShapeInterface selectedShapeForContextMenu = null;
@@ -118,6 +121,19 @@ public class MainViewController implements Initializable {
         initializeSplitPane();
         initializeShapeChoiceBox();
         initializeZoomControls();
+
+        //default fontSize value
+        fontSizeComboBox.setValue(14);
+        contextDTO.setFontSize(14);
+
+        fontSizeComboBox.setOnAction(event -> {
+            Integer selected = fontSizeComboBox.getValue();
+            if (selected != null) {
+                contextDTO.setFontSize(selected.intValue());
+            }
+        });
+
+
         gridButton.setOnAction(e -> {
             if (gridButton.isSelected()) {
                 gridCanvas.setVisible(true);
@@ -516,6 +532,7 @@ public class MainViewController implements Initializable {
 
         Point2D defaultPosition = new Point2D(100, 100); // oppure dove preferisci
         contextDTO.setText(text);
+        contextDTO.setFontSize(fontSizeComboBox.getValue()); // prende il fontSize dal combobox
         contextDTO.setSceneX(defaultPosition.getX());
         contextDTO.setSceneY(defaultPosition.getY());
         contextDTO.setBorderColor(borderColorPicker.getValue());
