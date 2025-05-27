@@ -15,128 +15,83 @@ public class AddToCanvasReceiver {
         this.drawingDTO = drawingDTO;
     }
 
-//    public void add() {
-//        ShapeOption selectedShape = drawingDTO.getShapeOption();
-//
-//        switch (selectedShape.getName()) {
-//            case "Text" : {
-//                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-//                double x = localCoords.getX();
-//                double y = localCoords.getY();
-//                String content = drawingDTO.getText();
-//
-//                AbstractShape abstractText = createText(drawingDTO.getBorderColor(), 2, 80, 40, content);
-//                ShapeInterface textShape = abstractText.getShape();
-//                textShape.draw(x, y);
-//                textShape.getNode().setUserData(textShape);
-//                drawingDTO.getDrawingPane().getChildren().add(textShape.getNode());
-//                break;
-//            }
-//
-//            case "Ellipse": {
-//                Point2D sceneCoords = new Point2D(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-//                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(sceneCoords);
-//
-//                double x = localCoords.getX();
-//                double y = localCoords.getY();
-//
-//                AbstractShape abstractEllipse = createEllipse(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40);
-//                ShapeInterface shapeInterface = abstractEllipse.getShape();
-//                EllipseShape ellipseShape = (EllipseShape) shapeInterface;
-//                ellipseShape.draw(x, y);
-//                ellipseShape.getNode().setUserData(shapeInterface);
-//                drawingDTO.getDrawingPane().getChildren().add(ellipseShape.getNode());
-//                break;
-//            }
-//            case "Line": {
-//                Point2D sceneCoords = new Point2D(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-//                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(sceneCoords);
-//                double x = localCoords.getX();
-//                double y = localCoords.getY();
-//                if (drawingDTO.getStartPoint() == null) {
-//                    drawingDTO.setStartPoint(localCoords);
-//                } else {
-//                    LineCreator lineCreator = new LineCreator();
-//                    lineCreator.creationOfShape(drawingDTO.getBorderColor(), null, 5, 0, 0);
-//                    ShapeInterface shapeInterface = lineCreator.getShape();
-//                    Double[] points = {x, y, drawingDTO.getStartPoint().getX(), drawingDTO.getStartPoint().getY()};
-//                    LineShape lineShape = (LineShape) shapeInterface;
-//                    lineShape.draw(points);
-//                    lineShape.getNode().setUserData(shapeInterface);
-//                    drawingDTO.getDrawingPane().getChildren().add(lineShape.getNode());
-//                    drawingDTO.setStartPoint(null);
-//                }
-//                break;
-//            }
-//            case "Rectangle": {
-//                Point2D sceneCoords = new Point2D(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-//                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(sceneCoords);
-//                double x = localCoords.getX();
-//                double y = localCoords.getY();
-//                AbstractShape abstractRectangle = createRectangle(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40);
-//                ShapeInterface shapeInterface = abstractRectangle.getShape();
-//                RectangleShape rectangleShape = (RectangleShape) shapeInterface;
-//                rectangleShape.draw(x, y);
-//                rectangleShape.getNode().setUserData(shapeInterface);
-//                drawingDTO.getDrawingPane().getChildren().add(rectangleShape.getNode());
-//                break;
-//            }
-//        }
-//    }
 
-public ShapeInterface addShape() {
-    ShapeInterface shape = null;
-    ShapeOption selectedShape = drawingDTO.getShapeOption();
+    public ShapeInterface addShape() {
+        ShapeInterface shape = null;
+        ShapeOption selectedShape = drawingDTO.getShapeOption();
 
-    switch (selectedShape.getName()) {
-        case "Ellipse": {
-            Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-            AbstractShape abstractEllipse = createEllipse(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40);
-            shape = abstractEllipse.getShape();
-            shape.draw(localCoords.getX(), localCoords.getY());
-            break;
-        }
-        case "Rectangle": {
-            Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-            AbstractShape abstractRectangle = createRectangle(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40);
-            shape = abstractRectangle.getShape();
-            shape.draw(localCoords.getX(), localCoords.getY());
-            break;
-        }
-        case "Line": {
-            Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-            if (drawingDTO.getStartPoint() == null) {
-                drawingDTO.setStartPoint(localCoords);
-                return null;  // incomplete line, non aggiungere
-            } else {
-                LineCreator lineCreator = new LineCreator();
-                lineCreator.creationOfShape(drawingDTO.getBorderColor(), null, 5, 0, 0, null);
-                shape = lineCreator.getShape();
-                Double[] points = {
-                        localCoords.getX(), localCoords.getY(),
-                        drawingDTO.getStartPoint().getX(), drawingDTO.getStartPoint().getY()
-                };
-                shape.draw(points);
-                drawingDTO.setStartPoint(null);
+        switch (selectedShape.getName()) {
+            case "Ellipse": {
+                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                AbstractShape abstractEllipse = createEllipse(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40);
+                shape = abstractEllipse.getShape();
+                Point2D clampedCoords = clampPosition(localCoords.getX(), localCoords.getY(), shape.getWidth(), shape.getHeight());
+                shape.draw(clampedCoords.getX(), clampedCoords.getY());
+                break;
             }
-            break;
+            case "Rectangle": {
+                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                AbstractShape abstractRectangle = createRectangle(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40);
+                shape = abstractRectangle.getShape();
+                Point2D clampedCoords = clampPosition(localCoords.getX(), localCoords.getY(), shape.getWidth(), shape.getHeight());
+                shape.draw(clampedCoords.getX(), clampedCoords.getY());
+                break;
+            }
+            case "Line": {
+                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                if (drawingDTO.getStartPoint() == null) {
+                    drawingDTO.setStartPoint(localCoords);
+                    return null;  // incomplete line, non aggiungere
+                } else {
+                    LineCreator lineCreator = new LineCreator();
+                    lineCreator.creationOfShape(drawingDTO.getBorderColor(), null, 5, 0, 0, null);
+                    shape = lineCreator.getShape();
+                    Double[] points = {
+                            localCoords.getX(), localCoords.getY(),
+                            drawingDTO.getStartPoint().getX(), drawingDTO.getStartPoint().getY()
+                    };
+                    shape.draw(points);
+                    drawingDTO.setStartPoint(null);
+                }
+                break;
+            }
+            case "Text": {
+                Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                AbstractShape abstractText = createText(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), drawingDTO.getFontSize(), 40, 20, drawingDTO.getText() );
+                shape = abstractText.getShape();
+                shape.draw(localCoords.getX(), localCoords.getY());
+                break;
+            }
         }
-        case "Text": {
-            Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-            AbstractShape abstractText = createText(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), drawingDTO.getFontSize(), 40, 20, drawingDTO.getText() );
-            shape = abstractText.getShape();
-            shape.draw(localCoords.getX(), localCoords.getY());
-            break;
+
+        if (shape != null) {
+            shape.getNode().setUserData(shape);
+            drawingDTO.getDrawingPane().getChildren().add(shape.getNode());
         }
+
+        return shape;
     }
 
-    if (shape != null) {
-        shape.getNode().setUserData(shape);
-        drawingDTO.getDrawingPane().getChildren().add(shape.getNode());
-    }
+    private Point2D clampPosition(double x, double y, double shapeWidth, double shapeHeight) {
+        double zoom = drawingDTO.getDrawingPane().getScaleX(); // Scala uniforme X/Y
+        double paneWidth = drawingDTO.getDrawingPane().getPrefWidth() * zoom;
+        double paneHeight = drawingDTO.getDrawingPane().getPrefHeight() * zoom;
 
-    return shape;
-}
+        double halfWidth = shapeWidth / 2;
+        double halfHeight = shapeHeight / 2;
+
+        double extraMargin = 42; // margine extra per non stare troppo vicino al bordo
+
+        double minX = (halfWidth + extraMargin) / zoom;
+        double minY = (halfHeight + extraMargin) / zoom;
+        double maxX = (paneWidth - halfWidth - extraMargin) / zoom;
+        double maxY = (paneHeight - halfHeight - extraMargin) / zoom;
+
+        double clampedX = Math.max(minX, Math.min(x, maxX));
+        double clampedY = Math.max(minY, Math.min(y, maxY));
+
+        return new Point2D(clampedX, clampedY);
+    }
 
 
     public void addClonedShape(ShapeInterface shape) {

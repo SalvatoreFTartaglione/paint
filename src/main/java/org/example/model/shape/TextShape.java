@@ -182,6 +182,23 @@ class TextShape implements ShapeInterface {
     }
 
     @Override
+    public boolean canMoveBy(double deltaX, double deltaY, double paneWidth, double paneHeight, double zoom, double margin) {
+        double newX = getX() + deltaX;
+        double newY = getY() + deltaY;
+
+        double width = getWidth();
+        double height = getHeight();
+
+        double minX = (width / 2 + margin) / zoom;
+        double maxX = (paneWidth - width / 2 - margin) / zoom;
+        double minY = (height / 2 + margin) / zoom;
+        double maxY = (paneHeight - height / 2 - margin) / zoom;
+
+        return newX >= minX && newX <= maxX && newY >= minY && newY <= maxY;
+    }
+
+
+    @Override
     public String toString() {
         return "Text;" + textNode.getText() + ";" + textNode.getStroke() + ";" + textNode.getFill() + ";" +
                 textNode.getX() + ";" + textNode.getY() + ";" + getCustomStrokeWidth() + "\n";

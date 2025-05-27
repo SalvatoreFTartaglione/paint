@@ -5,7 +5,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.AddToCanvasReceiver;
-import org.example.model.shape.RectangleShape;
 import org.example.model.shape.ShapeInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

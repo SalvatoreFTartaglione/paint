@@ -283,6 +283,28 @@ public class LineShape implements ShapeInterface{
     }
 
 
+    @Override
+    public boolean canMoveBy(double deltaX, double deltaY, double paneWidth, double paneHeight, double zoom, double margin) {
+        // Ottieni i punti attuali
+        double x1 = lineShape.getStartX() + deltaX;
+        double y1 = lineShape.getStartY() + deltaY;
+        double x2 = lineShape.getEndX() + deltaX;
+        double y2 = lineShape.getEndY() + deltaY;
+
+        double minX = margin / zoom;
+        double maxX = (paneWidth - margin) / zoom;
+        double minY = margin / zoom;
+        double maxY = (paneHeight - margin) / zoom;
+
+        boolean isWithinBounds =
+                x1 >= minX && x1 <= maxX &&
+                        x2 >= minX && x2 <= maxX &&
+                        y1 >= minY && y1 <= maxY &&
+                        y2 >= minY && y2 <= maxY;
+
+        return isWithinBounds;
+    }
+
 
 
 }

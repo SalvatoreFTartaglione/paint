@@ -1,10 +1,7 @@
 package org.example.model.commands;
 
-import javafx.geometry.Point2D;
 import org.example.model.DTO.DrawingContextDTO;
-import org.example.model.receivers.AddToCanvasReceiver;
 import org.example.model.receivers.ShapeReceiver;
-import org.example.model.shape.LineShape;
 import org.example.model.shape.ShapeInterface;
 
 public class PasteCommand implements CommandInterface {

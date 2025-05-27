@@ -1,6 +1,8 @@
 package org.example.model.DTO;
 
 import javafx.geometry.Point2D;
+import javafx.scene.Group;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -18,6 +20,24 @@ public class DrawingContextDTO {
     private Color fillColor;
     private String textContent;
     private int fontSize;
+    private ScrollPane scrollPane;
+    private Group mainCanvasContainer;
+
+    public Group getMainCanvasContainer() {
+        return mainCanvasContainer;
+    }
+
+    public void setMainCanvasContainer(Group mainCanvasContainer) {
+        this.mainCanvasContainer = mainCanvasContainer;
+    }
+
+    public ScrollPane getScrollPane() {
+        return scrollPane;
+    }
+
+    public void setScrollPane(ScrollPane scrollPane) {
+        this.scrollPane = scrollPane;
+    }
 
     public Pane getDrawingPane() {
         return drawingPane;

@@ -99,4 +99,6 @@ public interface ShapeInterface {
     //Text operation support
     String getText();
     void setText(String content);
+
+    boolean canMoveBy(double deltaX, double deltaY, double paneWidth, double paneHeight, double zoom, double margin);
 }

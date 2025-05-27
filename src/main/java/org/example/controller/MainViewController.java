@@ -8,36 +8,45 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.*;
 import org.example.model.receivers.*;
-import org.example.model.receivers.AddToCanvasReceiver;
 import org.example.model.receivers.ChangesOnShapeReceiver;
 import org.example.model.receivers.DraggingReceiver;
 import org.example.model.receivers.ShapeReceiver;
 import org.example.model.shape.ContextMenuActions;
 import org.example.model.shape.ContextMenuManager;
 import org.example.model.shape.ShapeInterface;
+import org.example.model.ZoomableScrollPane;
 
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import static java.lang.Math.round;
+
 public class MainViewController implements Initializable {
 
     @FXML
+    private CheckBox checkBoxGrid;
+    @FXML
     private ComboBox<Integer> fontSizeComboBox;
+    @FXML
+    private Label gridValueLabel;
+    @FXML
+    private Slider gridSlider;
     @FXML
     private CheckBox gridButton;
     @FXML
@@ -77,7 +86,7 @@ public class MainViewController implements Initializable {
     @FXML
     private AnchorPane canvasPane;
     @FXML
-    private ScrollPane scrollPane;
+    private ZoomableScrollPane scrollPane;
     @FXML
     private Group mainCanvasContainer;
     @FXML
@@ -89,9 +98,8 @@ public class MainViewController implements Initializable {
     @FXML
     private Button resetZoomButton;
     @FXML
-    private Canvas gridCanvas;
-    @FXML
     private Label warningLabel;
+
 
 
     private boolean isDragging = false;
@@ -109,6 +117,9 @@ public class MainViewController implements Initializable {
     private boolean hasDragged = false;
     private ShapeReceiver shapeReceiver = new ShapeReceiver(null);
     private double currentZoom = 1.0;
+    private static final double CLICK_MARGIN = 5.0; // distanza minima dai bordi
+    private Pane gridPane = new Pane();
+
 
     /**
      * Initializes the controller after the root element has been completely processed.
@@ -121,21 +132,13 @@ public class MainViewController implements Initializable {
         initializeSplitPane();
         initializeShapeChoiceBox();
         initializeZoomControls();
+        initializeGridControls();
+
         fontSizeComboBox.setValue(56);
         fontSizeComboBox.setOnAction(event -> {
             Integer selected = fontSizeComboBox.getValue();
             if (selected != null) {
                 contextDTO.setFontSize(selected.intValue());
-            }
-        });
-
-
-        gridButton.setOnAction(e -> {
-            if (gridButton.isSelected()) {
-                gridCanvas.setVisible(true);
-                drawGrid();
-            } else {
-                gridCanvas.setVisible(false);
             }
         });
 
@@ -147,11 +150,28 @@ public class MainViewController implements Initializable {
             isDragging = true;
         });
 
-        scrollPane.setOnMouseReleased(event -> {
+        drawingPane.setOnMouseReleased(event -> {
+            double x = event.getX();
+            double y = event.getY();
+            double paneWidth = drawingPane.getWidth();
+            double paneHeight = drawingPane.getHeight();
+
+            // Verifica che il click non sia troppo vicino ai bordi
+            boolean isWithinSafeArea =
+                    x > CLICK_MARGIN && x < (paneWidth - CLICK_MARGIN) &&
+                            y > CLICK_MARGIN && y < (paneHeight - CLICK_MARGIN);
+
+            if (!isWithinSafeArea) {
+                return; // Ignora il click
+            }
+
             if (!isDragging && event.getButton() == MouseButton.PRIMARY) {
+                // Se clic sinistro, disegna
                 DrawOnCanvas(event);
             } else if (event.getButton() == MouseButton.SECONDARY) {
+                // Se clic destro, verifica se hai cliccato uno shape
                 boolean clickedOnShape = false;
+
                 for (Node node : drawingPane.getChildren()) {
                     if (node.contains(node.sceneToLocal(event.getSceneX(), event.getSceneY()))) {
                         clickedOnShape = true;
@@ -165,60 +185,71 @@ public class MainViewController implements Initializable {
             }
         });
 
+
         // stops dragging with mouse of the drawing pane
         scrollPane.setPannable(false);
+        scrollPane.setTarget(mainCanvasContainer);
+
+    }
+
+    private void initializeGridControls() {
+        gridSlider.setValue(50);
+        gridValueLabel.setText(round(gridSlider.getValue()) +" px");
+        gridSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            createGrid(newValue.doubleValue(), gridPane);
+            gridValueLabel.setText(round(gridSlider.getValue()) +" px");
+        });
+        gridPane.setPrefSize(5000.0, 5000.0);
+        createGrid(50.0, gridPane);
+        gridPane.setMouseTransparent(true);
+        mainCanvasContainer.getChildren().add(0, gridPane);
+        drawingPane.setStyle("-fx-border-color: black; -fx-border-width: 5px; -fx-border-style: solid;");
+        gridPane.setVisible(false);
+    }
+
+    private void createGrid(double cellSize, Pane gridPane) {
+
+        gridPane.getChildren().clear();
+
+        double width = gridPane.getPrefWidth();
+        double height = gridPane.getPrefHeight();
+
+        for (double x = 0; x <= width; x += cellSize) {
+            Line vLine = new Line(x, 0, x, height);
+            vLine.setStroke(Color.GRAY);
+            vLine.setStrokeWidth(1);
+            gridPane.getChildren().add(vLine);
+        }
+
+        for (double y = 0; y <= height; y += cellSize) {
+            Line hLine = new Line(0, y, width, y);
+            hLine.setStroke(Color.GRAY);
+            hLine.setStrokeWidth(1);
+            gridPane.getChildren().add(hLine);
+        }
+    }
+
+    public void resetGrid(ActionEvent actionEvent) {
+        gridSlider.setValue(50);
+        createGrid(50.0, gridPane);
     }
 
     private void initializeZoomControls() {
-        zoomSlider.setMin(0.1);  // 10%
-        zoomSlider.setMax(2.0);  // 200%
-        zoomSlider.setValue(1.0); // 100%
+        zoomSlider.setMin(0.20);
+        zoomSlider.setMax(2.0);
+        zoomSlider.setValue(1.0);
+
         zoomSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             double zoomLevel = newValue.doubleValue();
-            applyZoom(zoomLevel);
+            scrollPane.setZoom(zoomLevel);
             updateZoomLabel(zoomLevel);
         });
 
         updateZoomLabel(1.0);
     }
 
-    private void drawGrid() {
-        GraphicsContext gc = gridCanvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
-
-        double cellSize = 50;
-        gc.setStroke(Color.LIGHTGRAY);
-        gc.setLineWidth(0.5);
-
-        for (double x = 0; x <= gridCanvas.getWidth(); x += cellSize) {
-            gc.strokeLine(x, 0, x, gridCanvas.getHeight());
-        }
-
-        for (double y = 0; y <= gridCanvas.getHeight(); y += cellSize) {
-            gc.strokeLine(0, y, gridCanvas.getWidth(), y);
-        }
-    }
-
-    private void applyZoom(double zoomLevel) {
-        currentZoom = zoomLevel;
-
-        double hValue = scrollPane.getHvalue();
-        double vValue = scrollPane.getVvalue();
-
-        drawingPane.setScaleX(zoomLevel);
-        drawingPane.setScaleY(zoomLevel);
-
-        double originalWidth = 1500.0;
-        double originalHeight = 1500.0;
-
-        Platform.runLater(() -> {
-            scrollPane.setHvalue(hValue);
-            scrollPane.setVvalue(vValue);
-        });
-    }
-
     private void updateZoomLabel(double zoomLevel) {
-        int percentage = (int) Math.round(zoomLevel * 100);
+        int percentage = (int) round(zoomLevel * 100);
         zoomValueLabel.setText(percentage + "%");
     }
 
@@ -486,30 +517,37 @@ public class MainViewController implements Initializable {
                 isDragging0 = true;
             }
             hasDragged = true;
-            // Get Coordinates
+
             double deltaX = event.getX() - dragStart[0].getX();
             double deltaY = event.getY() - dragStart[0].getY();
-            //Real-time movement (without command)
-            shape.moveBy(deltaX, deltaY);
-            dragStart[0] = new Point2D(event.getX(), event.getY());
+
+            // Dati del pane per il controllo dei limiti
+            double zoom = drawingPane.getScaleX();
+            double paneWidth = drawingPane.getPrefWidth() * zoom;
+            double paneHeight = drawingPane.getPrefHeight() * zoom;
+            double extraMargin = 20;
+
+            // Verifica se il movimento è consentito
+            if (shape.canMoveBy(deltaX, deltaY, paneWidth, paneHeight, zoom, extraMargin)) {
+                shape.moveBy(deltaX, deltaY);
+                dragStart[0] = new Point2D(event.getX(), event.getY());
+            }
+
             event.consume();
         });
 
         node.setOnMouseReleased(event -> {
             if (hasDragged) {
-                // Compute total displacement
                 Point2D currentPosition = new Point2D(shape.getX(), shape.getY());
                 double totalDeltaX = currentPosition.getX() - shapeStartPosition[0].getX();
                 double totalDeltaY = currentPosition.getY() - shapeStartPosition[0].getY();
-                //If there was actually a displacement, create the command
+
                 if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
-                    // Reset starting position
-                    shape.moveBy(-totalDeltaX, -totalDeltaY);
-                    // Create and execute DragCommand
+                    shape.moveBy(-totalDeltaX, -totalDeltaY); // rollback
                     DragCommand dragCommand = new DragCommand(shape, totalDeltaX, totalDeltaY, draggingReceiver);
                     invoker.executeCommand(dragCommand);
                 }
-                // Delay to avoid interference with others clicks
+
                 Platform.runLater(() -> {
                     isDragging0 = false;
                     hasDragged = false;
@@ -518,6 +556,8 @@ public class MainViewController implements Initializable {
             event.consume();
         });
     }
+
+
 
     /**
      * Handles the primary mouse click to draw the selected shape on the canvas.
@@ -551,12 +591,6 @@ public class MainViewController implements Initializable {
                         if (warningLabel != null) {
                             warningLabel.setText("Text too long");
                             warningLabel.setVisible(true);
-                            /*// Show alert for clarity
-                            Alert alert = new Alert(Alert.AlertType.WARNING);
-                            alert.setTitle("Text Too Long");
-                            alert.setHeaderText("Text exceeds maximum length");
-                            alert.setContentText("Please enter text with maximum 20 characters. Current length: " + text.length());
-                            alert.showAndWait();*/
                             return;
                         }
                     } else {
@@ -567,7 +601,7 @@ public class MainViewController implements Initializable {
                     contextDTO.setFontSize(fontSizeComboBox.getValue());
                 }
 
-                setParameters(mouseEvent, contextMenu, shapeComboBox, drawingPane, contextDTO.getStartPoint(), borderColorPicker, fillColorPicker);
+                setParameters(mouseEvent, shapeComboBox, drawingPane, contextDTO.getStartPoint(), borderColorPicker, fillColorPicker);
                 addToCanvasReceiver = new AddToCanvasReceiver(contextDTO);
                 CommandInterface addShape = new AddShapeCommand(contextDTO, addToCanvasReceiver);
                 invoker.executeCommand(addShape);
@@ -590,7 +624,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private void setParameters(MouseEvent mouseEvent, ContextMenu contextMenu, ComboBox<ShapeOption> shapeComboBox, Pane drawingPane, Point2D startPoint, ColorPicker borderColorPicker, ColorPicker fillColorPicker) {
+    private void setParameters(MouseEvent mouseEvent, ComboBox<ShapeOption> shapeComboBox, Pane drawingPane, Point2D startPoint, ColorPicker borderColorPicker, ColorPicker fillColorPicker) {
         contextDTO.setDrawingPane(drawingPane);
         contextDTO.setStartPoint(startPoint);
         contextDTO.setBorderColor(borderColorPicker.getValue());
@@ -598,6 +632,8 @@ public class MainViewController implements Initializable {
         contextDTO.setSceneX(mouseEvent.getSceneX());
         contextDTO.setSceneY(mouseEvent.getSceneY());
         contextDTO.setShapeOption(shapeComboBox.getValue());
+        contextDTO.setScrollPane(scrollPane);
+        contextDTO.setMainCanvasContainer(mainCanvasContainer);
     }
 
     /**
@@ -688,24 +724,9 @@ public class MainViewController implements Initializable {
         invoker.undo();
     }
 
-
-    /*@FXML
-    private void onGridCheckBoxToggle(ActionEvent event) {
-        if (gridButton.isSelected()) {
-            drawGrid();
-            gridCanvas.setVisible(true);
-            gridCanvas.setDisable(false);
-            gridOnLabel.setVisible(true);
-            gridOffLabel.setVisible(false);
-        } else {
-            gridCanvas.setVisible(false);
-            gridCanvas.setDisable(true);
-            gridOnLabel.setVisible(false);
-            gridOffLabel.setVisible(true);
-        }
-    }*/
-
-
+    public void toggleGrid(ActionEvent actionEvent) {
+        gridPane.setVisible(checkBoxGrid.isSelected());
+    }
 
 }
 

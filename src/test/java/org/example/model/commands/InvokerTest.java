@@ -8,7 +8,6 @@ import org.example.model.receivers.AddToCanvasReceiver;
 import org.example.model.receivers.ChangesOnShapeReceiver;
 import org.example.model.receivers.PoistionManagerReceiver;
 import org.example.model.receivers.ShapeReceiver;
-import org.example.model.shape.RectangleShape;
 import org.example.model.shape.ShapeInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

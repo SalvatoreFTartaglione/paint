@@ -43,6 +43,20 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
+    public boolean canMoveBy(double deltaX, double deltaY, double paneWidth, double paneHeight, double zoom, double margin) {
+        double newX = getX() + deltaX;
+        double newY = getY() + deltaY;
+
+        double minX = (getWidth() / 2 + margin) / zoom;
+        double maxX = (paneWidth - getWidth() / 2 - margin) / zoom;
+        double minY = (getHeight() / 2 + margin) / zoom;
+        double maxY = (paneHeight - getHeight() / 2 - margin) / zoom;
+
+        return newX >= minX && newX <= maxX && newY >= minY && newY <= maxY;
+    }
+
+
+    @Override
     public Color getStrokeColor() {
        return (Color) ellipseShape.getStroke();
     }
