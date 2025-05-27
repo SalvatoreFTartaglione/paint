@@ -1,6 +1,7 @@
 package org.example.model.receivers;
 
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import org.example.controller.ShapeOption;
 import org.example.model.DTO.DrawingContextDTO;
@@ -144,8 +145,11 @@ public ShapeInterface addShape() {
 
 
     public void addClonedShape(ShapeInterface shape) {
-        shape.getNode().setUserData(shape); // Serve per il context menu
-        drawingDTO.getDrawingPane().getChildren().add(shape.getNode()); // Aggiunge la shape al canvas
+        Node node = shape.getNode();
+        node.setUserData(shape);
+        node.setPickOnBounds(true);
+        drawingDTO.getDrawingPane().getChildren().add(node);
+        node.toFront();
     }
 
     private static AbstractShape createRectangle(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {

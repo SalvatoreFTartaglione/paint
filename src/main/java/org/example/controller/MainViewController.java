@@ -156,9 +156,7 @@ public class MainViewController implements Initializable {
                 // Se clic sinistro, disegna
                 DrawOnCanvas(event);
             } else if (event.getButton() == MouseButton.SECONDARY) {
-                // Se clic destro, verifica se hai cliccato uno shape
                 boolean clickedOnShape = false;
-
                 for (Node node : drawingPane.getChildren()) {
                     if (node.contains(node.sceneToLocal(event.getSceneX(), event.getSceneY()))) {
                         clickedOnShape = true;
@@ -329,8 +327,12 @@ public class MainViewController implements Initializable {
                 contextDTO.setSceneY(event.getSceneY());
                 if(shapeReceiver.hasShape()) {
                     CommandInterface cmd = new PasteCommand(shapeReceiver, contextDTO);
-                    //undoManager.removeCommandFinished();
                     undoManager.executeCommand(cmd);
+
+                    ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
+                    Node node = pastedShape.getNode();
+                    attachEventHandlersToShape(node);
+                    makeDraggable(pastedShape);
                 }
             }
 
@@ -365,9 +367,7 @@ public class MainViewController implements Initializable {
         MenuItem pasteItem = new MenuItem("Paste");
         pasteItem.setOnAction(e -> {
             if(shapeReceiver.hasShape()) {
-                pasteItem.setDisable(false);
                 CommandInterface cmd = new PasteCommand(shapeReceiver, contextDTO);
-                //undoManager.removeCommandFinished();
                 undoManager.executeCommand(cmd);
 
                 // Recupera la shape incollata, perchè senza questo non posso aprire il contextMenu su una figura incollata

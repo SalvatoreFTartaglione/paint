@@ -23,6 +23,7 @@ public class CutCommand implements CommandInterface {
     @Override
     public void undoCommand() {
         receiver.undoCopy();
+        receiver.undoDelete(drawingContextDTO);
     }
 }
 
