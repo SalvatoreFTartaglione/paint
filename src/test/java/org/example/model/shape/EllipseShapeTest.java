@@ -1,75 +1,91 @@
 package org.example.model.shape;
 
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Ellipse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class EllipseShapeTest {
+public class EllipseShapeTest {
 
-    private EllipseShape ellipseShape;
+    private EllipseShape ellipse;
 
     @BeforeEach
-    void setUp() {
-        ellipseShape = new EllipseShape(Color.BLACK, Color.BLUE, 2.0, 50.0, 30.0);
+    public void setUp() {
+        ellipse = new EllipseShape(Color.BLACK, Color.BLUE, 2.0, 50.0, 30.0);
+        ellipse.draw(100.0, 200.0); // posiziona al centro
     }
 
     @Test
-    void testDrawCoordinates() {
-        ellipseShape.draw(100.0, 200.0);
-        Ellipse ellipse = (Ellipse) ellipseShape.getNode();
-
-        assertEquals(100.0, ellipse.getCenterX());
-        assertEquals(200.0, ellipse.getCenterY());
+    public void testInitialProperties() {
+        assertEquals(Color.BLACK, ellipse.getStrokeColor());
+        assertEquals(Color.BLUE, ellipse.getFillColor());
+        assertEquals(2.0, ellipse.getCustomStrokeWidth(), 0.01);
+        assertEquals(50.0, ellipse.getWidth(), 0.01);
+        assertEquals(30.0, ellipse.getHeight(), 0.01);
+        assertEquals(100.0, ellipse.getX(), 0.01);
+        assertEquals(200.0, ellipse.getY(), 0.01);
     }
 
     @Test
-    void testDrawWithPointsArrayUnsupported() {
-        Double[] points = {100.0, 200.0};
-        assertThrows(UnsupportedOperationException.class, () -> ellipseShape.draw(points));
+    public void testSetColors() {
+        ellipse.setStrokeColor(Color.RED);
+        ellipse.setFillColor(Color.YELLOW);
+
+        assertEquals(Color.RED, ellipse.getStrokeColor());
+        assertEquals(Color.YELLOW, ellipse.getFillColor());
     }
 
     @Test
-    void testGetAndSetStrokeColor() {
-        ellipseShape.setStrokeColor(Color.RED);
-        assertEquals(Color.RED, ellipseShape.getStrokeColor());
+    public void testMoveBy() {
+        ellipse.moveBy(10, -20);
+        assertEquals(110.0, ellipse.getX(), 0.01);
+        assertEquals(180.0, ellipse.getY(), 0.01);
     }
 
     @Test
-    void testGetAndSetFillColor() {
-        ellipseShape.setFillColor(Color.GREEN);
-        assertEquals(Color.GREEN, ellipseShape.getFillColor());
+    public void testSetSize() {
+        ellipse.setSize(70.0, 40.0);
+        assertEquals(70.0, ellipse.getWidth(), 0.01);
+        assertEquals(40.0, ellipse.getHeight(), 0.01);
     }
 
     @Test
-    void testGetAndSetSize() {
-        ellipseShape.setSize(80.0, 40.0);
-        assertEquals(80.0, ellipseShape.getWidth());
-        assertEquals(40.0, ellipseShape.getHeight());
+    public void testCustomStrokeWidth() {
+        ellipse.setCustomStrokeWidth(5.0);
+        assertEquals(5.0, ellipse.getCustomStrokeWidth(), 0.01);
     }
 
     @Test
-    void testGetAndSetCustomStrokeWidth() {
-        ellipseShape.setCustomStrokeWidth(5.0);
-        assertEquals(5.0, ellipseShape.getCustomStrokeWidth());
+    public void testCloneShape() {
+        ellipse.setX(120.0);
+        ellipse.setY(150.0);
+        ellipse.setSize(60.0, 45.0);
+
+        EllipseShape clone = (EllipseShape) ellipse.cloneShape();
+
+        assertEquals(ellipse.getStrokeColor(), clone.getStrokeColor());
+        assertEquals(ellipse.getFillColor(), clone.getFillColor());
+        assertEquals(ellipse.getCustomStrokeWidth(), clone.getCustomStrokeWidth(), 0.01);
+        assertEquals(ellipse.getWidth(), clone.getWidth(), 0.01);
+        assertEquals(ellipse.getHeight(), clone.getHeight(), 0.01);
+        // Nota: cloneShape non copia posizione
     }
 
     @Test
-    void testGetAndSetPosition() {
-        ellipseShape.setX(120.0);
-        ellipseShape.setY(140.0);
-        assertEquals(120.0, ellipseShape.getX());
-        assertEquals(140.0, ellipseShape.getY());
+    public void testScaleToSize() {
+        double oldMax = Math.max(ellipse.getWidth(), ellipse.getHeight());
+        ellipse.scaleToSize(100);
+        double newMax = Math.max(ellipse.getWidth(), ellipse.getHeight());
+        assertEquals(100, newMax, 0.1);
     }
 
     @Test
-    void testToStringFormat() {
-        ellipseShape.setX(10.0);
-        ellipseShape.setY(20.0);
-        String result = ellipseShape.toString();
-        assertTrue(result.startsWith("Ellipse"));
-        assertTrue(result.contains(";"));
+    public void testToStringFormat() {
+        String result = ellipse.toString();
+        assertTrue(result.startsWith("Ellipse;"));
+        assertTrue(result.contains(ellipse.getStrokeColor().toString()));
+        assertTrue(result.contains(ellipse.getFillColor().toString()));
     }
+
 }

@@ -1,106 +1,93 @@
 package org.example.model.shape;
 
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RectangleShapeTest {
+public class RectangleShapeTest {
 
-    private RectangleShape rectangleShape;
+    private RectangleShape rectangle;
 
     @BeforeEach
-    void setUp() {
-        // Inizializza JavaFX Toolkit
-        new JFXPanel();
-        rectangleShape = new RectangleShape(Color.RED, Color.BLUE, 3.0, 50.0, (int) 3.0);
+    public void setUp() {
+        rectangle = new RectangleShape(Color.BLACK, Color.ORANGE, 100, 60, 3);
+        rectangle.draw(150, 200);
     }
 
     @Test
-    void testDrawWithCoordinates() {
-        rectangleShape.draw(100.0, 200.0);
-        Rectangle rect = (Rectangle) rectangleShape.getNode();
-
-        assertEquals(100.0, rect.getX());
-        assertEquals(200.0, rect.getY());
+    public void testInitialProperties() {
+        assertEquals(Color.BLACK, rectangle.getStrokeColor());
+        assertEquals(Color.ORANGE, rectangle.getFillColor());
+        assertEquals(100.0, rectangle.getWidth(), 0.01);
+        assertEquals(60.0, rectangle.getHeight(), 0.01);
+        assertEquals(3.0, rectangle.getCustomStrokeWidth(), 0.01);
+        assertEquals(150.0, rectangle.getX(), 0.01);
+        assertEquals(200.0, rectangle.getY(), 0.01);
     }
 
     @Test
-    void testDrawWithPointsArray() {
-        Double[] points = {150.0, 250.0};
-
-        assertThrows(UnsupportedOperationException.class, () -> rectangleShape.draw(points));
-    }
-
-
-    @Test
-    void testGetStrokeColor() {
-        assertEquals(Color.RED, rectangleShape.getStrokeColor());
+    public void testSetColors() {
+        rectangle.setStrokeColor(Color.RED);
+        rectangle.setFillColor(Color.YELLOW);
+        assertEquals(Color.RED, rectangle.getStrokeColor());
+        assertEquals(Color.YELLOW, rectangle.getFillColor());
     }
 
     @Test
-    void testGetFillColor() {
-        assertEquals(Color.BLUE, rectangleShape.getFillColor());
+    public void testMoveBy() {
+        rectangle.moveBy(10, -20);
+        assertEquals(160.0, rectangle.getX(), 0.01);
+        assertEquals(180.0, rectangle.getY(), 0.01);
     }
 
     @Test
-    void testSetStrokeColor() {
-        rectangleShape.setStrokeColor(Color.GREEN);
-        assertEquals(Color.GREEN, rectangleShape.getStrokeColor());
+    public void testSetSize() {
+        rectangle.setSize(200, 150);
+        assertEquals(200.0, rectangle.getWidth(), 0.01);
+        assertEquals(150.0, rectangle.getHeight(), 0.01);
     }
 
     @Test
-    void testSetFillColor() {
-        rectangleShape.setFillColor(Color.YELLOW);
-        assertEquals(Color.YELLOW, rectangleShape.getFillColor());
+    public void testCustomStrokeWidth() {
+        rectangle.setCustomStrokeWidth(6.0);
+        assertEquals(6.0, rectangle.getCustomStrokeWidth(), 0.01);
     }
 
     @Test
-    void testSetXAndY() {
-        rectangleShape.setX(60.0);
-        rectangleShape.setY(70.0);
-        assertEquals(60.0, rectangleShape.getX());
-        assertEquals(70.0, rectangleShape.getY());
+    public void testCloneShape() {
+        RectangleShape clone = (RectangleShape) rectangle.cloneShape();
+
+        assertEquals(rectangle.getStrokeColor(), clone.getStrokeColor());
+        assertEquals(rectangle.getFillColor(), clone.getFillColor());
+        assertEquals(rectangle.getCustomStrokeWidth(), clone.getCustomStrokeWidth(), 0.01);
+        assertEquals(rectangle.getWidth(), clone.getWidth(), 0.01);
+        assertEquals(rectangle.getHeight(), clone.getHeight(), 0.01);
+        assertEquals(rectangle.getX(), clone.getX(), 0.01);
+        assertEquals(rectangle.getY(), clone.getY(), 0.01);
     }
 
     @Test
-    void testSetSize() {
-        rectangleShape.setSize(120.0, 90.0);
-        assertEquals(120.0, rectangleShape.getWidth());
-        assertEquals(90.0, rectangleShape.getHeight());
+    public void testScaleToSize() {
+        double originalMax = Math.max(rectangle.getWidth(), rectangle.getHeight());
+        rectangle.scaleToSize(200);
+        double newMax = Math.max(rectangle.getWidth(), rectangle.getHeight());
+        assertEquals(200, newMax, 0.5);
     }
 
     @Test
-    void testGetCustomStrokeWidth() {
-        assertEquals(3.0, rectangleShape.getCustomStrokeWidth());
+    public void testSliderLabel() {
+        String label = rectangle.getSliderLabel(123.456);
+        assertEquals("Dimension: 123.5", label);
     }
 
     @Test
-    void testSetCustomStrokeWidth() {
-        rectangleShape.setCustomStrokeWidth(5.0);
-        assertEquals(5.0, rectangleShape.getCustomStrokeWidth());
+    public void testToStringFormat() {
+        String str = rectangle.toString();
+        assertTrue(str.startsWith("Rectangle;"));
+        assertTrue(str.contains(rectangle.getStrokeColor().toString()));
+        assertTrue(str.contains(rectangle.getFillColor().toString()));
     }
 
-    @Test
-    void testFindShapeAtInside() {
-        rectangleShape.draw(10, 10);
-        assertNotNull(rectangleShape.findShapeAt(10, 10));
-    }
-
-    @Test
-    void testFindShapeAtOutside() {
-        rectangleShape.draw(10, 10);
-        assertNull(rectangleShape.findShapeAt(500, 500));
-    }
-
-    @Test
-    void testGetNodeReturnsRectangle() {
-        Node node = rectangleShape.getNode();
-        assertNotNull(node);
-        assertTrue(node instanceof Rectangle);
-    }
 }

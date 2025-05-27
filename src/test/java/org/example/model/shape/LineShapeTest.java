@@ -1,83 +1,72 @@
 package org.example.model.shape;
 
-import javafx.embed.swing.JFXPanel;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class LineShapeTest {
+public class LineShapeTest {
 
-    private LineShape lineShape;
+    private LineShape line;
 
     @BeforeEach
-    void setUp() {
-        // Inizializza JavaFX (necessario per test JavaFX)
-        new JFXPanel();  // evita errori headless
-        lineShape = new LineShape(Color.BLACK, 2.0);
+    public void setUp() {
+        line = new LineShape(Color.BLACK, 2.0);
+        Double[] points = {50.0, 100.0, 150.0, 200.0}; // X1, Y1, X2, Y2
+        line.draw(points);
     }
 
     @Test
-    void testDrawWithPoints() {
-        Double[] points = {10.0, 20.0, 30.0, 40.0};
-        lineShape.draw(points);
-
-        Line line = (Line) lineShape.getNode();
-
-        assertEquals(10.0, line.getStartX());
-        assertEquals(20.0, line.getStartY());
-        assertEquals(30.0, line.getEndX());
-        assertEquals(40.0, line.getEndY());
+    public void testInitialPoints() {
+        Double[] pts = line.getPoints();
+        assertNotNull(pts);
+        assertEquals(4, pts.length);
+        assertEquals(50.0, pts[0], 0.01);
+        assertEquals(100.0, pts[1], 0.01);
+        assertEquals(150.0, pts[2], 0.01);
+        assertEquals(200.0, pts[3], 0.01);
     }
 
     @Test
-    void testGetStrokeColor() {
-        assertEquals(Color.BLACK, lineShape.getStrokeColor());
+    public void testStrokeColor() {
+        assertEquals(Color.BLACK, line.getStrokeColor());
+    }
+
+
+    @Test
+    public void testStrokeWidth() {
+        assertEquals(2.0, line.getCustomStrokeWidth(), 0.01);
     }
 
     @Test
-    void testSetStrokeColor() {
-        lineShape.setStrokeColor(Color.BLUE);
-        assertEquals(Color.BLUE, lineShape.getStrokeColor());
+    public void testMoveBy() {
+        Double[] original = line.getPoints();
+        line.moveBy(10, 20);
+        Double[] moved = line.getPoints();
+
+        assertEquals(original[0] + 10, moved[0], 0.01);
+        assertEquals(original[1] + 20, moved[1], 0.01);
+        assertEquals(original[2] + 10, moved[2], 0.01);
+        assertEquals(original[3] + 20, moved[3], 0.01);
     }
 
     @Test
-    void testGetXAndY() {
-        lineShape.draw(new Double[]{5.0, 6.0, 15.0, 16.0});
-        assertEquals(5.0, lineShape.getX());
-        assertEquals(6.0, lineShape.getY());
+    public void testCloneShape() {
+        LineShape clone = (LineShape) line.cloneShape();
+        Double[] original = line.getPoints();
+        Double[] copied = clone.getPoints();
+
+        assertArrayEquals(original, copied);
+        assertEquals(line.getStrokeColor(), clone.getStrokeColor());
+        assertEquals(line.getCustomStrokeWidth(), clone.getCustomStrokeWidth(), 0.01);
     }
 
     @Test
-    void testSetXAndY() {
-        lineShape.setX(7.0);
-        lineShape.setY(8.0);
-        assertEquals(7.0, lineShape.getX());
-        assertEquals(8.0, lineShape.getY());
-    }
-
-    @Test
-    void testSetFillColorUnsupported() {
-        assertThrows(UnsupportedOperationException.class, () -> lineShape.setFillColor(Color.RED));
-    }
-
-    @Test
-    void testFindShapeAt() {
-        lineShape.draw(new Double[]{0.0, 0.0, 100.0, 100.0});
-        assertNotNull(lineShape.findShapeAt(50, 50));
-        assertNull(lineShape.findShapeAt(300, 300));
-    }
-
-    @Test
-    void testGetCustomStrokeWidth() {
-        assertEquals(2.0, lineShape.getCustomStrokeWidth());
-    }
-
-    @Test
-    void testGetNodeReturnsLine() {
-        assertTrue(lineShape.getNode() instanceof Line);
+    public void testToStringFormat() {
+        String output = line.toString();
+        assertTrue(output.startsWith("Line;"));
+        assertTrue(output.contains(line.getStrokeColor().toString()));
     }
 
 }

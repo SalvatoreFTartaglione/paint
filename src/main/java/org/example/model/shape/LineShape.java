@@ -53,7 +53,13 @@ public class LineShape implements ShapeInterface{
 
     @Override
     public Double[] getPoints(){
-        return this.points;
+        //return this.points;
+        return new Double[] {
+                lineShape.getStartX(),
+                lineShape.getStartY(),
+                lineShape.getEndX(),
+                lineShape.getEndY()
+        };
     }
 
     public void moveBy(double deltaX, double deltaY) {
@@ -88,7 +94,7 @@ public class LineShape implements ShapeInterface{
 
     @Override
     public void setCustomStrokeWidth(double strokeWidth) {
-
+        throw new UnsupportedOperationException("Unsupported operation.");
     }
 
     @Override
