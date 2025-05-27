@@ -1,12 +1,8 @@
 package org.example.model.shape;
 
-import javafx.collections.ObservableList;
-import javafx.geometry.Bounds;
 import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import org.example.model.commands.UndoManager;
 
 public class RectangleShape implements ShapeInterface {
 
@@ -154,6 +150,16 @@ public class RectangleShape implements ShapeInterface {
     @Override
     public String getSliderLabel(double value) {
         return String.format("Dimension: %.1f", value);
+    }
+
+    @Override
+    public String getText() {
+        throw new UnsupportedOperationException("Feature not supported.");
+    }
+
+    @Override
+    public void setText(String content) {
+        throw new UnsupportedOperationException("Feature not supported.");
     }
 
     @Override

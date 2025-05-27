@@ -27,8 +27,8 @@ public class ChangeFillColorCommand implements CommandInterface {
      */
     @Override
     public void executeCommand() {
-        oldColor = shape.getFillColor();  // salva il colore precedente
-        changesOnShapeReceiver.changeFillColor(shape,newColor);    // imposta il nuovo colore
+        oldColor = shape.getFillColor();
+        changesOnShapeReceiver.changeFillColor(shape,newColor);
     }
 
     /**
@@ -36,6 +36,6 @@ public class ChangeFillColorCommand implements CommandInterface {
      */
     @Override
     public void undoCommand() {
-        shape.setFillColor(oldColor);     // ripristina il colore precedente
+        shape.setFillColor(oldColor);
     }
 }

@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
-<?import javafx.scene.Group?>
 
-
-<?import javafx.scene.canvas.Canvas?>
-<?import javafx.collections.FXCollections?>
-<?import java.lang.Integer?>
 <SplitPane fx:id="splitPane" dividerPositions="0.3" orientation="VERTICAL" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.MainViewController">
     <items>
         <TabPane fx:id="tabPane" prefHeight="151.0" prefWidth="799.0" tabClosingPolicy="UNAVAILABLE">
@@ -19,7 +18,7 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="325.0">
                             <children>
-                                <Button fx:id="undoButton" onAction="#undoClicked" layoutX="14.0" layoutY="35.0">
+                                <Button fx:id="undoButton" layoutX="14.0" layoutY="35.0" onAction="#undoClicked">
                                     <graphic>
                                         <ImageView fx:id="undoImageButton" fitHeight="30.0" fitWidth="30.0" preserveRatio="true">
                                             <image>
@@ -28,13 +27,15 @@
                                         </ImageView>
                                     </graphic>
                                 </Button>
-                                <ComboBox fx:id="shapeComboBox" layoutX="152.0" layoutY="12.0" prefWidth="150.0"/>
+                                <ComboBox fx:id="shapeComboBox" layoutX="152.0" layoutY="12.0" prefWidth="150.0" />
                                 <ImageView fx:id="genericShapePhoto" fitHeight="28.0" fitWidth="28.0" layoutX="111.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true">
                                     <image>
                                         <Image url="@../images/genericShapes.png" />
                                     </image>
                                 </ImageView>
                                 <TextArea fx:id="textArea" layoutX="152.0" layoutY="49.0" prefHeight="33.0" prefWidth="152.0" />
+                                <Label fx:id="warningLabel" layoutX="152.0" layoutY="85.0" textFill="RED" text="" />
+
                                 <ImageView fx:id="genericTextPhoto" fitHeight="29.0" fitWidth="30.0" layoutX="110.0" layoutY="53.0" pickOnBounds="true" preserveRatio="true">
                                    <image>
                                       <Image url="@../images/genericText.png" />
@@ -43,18 +44,17 @@
                                 <ComboBox fx:id="fontSizeComboBox" layoutX="310.0" layoutY="49.0" prefWidth="70.0" promptText="Font">
                                     <items>
                                         <FXCollections fx:factory="observableArrayList">
-                                            <Integer fx:value="10"/>
-                                            <Integer fx:value="12"/>
-                                            <Integer fx:value="14"/>
-                                            <Integer fx:value="16"/>
-                                            <Integer fx:value="18"/>
-                                            <Integer fx:value="24"/>
-                                            <Integer fx:value="32"/>
-                                            <Integer fx:value="48"/>
+                                            <Integer fx:value="38" />
+                                            <Integer fx:value="46" />
+                                            <Integer fx:value="56" />
+                                            <Integer fx:value="66" />
+                                            <Integer fx:value="76" />
+                                            <Integer fx:value="86" />
+                                            <Integer fx:value="92" />
+                                            <Integer fx:value="100" />
                                         </FXCollections>
                                     </items>
                                 </ComboBox>
-                                <Button fx:id="enterTextButton" onAction="#handleEnterText" layoutX="200.0" layoutY="90.0" mnemonicParsing="false" text="Enter" />
                                 <CheckBox fx:id="gridButton" layoutX="310.0" layoutY="95.0" mnemonicParsing="false" text="Show Grid" />
                                 <ColorPicker fx:id="fillColorPicker" editable="true" layoutX="466.0" layoutY="27.0">
                                     <value>
@@ -88,16 +88,13 @@
                                         <Font name="System Bold" size="14.0" />
                                     </font>
                                 </Label>
-                                <Slider fx:id="zoomSlider" layoutX="620.0" layoutY="25.0" prefWidth="120.0"
-                                        min="0.1" max="2.0" value="1.0" showTickLabels="true" showTickMarks="true"
-                                        majorTickUnit="0.5" minorTickCount="4" snapToTicks="false"/>
+                                <Slider fx:id="zoomSlider" layoutX="620.0" layoutY="25.0" majorTickUnit="0.5" max="2.0" min="0.1" minorTickCount="4" prefWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="false" value="1.0" />
                                 <Label fx:id="zoomValueLabel" layoutX="620.0" layoutY="55.0" prefHeight="17.0" prefWidth="80.0" text="100%">
                                     <font>
                                         <Font size="12.0" />
                                     </font>
                                 </Label>
-                                <Button fx:id="resetZoomButton" layoutX="620.0" layoutY="75.0" mnemonicParsing="false"
-                                        onAction="#resetZoom" text="Reset" prefWidth="60.0"/>
+                                <Button fx:id="resetZoomButton" layoutX="620.0" layoutY="75.0" mnemonicParsing="false" onAction="#resetZoom" prefWidth="60.0" text="Reset" />
 
                             </children>
                         </AnchorPane>
@@ -117,8 +114,8 @@
         </TabPane>
         <ScrollPane fx:id="scrollPane" pannable="true" prefHeight="357.0" prefWidth="793.0">
             <Group fx:id="mainCanvasContainer">
-                <Canvas fx:id="gridCanvas" width="1500.0" height="1500.0" mouseTransparent="true"/>
-                <Pane fx:id="drawingPane" prefHeight="1500.0" prefWidth="1500.0"/>
+                <Canvas fx:id="gridCanvas" height="1500.0" mouseTransparent="true" width="1500.0" />
+                <Pane fx:id="drawingPane" prefHeight="1500.0" prefWidth="1500.0" />
             </Group>
         </ScrollPane>
 

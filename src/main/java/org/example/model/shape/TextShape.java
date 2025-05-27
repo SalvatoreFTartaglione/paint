@@ -10,14 +10,19 @@ import javafx.scene.text.Text;
 class TextShape implements ShapeInterface {
 
     private final Text textNode;
-    private double strokeWidth = 1.0;
-
     private Double[] points = new Double[2]; // X, Y
+    private double baseWidth;
+    private double baseHeight;
 
-    public TextShape(String content, Color strokeColor, int fontSize) {
-        this.textNode = new Text(content);
-        this.textNode.setFill(strokeColor);
-        this.textNode.setFont(Font.font(fontSize));
+    public TextShape(String content, Color strokeColor, Color fillingColor, double width, double height, double strokeWidth) {
+        textNode = new Text(content);
+        textNode.setStroke(strokeColor);
+        textNode.setFill(fillingColor);
+        textNode.setX(width);
+        textNode.setY(height);
+        textNode.setFont(Font.font(strokeWidth));
+        baseWidth = textNode.getLayoutBounds().getWidth();
+        baseHeight = textNode.getLayoutBounds().getHeight();
     }
 
     @Override
@@ -41,21 +46,22 @@ class TextShape implements ShapeInterface {
         setY(getY() + deltaY);
     }
 
+
     @Override
     public ShapeInterface cloneShape() {
-        TextShape clone = new TextShape(getText(), getStrokeColor(), getFontSize());
+        TextShape clone = new TextShape(getText(), getStrokeColor(), getFillColor(), getWidth(), getHeight(), getCustomStrokeWidth());
         clone.draw(getX(), getY());
         return clone;
     }
 
     @Override
     public Color getStrokeColor() {
-        return (Color) textNode.getFill();
+        return (Color) textNode.getStroke();
     }
 
     @Override
     public void setStrokeColor(Color stroke) {
-        textNode.setFill(stroke);
+        textNode.setStroke(stroke);
     }
 
     @Override
@@ -80,8 +86,23 @@ class TextShape implements ShapeInterface {
 
     @Override
     public void setSize(double width, double height) {
-        textNode.setFont(Font.font(width)); // interpreta width come fontSize
+        // Sicurezza: evita divisione per 0
+        if (baseWidth == 0 || baseHeight == 0) {
+            baseWidth = textNode.getLayoutBounds().getWidth();
+            baseHeight = textNode.getLayoutBounds().getHeight();
+            if (baseWidth == 0 || baseHeight == 0) return; // ancora non pronto
+        }
+
+        double scaleX = width / baseWidth;
+        double scaleY = height / baseHeight;
+
+        // Usa scala uniforme per evitare schiacciamenti
+        double uniformScale = Math.min(scaleX, scaleY);
+
+        textNode.setScaleX(uniformScale);
+        textNode.setScaleY(uniformScale);
     }
+
 
     @Override
     public double getX() {
@@ -127,7 +148,7 @@ class TextShape implements ShapeInterface {
 
     @Override
     public double getEffectiveSize() {
-        return getFontSize();
+        return getCustomStrokeWidth();
     }
 
     @Override
@@ -137,12 +158,12 @@ class TextShape implements ShapeInterface {
 
     @Override
     public double getMaxSliderSize() {
-        return Math.max(72, getEffectiveSize() * 3); // Max 72pt o 3x corrente
+        return Math.max(120, getEffectiveSize() * 0.7);
     }
 
     @Override
     public double getMinSliderSize() {
-        return Math.max(8, getEffectiveSize() * 0.3); // Min 8pt o 30% corrente
+        return Math.max(20, getEffectiveSize() * 0.1);
     }
 
     @Override
@@ -151,19 +172,20 @@ class TextShape implements ShapeInterface {
     }
 
     @Override
-    public String toString() {
-        return "Text;" + getText() + ";" + getStrokeColor() + ";" + getX() + ";" + getY() + ";" + getFontSize() + "\n";
-    }
-
     public String getText() {
-        return textNode.getText();
+        return textNode.getText() == null ? "" : textNode.getText();
     }
 
+    @Override
     public void setText(String content) {
         textNode.setText(content);
     }
 
-    public int getFontSize() {
-        return (int) textNode.getFont().getSize();
+    @Override
+    public String toString() {
+        return "Text;" + textNode.getText() + ";" + textNode.getStroke() + ";" + textNode.getFill() + ";" +
+                textNode.getX() + ";" + textNode.getY() + ";" + getCustomStrokeWidth() + "\n";
     }
+
+
 }

@@ -2,7 +2,7 @@ package org.example.model.commands;
 
 import java.util.Stack;
 
-public class UndoManager {
+public class Invoker {
     private final Stack<CommandInterface> history = new Stack<>();
 
     /**
@@ -13,7 +13,8 @@ public class UndoManager {
     public void executeCommand(CommandInterface cmd) {
         cmd.executeCommand();
         history.push(cmd);
-        printStack("After EXECUTE");
+        // Debug print
+        //printStack("After EXECUTE");
     }
 
     public void executeCopyCommand(CommandInterface cmd){
@@ -35,10 +36,12 @@ public class UndoManager {
     public void undo() {
         if (!history.isEmpty()) {
             history.pop().undoCommand();
-            printStack("After UNDO");
+            //debug print
+            //printStack("After UNDO");
         }
     }
 
+    // debug method
     private void printStack(String title) {
         System.out.println("==== " + title + " ====");
         for (int i = history.size() - 1; i >= 0; i--) {

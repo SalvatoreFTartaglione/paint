@@ -1,13 +1,8 @@
 package org.example.model.shape;
 
-import javafx.collections.ObservableList;
-import javafx.geometry.Bounds;
 import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import org.example.model.commands.UndoManager;
 
 
 public class LineShape implements ShapeInterface{
@@ -200,15 +195,6 @@ public class LineShape implements ShapeInterface{
         throw new UnsupportedOperationException("The following feature is not supported");
     }
 
-    /**
-     * @return String
-     * Prints the propeties of the shape
-     */
-    @Override
-    public String toString() {
-        return "Line" + ";" + lineShape.getStroke() + ";" + lineShape.getEndX() + ";" + lineShape.getEndY() + ";"
-                + lineShape.getStartX() + ";" + lineShape.getStartY() + ";" + lineShape.getStrokeWidth()+ "\n";
-    }
 
     @Override
     public Node getNode() {
@@ -269,6 +255,27 @@ public class LineShape implements ShapeInterface{
     public String getSliderLabel(double value) {
         return String.format("Length: %.1f", value);
     }
+
+    @Override
+    public String getText() {
+        throw new UnsupportedOperationException("Feature not supported.");
+    }
+
+    @Override
+    public void setText(String content) {
+        throw new UnsupportedOperationException("Feature not supported.");
+    }
+
+    /**
+     * @return String
+     * Prints the propeties of the shape
+     */
+    @Override
+    public String toString() {
+        return "Line" + ";" + lineShape.getStroke() + ";" + lineShape.getEndX() + ";" + lineShape.getEndY() + ";"
+                + lineShape.getStartX() + ";" + lineShape.getStartY() + ";" + lineShape.getStrokeWidth()+ "\n";
+    }
+
 
 
 

@@ -7,7 +7,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -91,12 +90,14 @@ public class MainViewController implements Initializable {
     private Button resetZoomButton;
     @FXML
     private Canvas gridCanvas;
+    @FXML
+    private Label warningLabel;
 
 
     private boolean isDragging = false;
     private Point2D startPoint = null;
     private ShapeInterface selectedShapeForContextMenu = null;
-    private UndoManager undoManager;
+    private Invoker invoker;
     private ContextMenu contextMenu = new ContextMenu();
     private final DrawingContextDTO contextDTO = new DrawingContextDTO();
     private AddToCanvasReceiver addToCanvasReceiver = null;
@@ -106,7 +107,6 @@ public class MainViewController implements Initializable {
     // State flag to understand if user is dragging and avoid accidentally adding new shapes to the canvas
     private boolean isDragging0 = false;
     private boolean hasDragged = false;
-
     private ShapeReceiver shapeReceiver = new ShapeReceiver(null);
     private double currentZoom = 1.0;
 
@@ -121,11 +121,7 @@ public class MainViewController implements Initializable {
         initializeSplitPane();
         initializeShapeChoiceBox();
         initializeZoomControls();
-
-        //default fontSize value
-        fontSizeComboBox.setValue(14);
-        contextDTO.setFontSize(14);
-
+        fontSizeComboBox.setValue(56);
         fontSizeComboBox.setOnAction(event -> {
             Integer selected = fontSizeComboBox.getValue();
             if (selected != null) {
@@ -153,7 +149,6 @@ public class MainViewController implements Initializable {
 
         scrollPane.setOnMouseReleased(event -> {
             if (!isDragging && event.getButton() == MouseButton.PRIMARY) {
-                // Se clic sinistro, disegna
                 DrawOnCanvas(event);
             } else if (event.getButton() == MouseButton.SECONDARY) {
                 boolean clickedOnShape = false;
@@ -178,7 +173,6 @@ public class MainViewController implements Initializable {
         zoomSlider.setMin(0.1);  // 10%
         zoomSlider.setMax(2.0);  // 200%
         zoomSlider.setValue(1.0); // 100%
-
         zoomSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             double zoomLevel = newValue.doubleValue();
             applyZoom(zoomLevel);
@@ -244,7 +238,6 @@ public class MainViewController implements Initializable {
             if (contextMenu != null && contextMenu.isShowing()) {
                 contextMenu.hide();
             }
-
             // Ottieni la ShapeInterface dal userData del nodo
             Object userData = shapeNode.getUserData();
             if (userData instanceof ShapeInterface) {
@@ -277,47 +270,47 @@ public class MainViewController implements Initializable {
             @Override
             public void onFillColorChanged(Color newColor) {
                 CommandInterface cmd = new ChangeFillColorCommand(shape, newColor, changesOnShapeReceiver);
-                undoManager.executeCommand(cmd);
+                invoker.executeCommand(cmd);
             }
 
             @Override
             public void onStrokeColorChanged(Color newColor) {
                 CommandInterface cmd = new ChangeStrokeColorCommand(shape, newColor, changesOnShapeReceiver);
-                undoManager.executeCommand(cmd);
+                invoker.executeCommand(cmd);
             }
 
             @Override
             public void onSendToBack() {
                 poistionManagerReceiver = new PoistionManagerReceiver(shape);
                 CommandInterface cmd = new SendBackwardCommand(poistionManagerReceiver);
-                undoManager.executeCommand(cmd);
+                invoker.executeCommand(cmd);
             }
 
             @Override
             public void onBringToFront() {
                 poistionManagerReceiver = new PoistionManagerReceiver(shape);
                 CommandInterface cmd = new BringForwardCommand(poistionManagerReceiver);
-                undoManager.executeCommand(cmd);
+                invoker.executeCommand(cmd);
             }
 
             @Override
             public void onResize(double newWidth, double newHeight) {
                 poistionManagerReceiver = new PoistionManagerReceiver(shape);
                 CommandInterface cmd = new ResizeCommand(poistionManagerReceiver, newWidth, newHeight, oldWidth, oldHeight);
-                undoManager.executeCommand(cmd);
+                invoker.executeCommand(cmd);
             }
 
 
             @Override
             public void onCopy() {
                 CommandInterface cmd = new CopyCommand(shape, shapeReceiver);
-                undoManager.executeCopyCommand(cmd);
+                invoker.executeCopyCommand(cmd);
             }
 
             @Override
             public void onCut() {
                 CommandInterface cmd = new CutCommand(shape, shapeReceiver, contextDTO);
-                undoManager.executeCommand(cmd);
+                invoker.executeCommand(cmd);
             }
 
 
@@ -327,7 +320,7 @@ public class MainViewController implements Initializable {
                 contextDTO.setSceneY(event.getSceneY());
                 if(shapeReceiver.hasShape()) {
                     CommandInterface cmd = new PasteCommand(shapeReceiver, contextDTO);
-                    undoManager.executeCommand(cmd);
+                    invoker.executeCommand(cmd);
 
                     ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
                     Node node = pastedShape.getNode();
@@ -339,7 +332,7 @@ public class MainViewController implements Initializable {
             @Override
             public void onDelete() {
                 CommandInterface cmd = new DeleteCommand(contextDTO, shape, shapeReceiver);
-                undoManager.executeCommand(cmd);
+                invoker.executeCommand(cmd);
             }
         };
 
@@ -368,7 +361,7 @@ public class MainViewController implements Initializable {
         pasteItem.setOnAction(e -> {
             if(shapeReceiver.hasShape()) {
                 CommandInterface cmd = new PasteCommand(shapeReceiver, contextDTO);
-                undoManager.executeCommand(cmd);
+                invoker.executeCommand(cmd);
 
                 // Recupera la shape incollata, perchè senza questo non posso aprire il contextMenu su una figura incollata
                 ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
@@ -386,74 +379,26 @@ public class MainViewController implements Initializable {
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
     }
 
-
-
-    /*
-    // 6. Versione alternativa con Lambda (ancora più concisa)
-    private void showContextMenuForShape(ShapeInterface shape, MouseEvent event) {
-        ShapeContextMenuManager.MenuComponents menuComponents =
-            ShapeContextMenuManager.createContextMenu(shape, new ContextMenuActions() {
-                public void onFillColorChanged(Color c) {
-                    undoManager.executeCommand(new ChangeFillColorCommand(shape, c, changesOnShapeReceiver));
-                }
-                public void onStrokeColorChanged(Color c) {
-                    undoManager.executeCommand(new ChangeStrokeColorCommand(shape, c, changesOnShapeReceiver));
-                }
-                public void onSendToBack() {
-                    undoManager.executeCommand(new SendBackwardCommand(shape.getNode(), drawingPane));
-                }
-                public void onBringToFront() {
-                    undoManager.executeCommand(new BringForwardCommand(shape.getNode(), drawingPane));
-                }
-            });
-
-        contextMenu = menuComponents.contextMenu;
-        contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
-    }
-     */
-
-
-
     /**
      * Sets the undo manager for this controller.
      *
-     * @param undoManager the {@code UndoManager} to associate with the canvas
+     * @param invoker the {@code Invoker} to associate with the canvas
      */
-    public void setUndoManager(UndoManager undoManager) {
-        this.undoManager = undoManager;
+    public void setUndoManager(Invoker invoker) {
+        this.invoker = invoker;
     }
-
-
-    /*private void drawGrid() {
-        double width = gridCanvas.getWidth();
-        double height = gridCanvas.getHeight();
-        double cellSize = 50; // dimensione delle celle
-
-        var gc = gridCanvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, width, height); // pulizia
-
-        gc.setLineWidth(0.5);
-        gc.setStroke(javafx.scene.paint.Color.GRAY); // colore griglia
-        // linee verticali
-        for (double x = 0; x <= width; x += cellSize) {
-            gc.strokeLine(x, 0, x, height);
-        }
-        // linee orizzontali
-        for (double y = 0; y <= height; y += cellSize) {
-            gc.strokeLine(0, y, width, y);
-        }
-    }*/
 
     private void initializeShapeChoiceBox() {
         List<ShapeOption> shapes = List.of(
                 new ShapeOption("Ellipse", "/org/example/images/ellipse.png"),
                 new ShapeOption("Line", "/org/example/images/segment.png"),
-                new ShapeOption("Rectangle", "/org/example/images/rectangle.png")
+                new ShapeOption("Rectangle", "/org/example/images/rectangle.png"),
+                new ShapeOption("Text", "/org/example/images/text.png")
         );
 
         shapeComboBox.getItems().addAll(shapes);
 
-        // Imposto la cell factory per mostrare nome + immagine
+        // Set the cell factory to show name + image
         shapeComboBox.setCellFactory(lv -> new ListCell<>() {
             private final ImageView imageView = new ImageView();
 
@@ -525,33 +470,6 @@ public class MainViewController implements Initializable {
         });
     }
 
-    @FXML
-    private void handleEnterText(ActionEvent event) {
-        String text = textArea.getText();
-        if (text == null || text.trim().isEmpty()) return;
-
-        Point2D defaultPosition = new Point2D(100, 100); // oppure dove preferisci
-        contextDTO.setText(text);
-        contextDTO.setFontSize(fontSizeComboBox.getValue()); // prende il fontSize dal combobox
-        contextDTO.setSceneX(defaultPosition.getX());
-        contextDTO.setSceneY(defaultPosition.getY());
-        contextDTO.setBorderColor(borderColorPicker.getValue());
-        contextDTO.setFillColor(fillColorPicker.getValue());
-        contextDTO.setDrawingPane(drawingPane);
-        contextDTO.setShapeOption(new ShapeOption("Text", ""));  // Stringa coerente con il case di AddToCanvas
-
-        addToCanvasReceiver = new AddToCanvasReceiver(contextDTO);
-        CommandInterface addTextCommand = new AddShapeCommand(contextDTO, addToCanvasReceiver);
-        undoManager.executeCommand(addTextCommand);
-
-        // Gestione degli handler
-        Node lastNode = drawingPane.getChildren().get(drawingPane.getChildren().size() - 1);
-        attachEventHandlersToShape(lastNode);
-        makeDraggable((ShapeInterface) lastNode.getUserData());
-    }
-
-
-
     private void makeDraggable(ShapeInterface shape) {
         final Point2D[] dragStart = new Point2D[1];
         final Point2D[] shapeStartPosition = new Point2D[1];
@@ -589,7 +507,7 @@ public class MainViewController implements Initializable {
                     shape.moveBy(-totalDeltaX, -totalDeltaY);
                     // Create and execute DragCommand
                     DragCommand dragCommand = new DragCommand(shape, totalDeltaX, totalDeltaY, draggingReceiver);
-                    undoManager.executeCommand(dragCommand);
+                    invoker.executeCommand(dragCommand);
                 }
                 // Delay to avoid interference with others clicks
                 Platform.runLater(() -> {
@@ -603,11 +521,13 @@ public class MainViewController implements Initializable {
 
     /**
      * Handles the primary mouse click to draw the selected shape on the canvas.
-     * Supports Ellipse, Line, and Rectangle.
+     * Supports Ellipse, Line, Rectangle, and Text.
      *
      * @param mouseEvent the mouse event containing click coordinates
      */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
+        Label warningLabel = new Label();
+        warningLabel.setTextFill(Color.RED);
         // Ignore the click if we just finished dragging
         if (hasDragged) {
             return;
@@ -616,16 +536,55 @@ public class MainViewController implements Initializable {
             if (contextMenu.isShowing()) {
                 contextMenu.hide();
             } else {
+                // Special handling for Text shape
+                if ("Text".equals(shapeComboBox.getValue().getName())) {
+                    String text = textArea.getText();
+                    if (text == null || text.trim().isEmpty()) {
+                        textArea.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+                        warningLabel.setText("Text field is empty");
+                        warningLabel.setVisible(true);
+                        return;
+                    }
+                    // Check length
+                    if (text.length() > 25) {
+                        textArea.setStyle("-fx-border-color: red; -fx-border-width: 4;");
+                        if (warningLabel != null) {
+                            warningLabel.setText("Text too long");
+                            warningLabel.setVisible(true);
+                            /*// Show alert for clarity
+                            Alert alert = new Alert(Alert.AlertType.WARNING);
+                            alert.setTitle("Text Too Long");
+                            alert.setHeaderText("Text exceeds maximum length");
+                            alert.setContentText("Please enter text with maximum 20 characters. Current length: " + text.length());
+                            alert.showAndWait();*/
+                            return;
+                        }
+                    } else {
+                        textArea.setStyle(""); // Reset style
+                        warningLabel.setText(""); // Clear warning
+                    }
+                    contextDTO.setText(text);
+                    contextDTO.setFontSize(fontSizeComboBox.getValue());
+                }
+
                 setParameters(mouseEvent, contextMenu, shapeComboBox, drawingPane, contextDTO.getStartPoint(), borderColorPicker, fillColorPicker);
                 addToCanvasReceiver = new AddToCanvasReceiver(contextDTO);
                 CommandInterface addShape = new AddShapeCommand(contextDTO, addToCanvasReceiver);
-                undoManager.executeCommand(addShape);
+                invoker.executeCommand(addShape);
+
                 // Assign event handlers to newly created shape
                 // Assuming AddShapeCommand adds the shape as the last element of the drawingPane
                 if (!drawingPane.getChildren().isEmpty()) {
                     Node lastAddedShape = drawingPane.getChildren().get(drawingPane.getChildren().size() - 1);
                     attachEventHandlersToShape(lastAddedShape);
                     makeDraggable((ShapeInterface) lastAddedShape.getUserData());
+                }
+
+                // Clear text area after adding text to canvas
+                if ("Text".equals(shapeComboBox.getValue().getName())) {
+                    textArea.clear();
+                    textArea.setStyle(""); // Clear style after draw
+                    warningLabel.setText(""); // Hide warning
                 }
             }
         }
@@ -648,7 +607,7 @@ public class MainViewController implements Initializable {
     @FXML
     private void saveFile(ActionEvent event) {
         SaveCommand saveCommandFile = new SaveCommand(drawingPane);
-        undoManager.executeSaveCommand(saveCommandFile);
+        invoker.executeSaveCommand(saveCommandFile);
     }
 
 
@@ -669,7 +628,7 @@ public class MainViewController implements Initializable {
             drawingPane.getChildren().clear();
             // Execute load
             LoadCommand load = new LoadCommand(drawingPane);
-            undoManager.executeLoadCommand(load);
+            invoker.executeLoadCommand(load);
             // Assign event handlers to all loaded shapes and make nodes draggable
             attachEventHandlersToAllShapes();
         }
@@ -701,19 +660,19 @@ public class MainViewController implements Initializable {
             if (result.get().getText().equals("Yes")) {
                 // Saving file
                 SaveCommand saveCommandFile = new SaveCommand(drawingPane);
-                undoManager.executeSaveCommand(saveCommandFile);
+                invoker.executeSaveCommand(saveCommandFile);
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // After saving execute load
                 LoadCommand load = new LoadCommand(drawingPane);
-                undoManager.executeLoadCommand(load);
+                invoker.executeLoadCommand(load);
 
             } else if (result.get().getText().equals("No")) {
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // Execute load
                 LoadCommand load = new LoadCommand(drawingPane);
-                undoManager.executeLoadCommand(load);
+                invoker.executeLoadCommand(load);
             }
         }
     }
@@ -726,7 +685,7 @@ public class MainViewController implements Initializable {
      */
     @FXML
     public void undoClicked(ActionEvent actionEvent) {
-        undoManager.undo();
+        invoker.undo();
     }
 
 

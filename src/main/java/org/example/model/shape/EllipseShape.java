@@ -142,6 +142,16 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
+    public String getText() {
+        throw new UnsupportedOperationException("Feature not supported.");
+    }
+
+    @Override
+    public void setText(String content) {
+        throw new UnsupportedOperationException("Feature not supported.");
+    }
+
+    @Override
     public String toString() {
         return "Ellipse" + ";" + ellipseShape.getStroke() + ";" + ellipseShape.getFill() + ";" + ellipseShape.getStrokeWidth() + ";"
                 + ellipseShape.getRadiusX() + ";" + ellipseShape.getRadiusY() + ";" + ellipseShape.getCenterX() + ";" + ellipseShape.getCenterY() + "\n";

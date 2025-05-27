@@ -21,7 +21,6 @@ public class AddShapeCommand implements CommandInterface {
 
 
     public void undoCommand() {
-        //int indexOfLastShape = drawingDTO.getDrawingPane().getChildren().size()-1;
         if (!drawingDTO.getDrawingPane().getChildren().isEmpty()) {
             drawingDTO.getDrawingPane().getChildren().remove(shape.getNode());
         }

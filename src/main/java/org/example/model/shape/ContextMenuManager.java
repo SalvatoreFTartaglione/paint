@@ -136,20 +136,43 @@ public class ContextMenuManager {
                 double nw = Double.parseDouble(w.getText());
                 double nh = Double.parseDouble(h.getText());
 
-                // Reset border in case of valid input
-                w.setStyle("");
-                h.setStyle("");
+                // Validation: checks for element > 300
+                boolean widthValid = nw > 0 && nw < 300;
+                boolean heightValid = nh > 0 && nh < 300;
 
-                resizeHandler.onResize(nw, nh);
+                if (widthValid && heightValid) {
+                    // Reset border for bad input
+                    w.setStyle("");
+                    h.setStyle("");
+                    resizeHandler.onResize(nw, nh);
+                } else {
+                    // Higlight field with bad values
+                    if (!widthValid) {
+                        w.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
+                    } else {
+                        w.setStyle("");
+                    }
+
+                    if (!heightValid) {
+                        h.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
+                    } else {
+                        h.setStyle("");
+                    }
+                }
+
             } catch (NumberFormatException e) {
-                // Red border to signal error
+                // Red border
                 w.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
                 h.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
             }
         };
 
-        // Apply only when button is clicked
+        // Applica quando viene premuto il pulsante
         applyBtn.setOnAction(e -> apply.run());
+
+        // Gestisci l'evento Enter sui text field
+        w.setOnAction(e -> apply.run());
+        h.setOnAction(e -> apply.run());
 
         return item;
     }

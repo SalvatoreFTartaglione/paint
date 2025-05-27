@@ -1,9 +1,7 @@
 package org.example.model.shape;
 
 import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.paint.Color;
-import org.example.model.commands.UndoManager;
 
 public interface ShapeInterface {
 
@@ -97,4 +95,8 @@ public interface ShapeInterface {
     default String getSliderLabel(double value) {
         return String.format("%.1f", value);
     }
+
+    //Text operation support
+    String getText();
+    void setText(String content);
 }

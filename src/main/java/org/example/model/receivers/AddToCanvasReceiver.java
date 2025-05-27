@@ -83,22 +83,12 @@ public class AddToCanvasReceiver {
 //            }
 //        }
 //    }
+
 public ShapeInterface addShape() {
     ShapeInterface shape = null;
     ShapeOption selectedShape = drawingDTO.getShapeOption();
 
     switch (selectedShape.getName()) {
-        case "Text": {
-            Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-            String content = drawingDTO.getText();
-            int fontSize = drawingDTO.getFontSize();
-
-            AbstractShape abstractText = createText(drawingDTO.getBorderColor(), 2, 80, 40, content, fontSize);
-            shape = abstractText.getShape();
-            shape.draw(localCoords.getX(), localCoords.getY());
-            break;
-        }
-
         case "Ellipse": {
             Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
             AbstractShape abstractEllipse = createEllipse(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40);
@@ -106,7 +96,6 @@ public ShapeInterface addShape() {
             shape.draw(localCoords.getX(), localCoords.getY());
             break;
         }
-
         case "Rectangle": {
             Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
             AbstractShape abstractRectangle = createRectangle(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40);
@@ -114,7 +103,6 @@ public ShapeInterface addShape() {
             shape.draw(localCoords.getX(), localCoords.getY());
             break;
         }
-
         case "Line": {
             Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
             if (drawingDTO.getStartPoint() == null) {
@@ -122,7 +110,7 @@ public ShapeInterface addShape() {
                 return null;  // incomplete line, non aggiungere
             } else {
                 LineCreator lineCreator = new LineCreator();
-                lineCreator.creationOfShape(drawingDTO.getBorderColor(), null, 5, 0, 0);
+                lineCreator.creationOfShape(drawingDTO.getBorderColor(), null, 5, 0, 0, null);
                 shape = lineCreator.getShape();
                 Double[] points = {
                         localCoords.getX(), localCoords.getY(),
@@ -131,6 +119,13 @@ public ShapeInterface addShape() {
                 shape.draw(points);
                 drawingDTO.setStartPoint(null);
             }
+            break;
+        }
+        case "Text": {
+            Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+            AbstractShape abstractText = createText(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), drawingDTO.getFontSize(), 40, 20, drawingDTO.getText() );
+            shape = abstractText.getShape();
+            shape.draw(localCoords.getX(), localCoords.getY());
             break;
         }
     }
@@ -154,19 +149,19 @@ public ShapeInterface addShape() {
 
     private static AbstractShape createRectangle(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
         AbstractShape rectangle = new RectangleCreator();
-        rectangle.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
+        rectangle.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null);
         return rectangle;
     }
 
     private static AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
         AbstractShape ellipse = new EllipseCreator();
-        ellipse.creationOfShape(strokeColor, fillColor, borderWidth, width, height);
+        ellipse.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null);
         return ellipse;
     }
 
-    private static AbstractShape createText(Color strokeColor, int borderWidth, double width, double height, String content, int fontSize) {
-        AbstractShape textCreator = new TextShapeCreator(content, fontSize);    //
-        textCreator.creationOfShape(strokeColor, null, borderWidth, width, height);
+    private static AbstractShape createText(Color strokeColor, Color fillColor, int borderWidth, double width, double height, String content) {
+        AbstractShape textCreator = new TextCreator();
+        textCreator.creationOfShape(strokeColor, fillColor, borderWidth, width, height, content);
         return textCreator;
     }
 }

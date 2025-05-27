@@ -1,25 +1,21 @@
 package org.example.view;
 
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Point2D;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.example.controller.MainViewController;
-import org.example.model.commands.UndoManager;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.commands.Invoker;
 
 import java.io.IOException;
 
 public class MainView {
-    private final UndoManager undoManager;
+    private final Invoker invoker;
     private MainViewController mainViewController;
 
-    public MainView(MainViewController controller, UndoManager undoManager) {
+    public MainView(MainViewController controller, Invoker invoker) {
         this.mainViewController = controller;
-        this.undoManager = undoManager;
+        this.invoker = invoker;
     }
 
     public void start(Stage stage) {
@@ -29,7 +25,7 @@ public class MainView {
 
             //assegnazione controller
             mainViewController = loader.getController();
-            mainViewController.setUndoManager(undoManager);
+            mainViewController.setUndoManager(invoker);
             //mainViewController.setController(controller);
 
             Scene scene = new Scene(root);
