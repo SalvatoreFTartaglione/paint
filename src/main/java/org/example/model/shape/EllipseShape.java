@@ -1,11 +1,9 @@
 package org.example.model.shape;
 
-import javafx.collections.ObservableList;
-import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
-import javafx.scene.shape.Rectangle;
 
 
 public class EllipseShape implements ShapeInterface {
@@ -53,6 +51,38 @@ public class EllipseShape implements ShapeInterface {
         double maxY = (paneHeight - getHeight() / 2 - margin) / zoom;
 
         return newX >= minX && newX <= maxX && newY >= minY && newY <= maxY;
+    }
+
+    @Override
+    public void mirrorUp() {
+        Point2D centerOfEllipse = new Point2D(getX(), getY());
+        Point2D pointYUpFromCenterOfEllipse = new Point2D(centerOfEllipse.getX(), centerOfEllipse.getY() - (getHeight()));
+
+        double distance = centerOfEllipse.getY() - pointYUpFromCenterOfEllipse.getY();
+        double mirroredY = pointYUpFromCenterOfEllipse.getY() - distance;
+
+        ellipseShape.setCenterY(mirroredY);
+    }
+
+    @Override
+    public void mirrorDown() {
+        Point2D centerOfEllipse = new Point2D(getX(), getY());
+        Point2D pointXDownFromCenterOfEllipse = new Point2D(centerOfEllipse.getX(), centerOfEllipse.getY() + (getHeight()));
+
+        double distance = pointXDownFromCenterOfEllipse.getY() - centerOfEllipse.getY();
+        double mirroredY = pointXDownFromCenterOfEllipse.getY() + distance;
+
+        ellipseShape.setCenterY(mirroredY);
+    }
+
+    @Override
+    public void mirrorLeft() {
+
+    }
+
+    @Override
+    public void mirrorRight() {
+
     }
 
 

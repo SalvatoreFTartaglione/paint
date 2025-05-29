@@ -111,7 +111,7 @@ public class MainViewController implements Initializable {
     private AddToCanvasReceiver addToCanvasReceiver = null;
     private ChangesOnShapeReceiver changesOnShapeReceiver = new ChangesOnShapeReceiver();
     private DraggingReceiver draggingReceiver = new DraggingReceiver() {};
-    private PoistionManagerReceiver poistionManagerReceiver;
+    private PositionManagerReceiver positionManagerReceiver;
     // State flag to understand if user is dragging and avoid accidentally adding new shapes to the canvas
     private boolean isDragging0 = false;
     private boolean hasDragged = false;
@@ -312,22 +312,50 @@ public class MainViewController implements Initializable {
 
             @Override
             public void onSendToBack() {
-                poistionManagerReceiver = new PoistionManagerReceiver(shape);
-                CommandInterface cmd = new SendBackwardCommand(poistionManagerReceiver);
+                positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new SendBackwardCommand(positionManagerReceiver);
                 invoker.executeCommand(cmd);
             }
 
             @Override
             public void onBringToFront() {
-                poistionManagerReceiver = new PoistionManagerReceiver(shape);
-                CommandInterface cmd = new BringForwardCommand(poistionManagerReceiver);
+                positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new BringForwardCommand(positionManagerReceiver);
                 invoker.executeCommand(cmd);
             }
 
             @Override
             public void onResize(double newWidth, double newHeight) {
-                poistionManagerReceiver = new PoistionManagerReceiver(shape);
-                CommandInterface cmd = new ResizeCommand(poistionManagerReceiver, newWidth, newHeight, oldWidth, oldHeight);
+                /*positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new ResizeCommand(positionManagerReceiver, newWidth, newHeight, oldWidth, oldHeight);
+                invoker.executeCommand(cmd);*/
+            }
+
+            @Override
+            public void onMirrorUp() {
+                positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, true, false, false, false);
+                invoker.executeCommand(cmd);
+            }
+
+            @Override
+            public void onMirrorDown() {
+                positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, true, false,false);
+                invoker.executeCommand(cmd);
+            }
+
+            @Override
+            public void onMirrorLeft() {
+                positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, true, false);
+                invoker.executeCommand(cmd);
+            }
+
+            @Override
+            public void onMirrorRight() {
+                positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, false, true);
                 invoker.executeCommand(cmd);
             }
 

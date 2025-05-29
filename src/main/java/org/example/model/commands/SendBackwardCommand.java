@@ -2,19 +2,18 @@ package org.example.model.commands;
 
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import org.example.model.receivers.PoistionManagerReceiver;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.receivers.PositionManagerReceiver;
 
 public class SendBackwardCommand implements CommandInterface{
 
-    private PoistionManagerReceiver poistionManagerReceiver;
+    private PositionManagerReceiver positionManagerReceiver;
     private Node node;
     private Pane drawingPane;
     private int oldIndex;
 
-    public SendBackwardCommand(PoistionManagerReceiver poistionManagerReceiver){
-       this.node = poistionManagerReceiver.getShape().getNode();
-       this.poistionManagerReceiver = poistionManagerReceiver;
+    public SendBackwardCommand(PositionManagerReceiver positionManagerReceiver){
+       this.node = positionManagerReceiver.getShape().getNode();
+       this.positionManagerReceiver = positionManagerReceiver;
     }
 
     @Override
@@ -24,7 +23,7 @@ public class SendBackwardCommand implements CommandInterface{
             drawingPane = (Pane) node.getParent();
             oldIndex = drawingPane.getChildren().indexOf(node);
             // Send node backward
-            poistionManagerReceiver.toBack();
+            positionManagerReceiver.toBack();
         } else {
             throw new IllegalStateException("Node does not have a Pane parent");
         }

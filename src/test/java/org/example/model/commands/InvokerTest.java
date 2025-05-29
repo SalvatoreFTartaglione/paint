@@ -6,7 +6,7 @@ import org.example.controller.ShapeOption;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.AddToCanvasReceiver;
 import org.example.model.receivers.ChangesOnShapeReceiver;
-import org.example.model.receivers.PoistionManagerReceiver;
+import org.example.model.receivers.PositionManagerReceiver;
 import org.example.model.receivers.ShapeReceiver;
 import org.example.model.shape.ShapeInterface;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +58,7 @@ public class InvokerTest {
         assertEquals(Color.BLUE, originalShape.getFillColor());
 
         // 3. Resize shape
-        PoistionManagerReceiver pmr = new PoistionManagerReceiver(originalShape);
+        PositionManagerReceiver pmr = new PositionManagerReceiver(originalShape);
         double oldWidth = originalShape.getWidth();
         double oldHeight = originalShape.getHeight();
         CommandInterface resizeCmd = new ResizeCommand(pmr, 200, 150, oldWidth, oldHeight);

@@ -2,7 +2,7 @@ package org.example.model.commands;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import org.example.model.receivers.PoistionManagerReceiver;
+import org.example.model.receivers.PositionManagerReceiver;
 import org.example.model.shape.RectangleShape;
 import org.example.model.shape.ShapeInterface;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +45,7 @@ public class BringForwardCommandTest {
         assertEquals(shape2.getNode(), drawingPane.getChildren().get(1));
 
         // shape1 in basso, portiamola sopra
-        PoistionManagerReceiver receiver = new PoistionManagerReceiver(shape1);
+        PositionManagerReceiver receiver = new PositionManagerReceiver(shape1);
         BringForwardCommand cmd = new BringForwardCommand(receiver);
 
         cmd.executeCommand();
@@ -56,7 +56,7 @@ public class BringForwardCommandTest {
 
     @Test
     public void testUndoCommandRestoresOriginalPosition() {
-        PoistionManagerReceiver receiver = new PoistionManagerReceiver(shape1);
+        PositionManagerReceiver receiver = new PositionManagerReceiver(shape1);
         BringForwardCommand cmd = new BringForwardCommand(receiver);
 
         cmd.executeCommand(); // porta in alto
@@ -70,7 +70,7 @@ public class BringForwardCommandTest {
     public void testExecuteThrowsIfNodeHasNoParent() {
         // Crea una shape non ancora aggiunta a un Pane
         ShapeInterface unboundShape = new RectangleShape(Color.BLACK, Color.GREEN, 100, 60, 2);
-        PoistionManagerReceiver receiver = new PoistionManagerReceiver(unboundShape);
+        PositionManagerReceiver receiver = new PositionManagerReceiver(unboundShape);
         BringForwardCommand cmd = new BringForwardCommand(receiver);
 
         Exception exception = assertThrows(IllegalStateException.class, cmd::executeCommand);

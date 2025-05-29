@@ -1,5 +1,6 @@
 package org.example.model.shape;
 
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -305,6 +306,55 @@ public class LineShape implements ShapeInterface{
         return isWithinBounds;
     }
 
+    @Override
+    public void mirrorUp() {
+        Point2D end = new Point2D(lineShape.getStartX(), lineShape.getStartY());
+        Point2D start = new Point2D(lineShape.getEndX(), lineShape.getEndY());
+        Point2D upperPoint = start.getY() <= end.getY() ? start : end;
+
+        double centerY = (start.getY() + end.getY()) / 2;
+
+        double mirroredCenterY = upperPoint.getY() - (centerY - upperPoint.getY());
+
+        double offsetStartY = start.getY() - centerY;
+        double offsetEndY = end.getY() - centerY;
+        double newStartY = mirroredCenterY + offsetStartY;
+        double newEndY = mirroredCenterY + offsetEndY;
+
+        lineShape.setStartY(newStartY);
+        lineShape.setEndY(newEndY);
+    }
+
+
+    @Override
+    public void mirrorDown() {
+        Point2D end = new Point2D(lineShape.getStartX(), lineShape.getStartY());
+        Point2D start = new Point2D(lineShape.getEndX(), lineShape.getEndY());
+        Point2D lowerPoint = start.getY() >= end.getY() ? start : end;
+
+        double centerY = (start.getY() + end.getY()) / 2;
+
+        double mirroredCenterY = lowerPoint.getY() + (lowerPoint.getY() - centerY);
+
+        double offsetStartY = start.getY() - centerY;
+        double offsetEndY = end.getY() - centerY;
+        double newStartY = mirroredCenterY + offsetStartY;
+        double newEndY = mirroredCenterY + offsetEndY;
+
+        lineShape.setStartY(newStartY);
+        lineShape.setEndY(newEndY);
+    }
+
+
+    @Override
+    public void mirrorLeft() {
+
+    }
+
+    @Override
+    public void mirrorRight() {
+
+    }
 
 
 }

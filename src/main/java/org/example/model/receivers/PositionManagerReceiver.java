@@ -1,13 +1,12 @@
 package org.example.model.receivers;
 
-import javafx.scene.Node;
 import org.example.model.shape.ShapeInterface;
 
-public class PoistionManagerReceiver {
+public class PositionManagerReceiver {
 
     private ShapeInterface shape;
 
-    public PoistionManagerReceiver(ShapeInterface shape) {
+    public PositionManagerReceiver(ShapeInterface shape) {
         this.shape = shape;
     }
 
@@ -29,5 +28,21 @@ public class PoistionManagerReceiver {
 
     public void resize(double width, double height){
         shape.setSize(width, height);
+    }
+
+    public void mirrorUp(){
+        shape.mirrorUp();
+    }
+
+    public void mirrorDown(){
+        shape.mirrorDown();
+    }
+
+    public void mirrorLeft(){
+        shape.mirrorLeft();
+    }
+
+    public void mirrorRight(){
+        shape.mirrorRight();
     }
 }

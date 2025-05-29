@@ -1,13 +1,11 @@
 package org.example.model.shape;
 
 import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-class TextShape implements ShapeInterface {
+public class TextShape implements ShapeInterface {
 
     private final Text textNode;
     private Double[] points = new Double[2]; // X, Y
@@ -195,6 +193,31 @@ class TextShape implements ShapeInterface {
         double maxY = (paneHeight - height / 2 - margin) / zoom;
 
         return newX >= minX && newX <= maxX && newY >= minY && newY <= maxY;
+    }
+
+    @Override
+    public void mirrorUp() {
+        textNode.setScaleY(-textNode.getScaleY());
+        double currentY = textNode.getY();
+        textNode.setY(currentY - baseHeight);
+    }
+
+    @Override
+    public void mirrorDown() {
+        textNode.setScaleY(-textNode.getScaleY());
+        double currentY = textNode.getY();
+        textNode.setY(currentY + baseHeight);
+    }
+
+
+    @Override
+    public void mirrorLeft() {
+
+    }
+
+    @Override
+    public void mirrorRight() {
+
     }
 
 

@@ -1,5 +1,6 @@
 package org.example.model.shape;
 
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -61,6 +62,38 @@ public class RectangleShape implements ShapeInterface {
         double maxY = (paneHeight - getHeight() / 2 - margin) / zoom;
 
         return newX >= minX && newX <= maxX && newY >= minY && newY <= maxY;
+    }
+
+    @Override
+    public void mirrorUp() {
+        double centerY = getY() + getHeight() / 2;
+        double topY = getY();
+        double distance = centerY - topY;
+        double mirroredCenterY = topY - distance;
+        double newY = mirroredCenterY - getHeight() / 2;
+
+        rectangleShape.setY(newY);
+    }
+
+    @Override
+    public void mirrorDown() {
+        double centerY = getY() + getHeight() / 2;
+        double bottomY = getY() + getHeight();
+        double distance = bottomY - centerY;
+        double mirroredCenterY = bottomY + distance;
+        double newY = mirroredCenterY - getHeight() / 2;
+
+        rectangleShape.setY(newY);
+    }
+
+    @Override
+    public void mirrorLeft() {
+
+    }
+
+    @Override
+    public void mirrorRight() {
+
     }
 
 

@@ -89,9 +89,21 @@ public class ContextMenuManager {
             visualPanel.setVisible(true);
         });
 
+        // Vertical mirroring up
+        Label verticalMirroringUpLabel = new Label("Vertical Mirroring Up");
+        CustomMenuItem verticalMirroringUp = new CustomMenuItem(verticalMirroringUpLabel);
+        verticalMirroringUp.setHideOnClick(false);
+        verticalMirroringUp.setOnAction(e -> {actions.onMirrorUp();});
+
+        // Vertical mirroring down
+        Label verticalMirroringLabel = new Label("Vertical Mirroring down");
+        CustomMenuItem verticalMirroringDown = new CustomMenuItem(verticalMirroringLabel);
+        verticalMirroringDown.setHideOnClick(false);
+        verticalMirroringDown.setOnAction(e -> {actions.onMirrorDown();});
+
         // Add items
-        contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem);
+        //contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
+        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, verticalMirroringUp,verticalMirroringDown);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }
