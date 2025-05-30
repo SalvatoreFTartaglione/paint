@@ -97,6 +97,26 @@ public class EllipseShape implements ShapeInterface {
         ellipseShape.setCenterX(mirroredX);
     }
 
+    @Override
+    public void setTextScaleX(double scale) {
+        ellipseShape.setScaleX(scale);
+    }
+
+    @Override
+    public double getTextScaleX() {
+        return ellipseShape.getScaleX();
+    }
+
+    @Override
+    public void setTextScaleY(double scale) {
+        ellipseShape.setScaleY(scale);
+    }
+
+    @Override
+    public double getTextScaleY() {
+        return ellipseShape.getScaleY();
+    }
+
 
     @Override
     public Color getStrokeColor() {

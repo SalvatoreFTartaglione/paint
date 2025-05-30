@@ -379,5 +379,25 @@ public class LineShape implements ShapeInterface{
         lineShape.setEndX(newEndX);
     }
 
+    @Override
+    public void setTextScaleX(double scale) {
+        lineShape.setScaleX(scale);
+    }
+
+    @Override
+    public double getTextScaleX() {
+        return lineShape.getScaleX();
+    }
+
+    @Override
+    public void setTextScaleY(double scale) {
+        lineShape.setScaleY(scale);
+    }
+
+    @Override
+    public double getTextScaleY() {
+        return lineShape.getScaleY();
+    }
+
 
 }

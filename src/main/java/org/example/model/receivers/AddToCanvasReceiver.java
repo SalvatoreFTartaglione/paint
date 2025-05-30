@@ -44,7 +44,7 @@ public class AddToCanvasReceiver {
                     return null;  // incomplete line, non aggiungere
                 } else {
                     LineCreator lineCreator = new LineCreator();
-                    lineCreator.creationOfShape(drawingDTO.getBorderColor(), null, 5, 0, 0, null);
+                    lineCreator.creationOfShape(drawingDTO.getBorderColor(), null, 5, 0, 0, null, 0.0, 0.0);
                     shape = lineCreator.getShape();
                     Double[] points = {
                             localCoords.getX(), localCoords.getY(),
@@ -104,19 +104,19 @@ public class AddToCanvasReceiver {
 
     private static AbstractShape createRectangle(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
         AbstractShape rectangle = new RectangleCreator();
-        rectangle.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null);
+        rectangle.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null, 0.0, 0.0);
         return rectangle;
     }
 
     private static AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
         AbstractShape ellipse = new EllipseCreator();
-        ellipse.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null);
+        ellipse.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null, 0.0, 0.0);
         return ellipse;
     }
 
     private static AbstractShape createText(Color strokeColor, Color fillColor, int borderWidth, double width, double height, String content) {
         AbstractShape textCreator = new TextCreator();
-        textCreator.creationOfShape(strokeColor, fillColor, borderWidth, width, height, content);
+        textCreator.creationOfShape(strokeColor, fillColor, borderWidth, width, height, content, 1.0, 1.0);
         return textCreator;
     }
 }

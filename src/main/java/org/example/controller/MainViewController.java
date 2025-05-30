@@ -2,6 +2,8 @@ package org.example.controller;
 
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -39,6 +41,9 @@ import static java.lang.Math.round;
 
 public class MainViewController implements Initializable {
 
+
+    @FXML
+    private ComboBox<ShapeInterface> favoritesShapeComboBox;
     @FXML
     private CheckBox checkBoxGrid;
     @FXML
@@ -119,6 +124,7 @@ public class MainViewController implements Initializable {
     private double currentZoom = 1.0;
     private static final double CLICK_MARGIN = 5.0; // distanza minima dai bordi
     private Pane gridPane = new Pane();
+    private ObservableList<ShapeInterface> favoritesShapeList = FXCollections.observableArrayList();
 
 
     /**
@@ -133,6 +139,7 @@ public class MainViewController implements Initializable {
         initializeShapeChoiceBox();
         initializeZoomControls();
         initializeGridControls();
+
 
         fontSizeComboBox.setValue(56);
         fontSizeComboBox.setOnAction(event -> {
@@ -535,7 +542,7 @@ public class MainViewController implements Initializable {
         Node node = shape.getNode();
 
         node.setOnMousePressed(event -> {
-            dragStart[0] = new Point2D(event.getX(), event.getY());
+            dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
             shapeStartPosition[0] = new Point2D(shape.getX(), shape.getY());
             event.consume();
         });
@@ -546,19 +553,17 @@ public class MainViewController implements Initializable {
             }
             hasDragged = true;
 
-            double deltaX = event.getX() - dragStart[0].getX();
-            double deltaY = event.getY() - dragStart[0].getY();
+            double deltaX = event.getSceneX() - dragStart[0].getX();
+            double deltaY = event.getSceneY() - dragStart[0].getY();
 
-            // Dati del pane per il controllo dei limiti
             double zoom = drawingPane.getScaleX();
             double paneWidth = drawingPane.getPrefWidth() * zoom;
             double paneHeight = drawingPane.getPrefHeight() * zoom;
             double extraMargin = 20;
 
-            // Verifica se il movimento è consentito
             if (shape.canMoveBy(deltaX, deltaY, paneWidth, paneHeight, zoom, extraMargin)) {
                 shape.moveBy(deltaX, deltaY);
-                dragStart[0] = new Point2D(event.getX(), event.getY());
+                dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY()); // aggiorna con scene coords
             }
 
             event.consume();

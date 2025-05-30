@@ -1,13 +1,13 @@
 package org.example.model.shape;
 
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
 public interface ShapeInterface {
 
     // utils method
-    ShapeInterface
-    cloneShape();
+    ShapeInterface cloneShape();
 
     // Shape color management
     void setStrokeColor(Color color);
@@ -96,6 +96,15 @@ public interface ShapeInterface {
         return String.format("%.1f", value);
     }
 
+    default Point2D getRestorePosition() {
+        return new Point2D(getX(), getY());
+    }
+
+    default void setRestorePosition(Point2D point) {
+        draw(point.getX(), point.getY());
+    }
+
+
     //Text operation support
     String getText();
     void setText(String content);
@@ -106,4 +115,10 @@ public interface ShapeInterface {
     void mirrorDown();
     void mirrorLeft();
     void mirrorRight();
+
+    // Utils for load and save command for text shape
+    void setTextScaleX(double scale);
+    double getTextScaleX();
+    void setTextScaleY(double scale);
+    double getTextScaleY();
 }

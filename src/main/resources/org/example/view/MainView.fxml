@@ -10,7 +10,7 @@
 <?import javafx.scene.text.*?>
 <?import org.example.model.*?>
 
-<SplitPane fx:id="splitPane" dividerPositions="0.3" orientation="VERTICAL" prefHeight="516.0" prefWidth="932.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.MainViewController">
+<SplitPane fx:id="splitPane" dividerPositions="0.3" orientation="VERTICAL" prefHeight="516.0" prefWidth="1056.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.MainViewController">
     <items>
         <TabPane fx:id="tabPane" prefHeight="151.0" prefWidth="799.0" tabClosingPolicy="UNAVAILABLE">
             <tabs>
@@ -27,14 +27,20 @@
                                         </ImageView>
                                     </graphic>
                                 </Button>
-                                <ComboBox fx:id="shapeComboBox" layoutX="152.0" layoutY="12.0" prefWidth="150.0" />
+                                <ComboBox fx:id="shapeComboBox" layoutX="152.0" layoutY="15.0" prefHeight="25.0" prefWidth="126.0" />
                                 <ImageView fx:id="genericShapePhoto" fitHeight="28.0" fitWidth="28.0" layoutX="111.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true">
                                     <image>
                                         <Image url="@../images/genericShapes.png" />
                                     </image>
                                 </ImageView>
-                                <TextArea fx:id="textArea" layoutX="152.0" layoutY="49.0" prefHeight="33.0" prefWidth="152.0" promptText="Choose 'Text' shape first"/>
-                                <Label fx:id="warningLabel" layoutX="152.0" layoutY="85.0" text="" textFill="RED" />
+                                <ComboBox fx:id="favoritesShapeComboBox" layoutX="332.0" layoutY="15.0" prefHeight="25.0" prefWidth="113.0" />
+                                <ImageView fx:id="favoritesShapePhoto" fitHeight="28.0" fitWidth="28.0" layoutX="296.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../images/favorites.png" />
+                                    </image>
+                                </ImageView>
+                                <TextArea fx:id="textArea" layoutX="152.0" layoutY="49.0" prefHeight="33.0" prefWidth="152.0" promptText="Choose 'Text' shape first" />
+                                <Label fx:id="warningLabel" layoutX="152.0" layoutY="85.0" textFill="RED" />
 
                                 <ImageView fx:id="genericTextPhoto" fitHeight="29.0" fitWidth="30.0" layoutX="110.0" layoutY="53.0" pickOnBounds="true" preserveRatio="true">
                                    <image>
@@ -55,60 +61,61 @@
                                         </FXCollections>
                                     </items>
                                 </ComboBox>
-                                <CheckBox fx:id="gridButton" layoutX="310.0" layoutY="95.0" mnemonicParsing="false" text="Show Grid" />
-                                <ColorPicker fx:id="fillColorPicker" editable="true" layoutX="466.0" layoutY="27.0">
+                                <ColorPicker fx:id="fillColorPicker" editable="true" layoutX="620.0" layoutY="27.0">
                                     <value>
                                         <Color red="0.5986841917037964" green="0.5848257541656494" blue="0.5848257541656494" />
                                     </value>
                                 </ColorPicker>
-                                <ImageView fx:id="chooseColorPhoto" fitHeight="45.0" fitWidth="53.0" layoutX="396.0" layoutY="42.0" pickOnBounds="true" preserveRatio="true">
+                                <ImageView fx:id="chooseColorPhoto" fitHeight="45.0" fitWidth="53.0" layoutX="567.0" layoutY="45.0" pickOnBounds="true" preserveRatio="true">
                                     <image>
                                         <Image url="@../images/colorPalette.png" />
                                     </image>
                                 </ImageView>
-                                <Label layoutX="464.0" layoutY="6.0" prefHeight="17.0" prefWidth="121.0" text="Fill color">
+                                <Label layoutX="620.0" layoutY="4.0" prefHeight="17.0" prefWidth="121.0" text="Fill color">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
                                     </font>
                                 </Label>
-                                <Label layoutX="466.0" layoutY="60.0" prefHeight="17.0" prefWidth="122.0" text="Border color">
+                                <Label layoutX="620.0" layoutY="58.0" prefHeight="17.0" prefWidth="122.0" text="Border color">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
                                     </font>
                                 </Label>
-                                <ColorPicker fx:id="borderColorPicker" editable="true" layoutX="466.0" layoutY="82.0">
+                                <ColorPicker fx:id="borderColorPicker" editable="true" layoutX="620.0" layoutY="83.0">
                                     <value>
                                         <Color />
                                     </value>
                                 </ColorPicker>
 
                                 <!-- ZOOM -->
-                                <Label layoutX="620.0" layoutY="6.0" prefHeight="17.0" prefWidth="80.0" text="Zoom">
+                                <Label layoutX="781.0" layoutY="6.0" prefHeight="17.0" prefWidth="80.0" text="Zoom">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
                                     </font>
                                 </Label>
-                                <Slider fx:id="zoomSlider" layoutX="620.0" layoutY="25.0" majorTickUnit="0.5" max="2.0" min="0.1" minorTickCount="4" prefWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="false" value="1.0" />
-                                <Label fx:id="zoomValueLabel" layoutX="620.0" layoutY="55.0" prefHeight="17.0" prefWidth="80.0" text="100%">
+                                <Slider fx:id="zoomSlider" layoutX="781.0" layoutY="23.0" majorTickUnit="0.5" max="2.0" min="0.1" minorTickCount="4" prefWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="false" value="1.0" />
+                                <Label fx:id="zoomValueLabel" layoutX="781.0" layoutY="62.0" prefHeight="17.0" prefWidth="80.0" text="100%">
                                     <font>
                                         <Font size="12.0" />
                                     </font>
                                 </Label>
-                                <Button fx:id="resetZoomButton" layoutX="620.0" layoutY="75.0" mnemonicParsing="false" onAction="#resetZoom" prefWidth="60.0" text="Reset" />
+                                <Button fx:id="resetZoomButton" layoutX="781.0" layoutY="81.0" mnemonicParsing="false" onAction="#resetZoom" prefWidth="60.0" text="Reset" />
                                 <!-- GRID -->
-                                <Label layoutX="780.0" layoutY="6.0" prefHeight="17.0" prefWidth="80.0" text="Grid">
+                                <Label layoutX="920.0" layoutY="5.0" prefHeight="17.0" prefWidth="80.0" text="Grid">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
                                     </font>
                                 </Label>
-                                <Slider fx:id="gridSlider" layoutX="780.0" layoutY="25.0" majorTickUnit="20" max="300" min="20" minorTickCount="20" prefWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="false" value="1.0" />
-                                <Label fx:id="gridValueLabel" layoutX="780.0" layoutY="55.0" prefHeight="17.0" prefWidth="80.0" text="100%">
+                                <Slider fx:id="gridSlider" layoutX="920.0" layoutY="25.0" majorTickUnit="20" max="300" min="20" minorTickCount="20" prefWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="false" value="1.0" />
+                                <Label fx:id="gridValueLabel" layoutX="920.0" layoutY="62.0" prefHeight="17.0" prefWidth="80.0" text="100%">
                                     <font>
                                         <Font size="12.0" />
                                     </font>
                                 </Label>
-                                <Button fx:id="resetGridButton" layoutX="780.0" layoutY="75.0" mnemonicParsing="false" onAction="#resetGrid" prefWidth="60.0" text="Reset" />
-                                <CheckBox fx:id="checkBoxGrid" layoutX="820.0" layoutY="8.0" mnemonicParsing="false" onAction="#toggleGrid"/>
+                                <Button fx:id="resetGridButton" layoutX="920.0" layoutY="81.0" mnemonicParsing="false" onAction="#resetGrid" prefWidth="60.0" text="Reset" />
+                                <CheckBox fx:id="checkBoxGrid" layoutX="952.0" layoutY="8.0" mnemonicParsing="false" onAction="#toggleGrid" />
+                        <Button layoutX="459.0" layoutY="15.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="97.0" text="Save Library" />
+                        <Button layoutX="459.0" layoutY="49.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="97.0" text="Import Library" />
 
                             </children>
                         </AnchorPane>

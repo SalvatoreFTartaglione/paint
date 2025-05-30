@@ -1,5 +1,6 @@
 package org.example.model.shape;
 
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -11,8 +12,10 @@ public class TextShape implements ShapeInterface {
     private Double[] points = new Double[2]; // X, Y
     private double baseWidth;
     private double baseHeight;
+    private boolean isFlippedX = false;
+    private boolean isFlippedY = false;
 
-    public TextShape(String content, Color strokeColor, Color fillingColor, double width, double height, double strokeWidth) {
+    public TextShape(String content, Color strokeColor, Color fillingColor, double width, double height, double strokeWidth, double scaleX, double scaleY) {
         textNode = new Text(content);
         textNode.setStroke(strokeColor);
         textNode.setFill(fillingColor);
@@ -21,6 +24,8 @@ public class TextShape implements ShapeInterface {
         textNode.setFont(Font.font(strokeWidth));
         baseWidth = textNode.getLayoutBounds().getWidth();
         baseHeight = textNode.getLayoutBounds().getHeight();
+        setTextScaleX(scaleX);
+        setTextScaleY(scaleY);
     }
 
     @Override
@@ -44,10 +49,9 @@ public class TextShape implements ShapeInterface {
         setY(getY() + deltaY);
     }
 
-
     @Override
     public ShapeInterface cloneShape() {
-        TextShape clone = new TextShape(getText(), getStrokeColor(), getFillColor(), getWidth(), getHeight(), getCustomStrokeWidth());
+        TextShape clone = new TextShape(getText(), getStrokeColor(), getFillColor(), getWidth(), getHeight(), getCustomStrokeWidth(), getTextScaleX(), getTextScaleY());
         clone.draw(getX(), getY());
         return clone;
     }
@@ -115,14 +119,20 @@ public class TextShape implements ShapeInterface {
 
     @Override
     public double getY() {
-        return textNode.getY();
+        return isFlippedY ? textNode.getY() - baseHeight : textNode.getY();
     }
 
     @Override
     public void setY(double y) {
-        textNode.setY(y);
+        // Se ribaltato verticalmente, compensa perché Y è baseline
+        if (isFlippedY) {
+            textNode.setY(y + baseHeight);
+        } else {
+            textNode.setY(y);
+        }
         points[1] = y;
     }
+
 
     @Override
     public Double[] getPoints() {
@@ -187,51 +197,115 @@ public class TextShape implements ShapeInterface {
         double width = getWidth();
         double height = getHeight();
 
-        double minX = (width / 2 + margin) / zoom;
-        double maxX = (paneWidth - width / 2 - margin) / zoom;
-        double minY = (height / 2 + margin) / zoom;
-        double maxY = (paneHeight - height / 2 - margin) / zoom;
+        double minX;
+        double maxX;
+        double minY;
+        double maxY;
+        if (isFlippedX || isFlippedY) {
+            minX = (width / 2 + (margin - 75)) / zoom;
+            maxX = (paneWidth - width / 2 - (margin - 75)) / zoom;
+            minY = (height / 2 + (margin - 75)) / zoom;
+            maxY = (paneHeight - height / 2 - (margin - 75)) / zoom;
+        }else {
+            minX = (width / 2 + (margin)) / zoom;
+            maxX = (paneWidth - width / 2 - (margin)) / zoom;
+            minY = (height / 2 + (margin)) / zoom;
+            maxY = (paneHeight - height / 2 - (margin)) / zoom;
+        }
 
         return newX >= minX && newX <= maxX && newY >= minY && newY <= maxY;
     }
 
+
     @Override
     public void mirrorUp() {
         textNode.setScaleY(-textNode.getScaleY());
-        double currentY = textNode.getY();
-        textNode.setY(currentY - baseHeight);
+        isFlippedY = !isFlippedY;
+
+        // Aggiorna anche l'array points per mantenere la coerenza
+        if (points[1] != null) {
+            points[1] = textNode.getY();
+        }
     }
 
     @Override
     public void mirrorDown() {
         textNode.setScaleY(-textNode.getScaleY());
-        double currentY = textNode.getY();
-        textNode.setY(currentY + baseHeight);
+        isFlippedY = !isFlippedY;
+
+        if (points[1] != null) {
+            points[1] = textNode.getY();
+        }
     }
-
-
-
 
     @Override
     public void mirrorLeft() {
         textNode.setScaleX(-textNode.getScaleX());
-        double currentX = textNode.getX();
-        textNode.setX(currentX - baseWidth);
+        isFlippedX = !isFlippedX;
+
+        if (points[0] != null) {
+            points[0] = textNode.getX();
+        }
     }
 
     @Override
     public void mirrorRight() {
         textNode.setScaleX(-textNode.getScaleX());
-        double currentX = textNode.getX();
-        textNode.setX(currentX + baseWidth);
+        isFlippedX = !isFlippedX;
+
+        if (points[0] != null) {
+            points[0] = textNode.getX();
+        }
     }
+
+    @Override
+    public void setTextScaleX(double scale) {
+        textNode.setScaleX(scale);
+    }
+
+    @Override
+    public double getTextScaleX() {
+        return textNode.getScaleX();
+    }
+
+    @Override
+    public void setTextScaleY(double scale) {
+        textNode.setScaleY(scale);
+    }
+
+    @Override
+    public double getTextScaleY() {
+        return textNode.getScaleY();
+    }
+
+    public double getRawX() {
+        return textNode.getX(); // senza compensazioni
+    }
+
+    public double getRawY() {
+        return textNode.getY(); // senza compensazioni
+    }
+
+    @Override
+    public Point2D getRestorePosition() {
+        return new Point2D(textNode.getX(), textNode.getY()); // Posizione effettiva
+    }
+
+    @Override
+    public void setRestorePosition(Point2D point) {
+        draw(point.getX(), point.getY()); // Usa draw come prima
+    }
+
+
 
 
     @Override
     public String toString() {
         return "Text;" + textNode.getText() + ";" + textNode.getStroke() + ";" + textNode.getFill() + ";" +
-                textNode.getX() + ";" + textNode.getY() + ";" + getCustomStrokeWidth() + "\n";
+                textNode.getX() + ";" + textNode.getY() + ";" + getCustomStrokeWidth() + ";" + getTextScaleX() + ";" + getTextScaleY() + "\n";
     }
+
+
 
 
 }

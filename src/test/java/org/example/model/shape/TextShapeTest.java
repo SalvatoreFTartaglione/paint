@@ -12,7 +12,7 @@ public class TextShapeTest {
 
     @BeforeEach
     public void setup() {
-        textShape = new TextShape("Hello", Color.BLACK, Color.RED, 100, 50, 16);
+        textShape = new TextShape("Hello", Color.BLACK, Color.RED, 100, 50, 16, 1.0, 1.0);
     }
 
     @Test

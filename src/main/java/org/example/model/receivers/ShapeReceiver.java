@@ -7,6 +7,7 @@ import javafx.scene.shape.Shape;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.shape.LineShape;
 import org.example.model.shape.ShapeInterface;
+import org.example.model.shape.TextShape;
 
 import java.util.Stack;
 
@@ -16,6 +17,7 @@ public class ShapeReceiver {
     private DrawingContextDTO drawingDTO;
     // Stack for deleted shapes (Undo task)
     private final Stack<ShapeInterface> deletedShapesStack = new Stack<>();
+    private final Stack<Point2D> deletedShapePositions = new Stack<>();
 
     public ShapeReceiver(DrawingContextDTO drawingDTO) {
         if (drawingDTO != null) {
@@ -109,7 +111,7 @@ public class ShapeReceiver {
     }
 
     // deletedShapes section:
-    public void delete(DrawingContextDTO drawingDTO, ShapeInterface shape) {
+    /*public void delete(DrawingContextDTO drawingDTO, ShapeInterface shape) {
         this.deletedShapesStack.push(shape);
 
         int indexNodeToDelete = drawingDTO.getDrawingPane().getChildren().indexOf(shape.getNode());
@@ -117,9 +119,17 @@ public class ShapeReceiver {
             drawingDTO.getDrawingPane().getChildren().remove(indexNodeToDelete);
         }
 
+    }*/
+
+    public void delete(DrawingContextDTO drawingDTO, ShapeInterface shape) {
+        deletedShapesStack.push(shape);
+        deletedShapePositions.push(shape.getRestorePosition());
+
+        drawingDTO.getDrawingPane().getChildren().remove(shape.getNode());
     }
 
-    public void undoDelete(DrawingContextDTO drawingDTO) {
+
+    /*public void undoDelete(DrawingContextDTO drawingDTO) {
         if (!deletedShapesStack.isEmpty()) {
             ShapeInterface restoredShape = deletedShapesStack.pop();
 
@@ -133,6 +143,11 @@ public class ShapeReceiver {
                 if (restoredShape instanceof LineShape) {
                     restoredShape.draw(restoredShape.getPoints());
                 } else {
+                    if (restoredShape instanceof TextShape){
+                        System.out.println("Sto restorando un text");
+                        TextShape textShape = (TextShape) restoredShape;
+                        System.out.println("ScaleX: " + textShape.getTextScaleX() + " ScaleY: " + textShape.getTextScaleY());
+                    }
                     restoredShape.draw(x, y);
                 }
 
@@ -148,6 +163,19 @@ public class ShapeReceiver {
             }
 
         }
+    }*/
+
+    public void undoDelete(DrawingContextDTO drawingDTO) {
+        if (!deletedShapesStack.isEmpty()) {
+            ShapeInterface restoredShape = deletedShapesStack.pop();
+            Point2D position = deletedShapePositions.pop();
+
+            if (restoredShape != null && position != null) {
+                restoredShape.setRestorePosition(position);
+                drawingDTO.getDrawingPane().getChildren().add(restoredShape.getNode());
+            }
+        }
     }
+
 
 }
