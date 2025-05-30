@@ -210,14 +210,20 @@ public class TextShape implements ShapeInterface {
     }
 
 
+
+
     @Override
     public void mirrorLeft() {
-
+        textNode.setScaleX(-textNode.getScaleX());
+        double currentX = textNode.getX();
+        textNode.setX(currentX - baseWidth);
     }
 
     @Override
     public void mirrorRight() {
-
+        textNode.setScaleX(-textNode.getScaleX());
+        double currentX = textNode.getX();
+        textNode.setX(currentX + baseWidth);
     }
 
 

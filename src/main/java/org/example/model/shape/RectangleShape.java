@@ -88,12 +88,24 @@ public class RectangleShape implements ShapeInterface {
 
     @Override
     public void mirrorLeft() {
+        double centerX = getX() + getWidth() / 2;
+        double leftX = getX();
+        double distance = centerX - leftX;
+        double mirroredCenterX = leftX - distance;
+        double newX = mirroredCenterX - getWidth() / 2;
 
+        rectangleShape.setX(newX);
     }
 
     @Override
     public void mirrorRight() {
+        double centerX = getX() + getWidth() / 2;
+        double rightX = getX() + getWidth();
+        double distance = rightX - centerX;
+        double mirroredCenterX = rightX + distance;
+        double newX = mirroredCenterX - getWidth() / 2;
 
+        rectangleShape.setX(newX);
     }
 
 

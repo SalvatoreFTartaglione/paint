@@ -77,12 +77,24 @@ public class EllipseShape implements ShapeInterface {
 
     @Override
     public void mirrorLeft() {
+        Point2D centerOfEllipse = new Point2D(getX(), getY());
+        Point2D pointLeft = new Point2D(centerOfEllipse.getX() - getWidth(), centerOfEllipse.getY());
 
+        double distance = centerOfEllipse.getX() - pointLeft.getX();
+        double mirroredX = pointLeft.getX() - distance;
+
+        ellipseShape.setCenterX(mirroredX);
     }
 
     @Override
     public void mirrorRight() {
+        Point2D centerOfEllipse = new Point2D(getX(), getY());
+        Point2D pointRight = new Point2D(centerOfEllipse.getX() + getWidth(), centerOfEllipse.getY());
 
+        double distance = pointRight.getX() - centerOfEllipse.getX();
+        double mirroredX = pointRight.getX() + distance;
+
+        ellipseShape.setCenterX(mirroredX);
     }
 
 

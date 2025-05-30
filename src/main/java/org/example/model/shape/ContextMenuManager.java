@@ -96,14 +96,26 @@ public class ContextMenuManager {
         verticalMirroringUp.setOnAction(e -> {actions.onMirrorUp();});
 
         // Vertical mirroring down
-        Label verticalMirroringLabel = new Label("Vertical Mirroring down");
+        Label verticalMirroringLabel = new Label("Vertical Mirroring Down");
         CustomMenuItem verticalMirroringDown = new CustomMenuItem(verticalMirroringLabel);
         verticalMirroringDown.setHideOnClick(false);
         verticalMirroringDown.setOnAction(e -> {actions.onMirrorDown();});
 
+        // Horizontal mirroring left
+        Label horizontalMirroringLeftLabel = new Label("Horizontal Mirroring Left");
+        CustomMenuItem horizontalMirroringLeft = new CustomMenuItem(horizontalMirroringLeftLabel);
+        horizontalMirroringLeft.setHideOnClick(false);
+        horizontalMirroringLeft.setOnAction(e -> {actions.onMirrorLeft();});
+
+        // Horizontal mirroring right
+        Label horizontalMirroringRightLabel = new Label("Horizontal Mirroring Right");
+        CustomMenuItem horizontalMirroringRight = new CustomMenuItem(horizontalMirroringRightLabel);
+        horizontalMirroringRight.setHideOnClick(false);
+        horizontalMirroringRight.setOnAction(e -> {actions.onMirrorRight();});
+
         // Add items
         //contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, verticalMirroringUp,verticalMirroringDown);
+        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, verticalMirroringUp,verticalMirroringDown, horizontalMirroringLeft, horizontalMirroringRight);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }

@@ -348,12 +348,35 @@ public class LineShape implements ShapeInterface{
 
     @Override
     public void mirrorLeft() {
+        // Calcola centro
+        double centerX = (lineShape.getStartX() + lineShape.getEndX()) / 2;
 
+        // Calcola distanza orizzontale metà (distanza dal centro all'estremità)
+        double halfWidth = Math.abs(lineShape.getEndX() - lineShape.getStartX()) / 2;
+
+        // Asse di riflessione: centro - halfWidth
+        double axisX = centerX - halfWidth;
+
+        // Riflette entrambi i punti rispetto all'asse verticale
+        double newStartX = 2 * axisX - lineShape.getStartX();
+        double newEndX = 2 * axisX - lineShape.getEndX();
+
+        lineShape.setStartX(newStartX);
+        lineShape.setEndX(newEndX);
     }
 
     @Override
     public void mirrorRight() {
+        double centerX = (lineShape.getStartX() + lineShape.getEndX()) / 2;
+        double halfWidth = Math.abs(lineShape.getEndX() - lineShape.getStartX()) / 2;
 
+        double axisX = centerX + halfWidth;
+
+        double newStartX = 2 * axisX - lineShape.getStartX();
+        double newEndX = 2 * axisX - lineShape.getEndX();
+
+        lineShape.setStartX(newStartX);
+        lineShape.setEndX(newEndX);
     }
 
 
