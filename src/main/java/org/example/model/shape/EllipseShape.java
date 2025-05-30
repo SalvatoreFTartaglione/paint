@@ -117,6 +117,16 @@ public class EllipseShape implements ShapeInterface {
         return ellipseShape.getScaleY();
     }
 
+    @Override
+    public void mirrorHorizontallyAroundCenter() {
+        ellipseShape.setScaleX(ellipseShape.getScaleX() * -1);
+    }
+
+    @Override
+    public void mirrorVerticallyAroundCenter() {
+        ellipseShape.setScaleY(ellipseShape.getScaleY() * -1);
+    }
+
 
     @Override
     public Color getStrokeColor() {

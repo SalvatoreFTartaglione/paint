@@ -341,29 +341,48 @@ public class MainViewController implements Initializable {
             @Override
             public void onMirrorUp() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
-                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, true, false, false, false);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, true, false, false, false, false, false);
                 invoker.executeCommand(cmd);
             }
 
             @Override
             public void onMirrorDown() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
-                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, true, false,false);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, true, false,false, false, false);
                 invoker.executeCommand(cmd);
             }
 
             @Override
             public void onMirrorLeft() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
-                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, true, false);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, true, false, false, false);
                 invoker.executeCommand(cmd);
             }
 
             @Override
             public void onMirrorRight() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
-                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, false, true);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, false, true, false, false);
                 invoker.executeCommand(cmd);
+            }
+
+            @Override
+            public void onMirrorHorizontalAroundCenter() {
+                positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, false, false, true, false);
+                invoker.executeCommand(cmd);
+            }
+
+            @Override
+            public void onMirrorVerticalAroundCenter() {
+                positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, false, false, false, true);
+                invoker.executeCommand(cmd);
+            }
+
+            @Override
+            public void onAddToFavorites() {
+
             }
 
 

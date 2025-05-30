@@ -128,6 +128,16 @@ public class RectangleShape implements ShapeInterface {
         return rectangleShape.getScaleY();
     }
 
+    @Override
+    public void mirrorHorizontallyAroundCenter() {
+        rectangleShape.setScaleX(rectangleShape.getScaleX() * -1);
+    }
+
+    @Override
+    public void mirrorVerticallyAroundCenter() {
+        rectangleShape.setScaleY(rectangleShape.getScaleY() * -1);
+    }
+
 
     @Override
     public Color getStrokeColor() {

@@ -16,4 +16,7 @@ public interface ContextMenuActions {
     void onMirrorDown();
     void onMirrorLeft();
     void onMirrorRight();
+    void onMirrorHorizontalAroundCenter();
+    void onMirrorVerticalAroundCenter();
+    void onAddToFavorites();
 }

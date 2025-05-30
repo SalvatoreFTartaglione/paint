@@ -121,4 +121,6 @@ public interface ShapeInterface {
     double getTextScaleX();
     void setTextScaleY(double scale);
     double getTextScaleY();
+    void mirrorHorizontallyAroundCenter();
+    void mirrorVerticallyAroundCenter();
 }

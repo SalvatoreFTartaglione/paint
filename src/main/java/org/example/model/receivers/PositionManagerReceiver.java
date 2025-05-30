@@ -45,4 +45,10 @@ public class PositionManagerReceiver {
     public void mirrorRight(){
         shape.mirrorRight();
     }
+    public void mirrorHorizontal(){
+        shape.mirrorHorizontallyAroundCenter();
+    }
+    public void mirrorVertical(){
+        shape.mirrorVerticallyAroundCenter();
+    }
 }

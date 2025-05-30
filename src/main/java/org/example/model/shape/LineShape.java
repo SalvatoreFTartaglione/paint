@@ -399,5 +399,25 @@ public class LineShape implements ShapeInterface{
         return lineShape.getScaleY();
     }
 
+    @Override
+    public void mirrorHorizontallyAroundCenter() {
+        double centerY = (lineShape.getStartY() + lineShape.getEndY()) / 2;
+        double offsetStartY = lineShape.getStartY() - centerY;
+        double offsetEndY = lineShape.getEndY() - centerY;
+
+        lineShape.setStartY(centerY - offsetStartY);
+        lineShape.setEndY(centerY - offsetEndY);
+    }
+
+    @Override
+    public void mirrorVerticallyAroundCenter() {
+        double centerX = (lineShape.getStartX() + lineShape.getEndX()) / 2;
+        double offsetStartX = lineShape.getStartX() - centerX;
+        double offsetEndX = lineShape.getEndX() - centerX;
+
+        lineShape.setStartX(centerX - offsetStartX);
+        lineShape.setEndX(centerX - offsetEndX);
+    }
+
 
 }

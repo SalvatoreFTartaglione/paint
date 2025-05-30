@@ -298,6 +298,16 @@ public class TextShape implements ShapeInterface {
 
 
 
+    @Override
+    public void mirrorHorizontallyAroundCenter() {
+        textNode.setScaleX(textNode.getScaleX() * -1);
+    }
+
+    @Override
+    public void mirrorVerticallyAroundCenter() {
+        textNode.setScaleY(textNode.getScaleY() * -1);
+    }
+
 
     @Override
     public String toString() {
