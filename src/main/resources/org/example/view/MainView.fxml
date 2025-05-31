@@ -58,6 +58,7 @@
                                             <Integer fx:value="86" />
                                             <Integer fx:value="92" />
                                             <Integer fx:value="100" />
+                                            <Integer fx:value="120" />
                                         </FXCollections>
                                     </items>
                                 </ComboBox>

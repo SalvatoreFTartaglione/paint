@@ -1,5 +1,6 @@
 package org.example.model.receivers;
 
+import javafx.scene.Node;
 import org.example.model.shape.ShapeInterface;
 
 public class PositionManagerReceiver {
@@ -26,8 +27,19 @@ public class PositionManagerReceiver {
         shape.getNode().toFront();
     }
 
-    public void resize(double width, double height){
-        shape.setSize(width, height);
+    public void resize(double newSize){
+        shape.resize(newSize);
+    }
+
+    public void stretch(double newWidth, double newHeight){
+        shape.stretch(newWidth, newHeight);
+    }
+    public void resetResize(double oldWidth, double oldHeight){
+        shape.setSize(oldWidth, oldHeight);
+    }
+
+    public void resetStretch(double oldWidth, double oldHeight){
+        shape.resetStretch(oldWidth, oldHeight);
     }
 
     public void mirrorUp(){

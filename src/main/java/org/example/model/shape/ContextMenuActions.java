@@ -11,7 +11,8 @@ public interface ContextMenuActions {
     void onCut();
     void onPaste();
     void onDelete();
-    void onResize(double newWidth, double newHeight);
+    void onResize(double oldWidth, double oldHeight, double newSize);
+    void onStretch(double oldWidth, double oldHeight, double newWidth, double newHeight);
     void onMirrorUp();
     void onMirrorDown();
     void onMirrorLeft();

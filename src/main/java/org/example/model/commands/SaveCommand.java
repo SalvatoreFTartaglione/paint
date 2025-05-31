@@ -11,8 +11,9 @@ public class SaveCommand implements CommandInterface {
 
     private CanvasExporter canvasExporter;
 
-    public SaveCommand(Pane drawingPane) {
-        canvasExporter = new CanvasExporter(drawingPane);
+    public SaveCommand(CanvasExporter canvasExporter) {
+        this.canvasExporter = canvasExporter;
+
     }
 
 
@@ -39,7 +40,7 @@ public class SaveCommand implements CommandInterface {
 
     @Override
     public void undoCommand() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Feature not supported.");
     }
 
 

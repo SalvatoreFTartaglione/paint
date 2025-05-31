@@ -31,7 +31,7 @@ public class EllipseShape implements ShapeInterface {
 
     @Override
     public void draw(Double[] points) {
-        throw new UnsupportedOperationException("The following feature is not supported");
+        throw new UnsupportedOperationException("Feature not supported.");
     }
 
     @Override
@@ -190,6 +190,40 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
+    public void resize(double newSize) {
+        // Mantieni l'aspect ratio dell'ellisse
+        double currentMax = Math.max(getWidth(), getHeight());
+        if (currentMax > 0) {
+            double scale = newSize / currentMax;
+            setSize(getWidth() * scale, getHeight() * scale);
+        } else {
+            setSize(newSize, newSize);
+        }
+    }
+
+    @Override
+    public double getStretchWidth() {
+        return this.getWidth();
+    }
+
+    @Override
+    public double getStretchHeight() {
+        return this.getHeight();
+    }
+
+    @Override
+    public void stretch(double width, double height){
+        ellipseShape.setRadiusX(width);
+        ellipseShape.setRadiusY(height);
+    }
+
+    @Override
+    public void resetStretch(double width, double height) {
+        this.setSize(width, height);
+    }
+
+
+    @Override
     public double getCustomStrokeWidth() {
         return ellipseShape.getStrokeWidth();
     }
@@ -216,25 +250,13 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
-    public void scaleToSize(double newSize) {
-        // Mantieni l'aspect ratio dell'ellisse
-        double currentMax = Math.max(getWidth(), getHeight());
-        if (currentMax > 0) {
-            double scale = newSize / currentMax;
-            setSize(getWidth() * scale, getHeight() * scale);
-        } else {
-            setSize(newSize, newSize);
-        }
-    }
-
-    @Override
     public String getSliderLabel(double value) {
         return String.format("Diameter: %.1f", value);
     }
 
     @Override
     public String getText() {
-        throw new UnsupportedOperationException("Feature not supported.");
+        return null;
     }
 
     @Override

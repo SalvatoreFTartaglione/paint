@@ -1,31 +1,33 @@
 package org.example.model.commands;
 
+import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 import org.example.model.receivers.PositionManagerReceiver;
+import org.example.model.receivers.ShapeReceiver;
+import org.example.model.shape.ShapeInterface;
 
 public class ResizeCommand implements CommandInterface {
 
-    private PositionManagerReceiver positionManagerReceiver;
-    private final double newWidth;
-    private final double newHeight;
+    private PositionManagerReceiver poistionManagerReceiver;
+    private final double newSize;
     private final double oldWidth;
     private final double oldHeight;
 
 
-    public ResizeCommand(PositionManagerReceiver positionManagerReceiver, double newWidth, double newHeight, double oldWidth, double oldHeight) {
-        this.newWidth = newWidth;
-        this.newHeight = newHeight;
-        this.positionManagerReceiver = positionManagerReceiver;
+    public ResizeCommand(PositionManagerReceiver poistionManagerReceiver, double newSize, double oldWidth, double oldHeight) {
+        this.newSize = newSize;
+        this.poistionManagerReceiver = poistionManagerReceiver;
         this.oldWidth = oldWidth;
         this.oldHeight = oldHeight;
     }
 
     @Override
     public void executeCommand() {
-        positionManagerReceiver.resize(newWidth, newHeight);
+        poistionManagerReceiver.resize(newSize);
     }
 
     @Override
     public void undoCommand() {
-        positionManagerReceiver.resize(this.oldWidth, this.oldHeight);
+        poistionManagerReceiver.resetResize(this.oldWidth, this.oldHeight);
     }
 }

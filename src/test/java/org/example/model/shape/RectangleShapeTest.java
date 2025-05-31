@@ -71,7 +71,7 @@ public class RectangleShapeTest {
     @Test
     public void testScaleToSize() {
         double originalMax = Math.max(rectangle.getWidth(), rectangle.getHeight());
-        rectangle.scaleToSize(200);
+        rectangle.resize(200);
         double newMax = Math.max(rectangle.getWidth(), rectangle.getHeight());
         assertEquals(200, newMax, 0.5);
     }

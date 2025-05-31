@@ -27,39 +27,42 @@ public interface ShapeInterface {
     boolean canHaveFill();
 
     Color getStrokeColor();
-
     void setCustomStrokeWidth(double strokeWidth);
-
     double getCustomStrokeWidth();
-
     void setFillColor(Color fill);
-
     Color getFillColor();
 
-    // Height and Width
+    // Resize and stretch
     double getWidth();
 
     double getHeight();
-
+    void resize(double newSize);
     void setSize(double width, double height);
+    double getStretchWidth();
+    double getStretchHeight();
+    void stretch(double width, double height);
+    void resetStretch(double width, double height);
+    double getEffectiveSize();
+    default double getMaxSliderSize() {
+        return 350;
+    }
+    default double getMinSliderSize() {
+        return Math.max(1, getEffectiveSize() * 0.1);
+    }
+    default String getSliderLabel(double value) {
+        return String.format("%.1f", value);
+    }
 
     // Drawing points for the shape
     double getX();
-
     double getY();
-
     void setX(double X);
-
     void setY(double Y);
-
     Double[] getPoints();
-
-    // Draws the shape
     void draw(double X, double Y);
-
     void draw(Double[] points);
 
-    // Simplified serialization
+    // Serialization
     String toString();
 
     // Get access to the Node of the Shape
@@ -67,48 +70,6 @@ public interface ShapeInterface {
 
     // Dragging support
     void moveBy(double deltaX, double deltaY);
-
-    /**
-     * Calcola la dimensione effettiva per il ridimensionamento visuale
-     *
-     * @return la dimensione corrente da usare come base per lo slider
-     */
-    double getEffectiveSize();
-
-    /**
-     * Calcola la dimensione massima ragionevole per lo slider
-     *
-     * @return la dimensione massima per il range dello slider
-     */
-    default double getMaxSliderSize() {
-        return getEffectiveSize() * 3;
-    }
-
-    /**
-     * Calcola la dimensione minima ragionevole per lo slider
-     *
-     * @return la dimensione minima per il range dello slider
-     */
-    default double getMinSliderSize() {
-        return Math.max(1, getEffectiveSize() * 0.1);
-    }
-
-    /**
-     * Ridimensiona la shape basandosi su un valore di scala
-     *
-     * @param scale il fattore di scala da applicare
-     */
-    void scaleToSize(double scale);
-
-    /**
-     * Restituisce l'etichetta da mostrare nello slider
-     *
-     * @param value il valore corrente dello slider
-     * @return la stringa da mostrare come label
-     */
-    default String getSliderLabel(double value) {
-        return String.format("%.1f", value);
-    }
 
     default Point2D getRestorePosition() {
         return new Point2D(getX(), getY());

@@ -26,7 +26,7 @@ public class RectangleShape implements ShapeInterface {
 
     @Override
     public void draw(Double[] points) {
-        throw new UnsupportedOperationException("The following feature is not supported");
+        throw new UnsupportedOperationException("Feature not supported.");
     }
 
     @Override
@@ -201,6 +201,28 @@ public class RectangleShape implements ShapeInterface {
     }
 
     @Override
+    public double getStretchWidth() {
+        return this.getWidth();
+    }
+
+    @Override
+    public double getStretchHeight() {
+        return this.getHeight();
+    }
+
+    @Override
+    public void stretch(double width, double height){
+        rectangleShape.setWidth(width);
+        rectangleShape.setHeight(height);
+    }
+
+    @Override
+    public void resetStretch(double width, double height) {
+        this.setSize(width, height);
+    }
+
+
+    @Override
     public double getCustomStrokeWidth() {
         return rectangleShape.getStrokeWidth();
     }
@@ -227,7 +249,7 @@ public class RectangleShape implements ShapeInterface {
     }
 
     @Override
-    public void scaleToSize(double newSize) {
+    public void resize(double newSize) {
         // Per i rettangoli, mantieni l'aspect ratio
         double currentMax = Math.max(getWidth(), getHeight());
         if (currentMax > 0) {
@@ -248,7 +270,7 @@ public class RectangleShape implements ShapeInterface {
 
     @Override
     public String getText() {
-        throw new UnsupportedOperationException("Feature not supported.");
+        return null;
     }
 
     @Override

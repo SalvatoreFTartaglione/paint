@@ -8,7 +8,7 @@ import javafx.scene.text.Text;
 
 public class TextShape implements ShapeInterface {
 
-    private final Text textNode;
+    private final Text textShape;
     private Double[] points = new Double[2]; // X, Y
     private double baseWidth;
     private double baseHeight;
@@ -16,14 +16,14 @@ public class TextShape implements ShapeInterface {
     private boolean isFlippedY = false;
 
     public TextShape(String content, Color strokeColor, Color fillingColor, double width, double height, double strokeWidth, double scaleX, double scaleY) {
-        textNode = new Text(content);
-        textNode.setStroke(strokeColor);
-        textNode.setFill(fillingColor);
-        textNode.setX(width);
-        textNode.setY(height);
-        textNode.setFont(Font.font(strokeWidth));
-        baseWidth = textNode.getLayoutBounds().getWidth();
-        baseHeight = textNode.getLayoutBounds().getHeight();
+        textShape = new Text(content);
+        textShape.setStroke(strokeColor);
+        textShape.setFill(fillingColor);
+        textShape.setX(width);
+        textShape.setY(height);
+        textShape.setFont(Font.font(strokeWidth));
+        baseWidth = textShape.getLayoutBounds().getWidth();
+        baseHeight = textShape.getLayoutBounds().getHeight();
         setTextScaleX(scaleX);
         setTextScaleY(scaleY);
     }
@@ -35,8 +35,8 @@ public class TextShape implements ShapeInterface {
 
     @Override
     public void draw(double X, double Y) {
-        textNode.setX(X);
-        textNode.setY(Y);
+         textShape.setX(X);
+         textShape.setY(Y);
         points[0] = X;
         points[1] = Y;
     }
@@ -63,81 +63,93 @@ public class TextShape implements ShapeInterface {
 
     @Override
     public Color getStrokeColor() {
-        return (Color) textNode.getStroke();
+        return (Color)  textShape.getStroke();
     }
 
     @Override
     public void setStrokeColor(Color stroke) {
-        textNode.setStroke(stroke);
+         textShape.setStroke(stroke);
     }
 
     @Override
     public Color getFillColor() {
-        return (Color) textNode.getFill();
+        return (Color)  textShape.getFill();
     }
 
     @Override
     public void setFillColor(Color fill) {
-        textNode.setFill(fill);
+         textShape.setFill(fill);
     }
 
     @Override
     public double getWidth() {
-        return textNode.getLayoutBounds().getWidth();
+        return  this.getCustomStrokeWidth();
     }
 
     @Override
     public double getHeight() {
-        return textNode.getLayoutBounds().getHeight();
+        return  this.getCustomStrokeWidth();
     }
 
     @Override
     public void setSize(double width, double height) {
-        // Sicurezza: evita divisione per 0
-        if (baseWidth == 0 || baseHeight == 0) {
-            baseWidth = textNode.getLayoutBounds().getWidth();
-            baseHeight = textNode.getLayoutBounds().getHeight();
-            if (baseWidth == 0 || baseHeight == 0) return; // ancora non pronto
-        }
+        this.setCustomStrokeWidth(Math.max(width, height));
+    }
 
-        double scaleX = width / baseWidth;
-        double scaleY = height / baseHeight;
+    @Override
+    public void resize(double newSize) {
+        this.setCustomStrokeWidth(newSize);
+    }
 
-        // Usa scala uniforme per evitare schiacciamenti
-        double uniformScale = Math.min(scaleX, scaleY);
+    @Override
+    public double getStretchWidth() {
+        return  textShape.getScaleX();
+    }
 
-        textNode.setScaleX(uniformScale);
-        textNode.setScaleY(uniformScale);
+    @Override
+    public double getStretchHeight() {
+        return  textShape.getScaleY();
+    }
+
+    @Override
+    public void resetStretch(double width, double height) {
+        textShape.setScaleX(width);
+        textShape.setScaleY(height);
+    }
+
+    @Override
+    public void stretch(double width, double height) {
+        textShape.setScaleX(width);
+        textShape.setScaleY(height);
     }
 
 
     @Override
     public double getX() {
-        return textNode.getX();
+        return  textShape.getX();
     }
 
     @Override
     public void setX(double x) {
-        textNode.setX(x);
+         textShape.setX(x);
         points[0] = x;
     }
 
     @Override
     public double getY() {
-        return isFlippedY ? textNode.getY() - baseHeight : textNode.getY();
+        return isFlippedY ? textShape.getY() - baseHeight : textShape.getY();
     }
 
     @Override
     public void setY(double y) {
         // Se ribaltato verticalmente, compensa perché Y è baseline
         if (isFlippedY) {
-            textNode.setY(y + baseHeight);
+            textShape.setY(y + baseHeight);
         } else {
-            textNode.setY(y);
+            textShape.setY(y);
         }
         points[1] = y;
     }
-
 
     @Override
     public Double[] getPoints() {
@@ -146,17 +158,17 @@ public class TextShape implements ShapeInterface {
 
     @Override
     public double getCustomStrokeWidth() {
-        return textNode.getFont().getSize();
+        return  textShape.getFont().getSize();
     }
 
     @Override
     public void setCustomStrokeWidth(double strokeWidth) {
-        textNode.setFont(Font.font(strokeWidth));
+         textShape.setFont(Font.font(strokeWidth));
     }
 
     @Override
     public Node getNode() {
-        return textNode;
+        return  textShape;
     }
 
     @Override
@@ -165,18 +177,13 @@ public class TextShape implements ShapeInterface {
     }
 
     @Override
-    public void scaleToSize(double scale) {
-        textNode.setFont(Font.font(scale));
-    }
-
-    @Override
     public double getMaxSliderSize() {
-        return Math.max(120, getEffectiveSize() * 0.7);
+        return 120;
     }
 
     @Override
     public double getMinSliderSize() {
-        return Math.max(20, getEffectiveSize() * 0.1);
+        return 38;
     }
 
     @Override
@@ -186,12 +193,12 @@ public class TextShape implements ShapeInterface {
 
     @Override
     public String getText() {
-        return textNode.getText() == null ? "" : textNode.getText();
+        return  textShape.getText() == null ? "" :  textShape.getText();
     }
 
     @Override
     public void setText(String content) {
-        textNode.setText(content);
+         textShape.setText(content);
     }
 
     @Override
@@ -224,76 +231,76 @@ public class TextShape implements ShapeInterface {
 
     @Override
     public void mirrorUp() {
-        textNode.setScaleY(-textNode.getScaleY());
+        textShape.setScaleY(-textShape.getScaleY());
         isFlippedY = !isFlippedY;
 
         // Aggiorna anche l'array points per mantenere la coerenza
         if (points[1] != null) {
-            points[1] = textNode.getY();
+            points[1] = textShape.getY();
         }
     }
 
     @Override
     public void mirrorDown() {
-        textNode.setScaleY(-textNode.getScaleY());
+        textShape.setScaleY(-textShape.getScaleY());
         isFlippedY = !isFlippedY;
 
         if (points[1] != null) {
-            points[1] = textNode.getY();
+            points[1] = textShape.getY();
         }
     }
 
     @Override
     public void mirrorLeft() {
-        textNode.setScaleX(-textNode.getScaleX());
+        textShape.setScaleX(-textShape.getScaleX());
         isFlippedX = !isFlippedX;
 
         if (points[0] != null) {
-            points[0] = textNode.getX();
+            points[0] = textShape.getX();
         }
     }
 
     @Override
     public void mirrorRight() {
-        textNode.setScaleX(-textNode.getScaleX());
+        textShape.setScaleX(-textShape.getScaleX());
         isFlippedX = !isFlippedX;
 
         if (points[0] != null) {
-            points[0] = textNode.getX();
+            points[0] = textShape.getX();
         }
     }
 
     @Override
     public void setTextScaleX(double scale) {
-        textNode.setScaleX(scale);
+        textShape.setScaleX(scale);
     }
 
     @Override
     public double getTextScaleX() {
-        return textNode.getScaleX();
+        return textShape.getScaleX();
     }
 
     @Override
     public void setTextScaleY(double scale) {
-        textNode.setScaleY(scale);
+        textShape.setScaleY(scale);
     }
 
     @Override
     public double getTextScaleY() {
-        return textNode.getScaleY();
+        return textShape.getScaleY();
     }
 
     public double getRawX() {
-        return textNode.getX(); // senza compensazioni
+        return textShape.getX(); // senza compensazioni
     }
 
     public double getRawY() {
-        return textNode.getY(); // senza compensazioni
+        return textShape.getY(); // senza compensazioni
     }
 
     @Override
     public Point2D getRestorePosition() {
-        return new Point2D(textNode.getX(), textNode.getY()); // Posizione effettiva
+        return new Point2D(textShape.getX(), textShape.getY()); // Posizione effettiva
     }
 
     @Override
@@ -305,22 +312,20 @@ public class TextShape implements ShapeInterface {
 
     @Override
     public void mirrorHorizontallyAroundCenter() {
-        textNode.setScaleX(textNode.getScaleX() * -1);
+        textShape.setScaleX(textShape.getScaleX() * -1);
     }
 
     @Override
     public void mirrorVerticallyAroundCenter() {
-        textNode.setScaleY(textNode.getScaleY() * -1);
+        textShape.setScaleY(textShape.getScaleY() * -1);
     }
 
 
     @Override
     public String toString() {
-        return "Text;" + textNode.getText() + ";" + textNode.getStroke() + ";" + textNode.getFill() + ";" +
-                textNode.getX() + ";" + textNode.getY() + ";" + getCustomStrokeWidth() + ";" + getTextScaleX() + ";" + getTextScaleY() + "\n";
+        return "Text;" + textShape.getText() + ";" + textShape.getStroke() + ";" + textShape.getFill() + ";" +
+                textShape.getX() + ";" + textShape.getY() + ";" + getCustomStrokeWidth() + ";" + getTextScaleX() + ";" + getTextScaleY() + "\n";
     }
-
-
 
 
 }

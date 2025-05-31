@@ -136,7 +136,7 @@ public class CompositeShape implements CompositeShapeInterface {
         double sy = currentH > 0 ? height / currentH : 1;
         double scale = Math.min(sx, sy);
         for (ShapeInterface s : children) {
-            s.scaleToSize(s.getEffectiveSize() * scale);
+            s.resize(s.getEffectiveSize() * scale);
         }
     }
 
@@ -173,7 +173,7 @@ public class CompositeShape implements CompositeShapeInterface {
 
     @Override
     public void draw(Double[] points) {
-        // non necessario per il composite
+        throw new UnsupportedOperationException("Feature not supported.");
     }
 
     @Override
@@ -194,20 +194,20 @@ public class CompositeShape implements CompositeShapeInterface {
     }
 
     @Override
-    public void scaleToSize(double scale) {
+    public void resize(double scale) {
         for (ShapeInterface s : children) {
-            s.scaleToSize(scale);
+            s.resize(scale);
         }
     }
 
     @Override
     public String getText() {
-        throw new UnsupportedOperationException("CompositeShape non gestisce testo");
+        throw new UnsupportedOperationException("Feature not supported.");
     }
 
     @Override
     public void setText(String content) {
-        throw new UnsupportedOperationException("CompositeShape non gestisce testo");
+        throw new UnsupportedOperationException("Feature not supported.");
     }
 
     //QUIII
@@ -343,6 +343,7 @@ public class CompositeShape implements CompositeShapeInterface {
         // 3) trasla di 2*centerY (per mantenere il centro al suo posto)
         groupNode.setTranslateY(groupNode.getTranslateY() + 2 * centerY);
     }
+
  ///fino a qui
     @Override
     public String toString() {
@@ -351,6 +352,26 @@ public class CompositeShape implements CompositeShapeInterface {
             sb.append("  ").append(s).append("\n");
         }
         return sb.toString();
+    }
+
+    @Override
+    public double getStretchWidth() {
+        throw new UnsupportedOperationException("Feature not supported.");
+    }
+
+    @Override
+    public double getStretchHeight() {
+        throw new UnsupportedOperationException("Feature not supported.");
+    }
+
+    @Override
+    public void stretch(double width, double height) {
+        throw new UnsupportedOperationException("Feature not supported.");
+    }
+
+    @Override
+    public void resetStretch(double width, double height) {
+        throw new UnsupportedOperationException("Feature not supported.");
     }
 
 }

@@ -75,7 +75,7 @@ public class EllipseShapeTest {
     @Test
     public void testScaleToSize() {
         double oldMax = Math.max(ellipse.getWidth(), ellipse.getHeight());
-        ellipse.scaleToSize(100);
+        ellipse.resize(100);
         double newMax = Math.max(ellipse.getWidth(), ellipse.getHeight());
         assertEquals(100, newMax, 0.1);
     }

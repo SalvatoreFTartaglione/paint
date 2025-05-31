@@ -12,8 +12,8 @@ public class LoadCommand implements CommandInterface {
     private CanvasImporter canvasImporter;
 
 
-    public LoadCommand(Pane pane) {
-        this.canvasImporter = new CanvasImporter(pane);
+    public LoadCommand(CanvasImporter canvasImporter) {
+        this.canvasImporter =  canvasImporter;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class LoadCommand implements CommandInterface {
 
     @Override
     public void undoCommand() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Feature not supported.");
     }
 
 

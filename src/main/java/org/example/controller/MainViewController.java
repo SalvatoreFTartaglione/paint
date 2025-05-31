@@ -126,6 +126,8 @@ public class MainViewController implements Initializable {
     private ChangesOnShapeReceiver changesOnShapeReceiver = new ChangesOnShapeReceiver();
     private DraggingReceiver draggingReceiver = new DraggingReceiver() {};
     private PositionManagerReceiver positionManagerReceiver;
+    private CanvasImporter canvasImporter;
+    private CanvasExporter canvasExporter;
     // State flag to understand if user is dragging and avoid accidentally adding new shapes to the canvas
     private boolean isDragging0 = false;
     private boolean hasDragged = false;
@@ -439,12 +441,17 @@ public class MainViewController implements Initializable {
             }
 
             @Override
-            public void onResize(double newWidth, double newHeight) {
-                /*positionManagerReceiver = new PositionManagerReceiver(shape);
-                CommandInterface cmd = new ResizeCommand(positionManagerReceiver, newWidth, newHeight, oldWidth, oldHeight);
-                invoker.executeCommand(cmd);*/
+            public void onResize(double oldWidth, double oldHeight, double newSize) {
+                positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new ResizeCommand(positionManagerReceiver, newSize, oldWidth, oldHeight);
+                invoker.executeCommand(cmd);
             }
 
+            public void onStretch(double oldWidth, double oldHeight, double newWidth, double newHeight) {
+                positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new StretchCommand(positionManagerReceiver, newWidth, newHeight, oldWidth, oldHeight);
+                invoker.executeCommand(cmd);
+            }
             @Override
             public void onMirrorUp() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
@@ -505,7 +512,6 @@ public class MainViewController implements Initializable {
                 invoker.executeCommand(cmd);
             }
 
-
             @Override
             public void onPaste() {
                 contextDTO.setSceneX(event.getSceneX());
@@ -532,75 +538,7 @@ public class MainViewController implements Initializable {
         ContextMenuManager.MenuComponents menuComponents = ContextMenuManager.createContextMenu(shape, actions);
         contextMenu = menuComponents.contextMenu;
 
-        // 3) Se siamo in multi-selezione e sto cliccando su una shape selezionata,
-        //    aggiungi “Group” invece delle restanti opzioni
-        if (currentSelection.size() >= 2 && currentSelection.contains(shape)) {
-            MenuItem groupItem = new MenuItem("Group");
-            groupItem.setOnAction(e -> {
-                // Costruisci e esegui il GroupCommand come fai di consueto
-                List<ShapeInterface> toGroup = new ArrayList<>(currentSelection);
-                GroupCommand cmd = new GroupCommand(grpReceiver, toGroup);
-                invoker.executeCommand(cmd);
-                CompositeShapeInterface composite = cmd.getCreatedGroup();
-                // pick-on-bounds + figli mouse-transparent
-                Node groupNode = composite.getNode();
-                groupNode.setPickOnBounds(true);
-                for (ShapeInterface s : composite.getChildren()) {
-                    s.getNode().setMouseTransparent(true);
-                }
-                attachEventHandlersToShape(groupNode);
-                makeDraggable(composite);
-                clearSelection();
-            });
-            ContextMenu onlyGroup = new ContextMenu(groupItem);
-            onlyGroup.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
-            return;
-        }
-
-        if(shape.isGroup()){
-            MenuItem ungroupItem = new MenuItem("UnGroup");
-            ungroupItem.setOnAction(e -> {
-                CompositeShapeInterface groupShape = (CompositeShapeInterface) shape;
-                UngroupCommand cmd = new UngroupCommand(grpReceiver, groupShape);
-                invoker.executeCommand(cmd);
-
-                // 2) Ottengo le shape scomposte
-                List<ShapeInterface> ungroupedChildren = cmd.getChildren();
-                // 3) Ottengo le posizioni salvate, che sono in coordinate di scena
-                Map<ShapeInterface, Point2D> savedScene = cmd.getOriginalScenePositions();
-
-                // 4) PER OGNI CHILD:
-                //    a) Converto savedScene.get(child) (sceneX, sceneY) in localX, localY del drawingPane
-                //    b) Imposto childNode.setLayoutX(localX) e setLayoutY(localY)
-                //    c) Ripristino interattività (mouseTransparent, pickOnBounds, handlers, drag)
-
-                for (ShapeInterface child : ungroupedChildren) {
-                    Node childNode = child.getNode();
-
-                    // a) prendo la Point2D in sceneCoordinate salvata
-                    Point2D scenePt = savedScene.get(child);
-                    if (scenePt != null) {
-                        // converto in coordinate local del drawingPane
-                        // ATTENZIONE: uso drawingPane.sceneToLocal(...) per ottenere localX/localY
-                        Point2D localOnPane = drawingPane.sceneToLocal(scenePt);
-
-                        // b) imposto esplicitamente layoutX, layoutY
-                        childNode.setLayoutX(localOnPane.getX());
-                        childNode.setLayoutY(localOnPane.getY());
-                    }
-
-                    // c1) ripristino mouseTransparent / pickOnBounds
-                    childNode.setMouseTransparent(false);
-                    childNode.setPickOnBounds(true);
-
-                    // c2) riattacco listener e drag
-                    attachEventHandlersToShape(childNode);
-                    makeDraggable(child);
-                }
-            });
-            contextMenu.getItems().add(ungroupItem);
-        }
-        //contextMenu.getItems().removeAll()
+        // Show context menu
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
     }
 
@@ -762,6 +700,7 @@ public class MainViewController implements Initializable {
             double deltaX = event.getSceneX() - dragStart[0].getX();
             double deltaY = event.getSceneY() - dragStart[0].getY();
 
+            // Dati del pane per il controllo dei limiti
             double zoom = drawingPane.getScaleX();
             double paneWidth = drawingPane.getPrefWidth() * zoom;
             double paneHeight = drawingPane.getPrefHeight() * zoom;
@@ -908,7 +847,8 @@ public class MainViewController implements Initializable {
      */
     @FXML
     private void saveFile(ActionEvent event) {
-        SaveCommand saveCommandFile = new SaveCommand(drawingPane);
+        canvasExporter = new CanvasExporter(drawingPane);
+        SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
         invoker.executeSaveCommand(saveCommandFile);
     }
 
@@ -919,9 +859,10 @@ public class MainViewController implements Initializable {
      */
     @FXML
     private void loadFile(ActionEvent event) {
+        canvasImporter = new CanvasImporter(drawingPane);
         // Check if canvas is empty
         if ( ! drawingPane.getChildren().isEmpty() ) {
-            loadManager(drawingPane);
+            loadManager(canvasImporter);
             // Assign event handlers to all loaded shapes
             attachEventHandlersToAllShapes();
         }
@@ -929,7 +870,7 @@ public class MainViewController implements Initializable {
             // Clear workspace from older shapes
             drawingPane.getChildren().clear();
             // Execute load
-            LoadCommand load = new LoadCommand(drawingPane);
+            LoadCommand load = new LoadCommand(canvasImporter);
             invoker.executeLoadCommand(load);
             // Assign event handlers to all loaded shapes and make nodes draggable
             attachEventHandlersToAllShapes();
@@ -973,7 +914,7 @@ public class MainViewController implements Initializable {
     }
 
 
-    private void loadManager(Pane drawingPane){
+    private void loadManager(CanvasImporter canvasImporter) {
         // Confirmation alert
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("SaveCommand Workspace");
@@ -987,19 +928,19 @@ public class MainViewController implements Initializable {
         if (result.isPresent()) {
             if (result.get().getText().equals("Yes")) {
                 // Saving file
-                SaveCommand saveCommandFile = new SaveCommand(drawingPane);
+                SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
                 invoker.executeSaveCommand(saveCommandFile);
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // After saving execute load
-                LoadCommand load = new LoadCommand(drawingPane);
+                LoadCommand load = new LoadCommand(canvasImporter);
                 invoker.executeLoadCommand(load);
 
             } else if (result.get().getText().equals("No")) {
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // Execute load
-                LoadCommand load = new LoadCommand(drawingPane);
+                LoadCommand load = new LoadCommand(canvasImporter);
                 invoker.executeLoadCommand(load);
             }
         }
@@ -1007,10 +948,10 @@ public class MainViewController implements Initializable {
 
 
     /**
-             * Handles the Undo button action to undo the last executed command.
-             *
-             * @param actionEvent the action event triggered by the undo button
-             */
+     * Handles the Undo button action to undo the last executed command.
+     *
+     * @param actionEvent the action event triggered by the undo button
+     */
     @FXML
     public void undoClicked(ActionEvent actionEvent) {
         invoker.undo();

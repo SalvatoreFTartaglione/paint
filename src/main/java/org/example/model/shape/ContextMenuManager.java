@@ -2,6 +2,7 @@ package org.example.model.shape;
 
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 public class ContextMenuManager {
@@ -31,14 +32,14 @@ public class ContextMenuManager {
         ColorPicker strokePicker = new ColorPicker(shape.getStrokeColor());
 
         // Resize mode buttons
-        MenuItem numeric = new MenuItem("Resize Numerically");
-        MenuItem visual  = new MenuItem("Resize Visually");
+        MenuItem stretch = new MenuItem("Stretch");
+        MenuItem resize  = new MenuItem("Resize");
 
         // Resize panels (initially hidden)
-        CustomMenuItem numericPanel = createResizeNumericItem(shape, actions::onResize);
-        CustomMenuItem visualPanel  = createResizeVisualItem(shape, actions::onResize);
-        numericPanel.setVisible(false);
-        visualPanel.setVisible(false);
+        CustomMenuItem stretchPanel = createStretchItem(shape, actions::onStretch);
+        CustomMenuItem resizePanel  = createResizeItem(shape, actions::onResize);
+        stretchPanel.setVisible(false);
+        resizePanel.setVisible(false);
 
         // Fill Color (for line must be null)
         fillPicker = createColorPickerItem(
@@ -75,60 +76,22 @@ public class ContextMenuManager {
         MenuItem deleteItem = new MenuItem("Delete");
         deleteItem.setOnAction(e -> actions.onDelete());
 
-                    // Toggle visibility of respective panels
-        Label numericLabel = new Label("Numerical Resize");
-        CustomMenuItem numericBtn = new CustomMenuItem(numericLabel);
-        numericBtn.setHideOnClick(false);
-        numericBtn.setOnAction(e -> {
-            numericPanel.setVisible(true);
-            visualPanel.setVisible(false);
-        });
-
-        Label visualLabel = new Label("Visual Resize");
+        // Resize shape
+        Label visualLabel = new Label("Resize");
         CustomMenuItem visualBtn = new CustomMenuItem(visualLabel);
         visualBtn.setHideOnClick(false);
         visualBtn.setOnAction(e -> {
-            numericPanel.setVisible(false);
-            visualPanel.setVisible(true);
+            resizePanel.setVisible(true);
         });
 
-//        // Vertical mirroring up
-//        Label verticalMirroringUpLabel = new Label("Vertical Mirroring Up");
-//        CustomMenuItem verticalMirroringUp = new CustomMenuItem(verticalMirroringUpLabel);
-//        verticalMirroringUp.setHideOnClick(false);
-//        verticalMirroringUp.setOnAction(e -> {actions.onMirrorUp();});
-//
-//        // Vertical mirroring down
-//        Label verticalMirroringLabel = new Label("Vertical Mirroring Down");
-//        CustomMenuItem verticalMirroringDown = new CustomMenuItem(verticalMirroringLabel);
-//        verticalMirroringDown.setHideOnClick(false);
-//        verticalMirroringDown.setOnAction(e -> {actions.onMirrorDown();});
-//
-//        // Horizontal mirroring left
-//        Label horizontalMirroringLeftLabel = new Label("Horizontal Mirroring Left");
-//        CustomMenuItem horizontalMirroringLeft = new CustomMenuItem(horizontalMirroringLeftLabel);
-//        horizontalMirroringLeft.setHideOnClick(false);
-//        horizontalMirroringLeft.setOnAction(e -> {actions.onMirrorLeft();});
-//
-//        // Horizontal mirroring right
-//        Label horizontalMirroringRightLabel = new Label("Horizontal Mirroring Right");
-//        CustomMenuItem horizontalMirroringRight = new CustomMenuItem(horizontalMirroringRightLabel);
-//        horizontalMirroringRight.setHideOnClick(false);
-//        horizontalMirroringRight.setOnAction(e -> {actions.onMirrorRight();});
-//
-//        // Horizontal mirroring around center
-//        Label horizontalMirroringAroundCenterLabel = new Label("Horizontal Mirroring Around Center");
-//        CustomMenuItem horizontalMirroringAroundCenter = new CustomMenuItem(horizontalMirroringAroundCenterLabel);
-//        horizontalMirroringAroundCenter.setHideOnClick(false);
-//        horizontalMirroringAroundCenter.setOnAction(e -> {actions.onMirrorHorizontalAroundCenter();});
-//
-//        // Vertical mirroring around center
-//        Label verticalMirroringAroundCenterLabel = new Label("Vertical Mirroring Around Center");
-//        CustomMenuItem verticalMirroringAroundCenter = new CustomMenuItem(verticalMirroringAroundCenterLabel);
-//        verticalMirroringAroundCenter.setHideOnClick(false);
-//        verticalMirroringAroundCenter.setOnAction(e -> {actions.onMirrorVerticalAroundCenter();});
-
-        Menu mirroringMenu = new Menu("Flip");
+        // stretch shape
+        Label numericLabel = new Label("Stretch");
+        CustomMenuItem numericBtn = new CustomMenuItem(numericLabel);
+        numericBtn.setHideOnClick(false);
+        numericBtn.setOnAction(e -> {
+            stretchPanel.setVisible(true);
+        });
+Menu mirroringMenu = new Menu("Flip");
 
         // Voci del sottomenù
         MenuItem verticalUp = new MenuItem("Vertical Up");
@@ -167,8 +130,8 @@ public class ContextMenuManager {
         addToFavorites.setOnAction(e -> {actions.onAddToFavorites();});
 
         // Add items
-        //contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu);
+        contextMenu.getItems().addAll(numericBtn, visualBtn, resizePanel, stretchPanel);
+        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }
@@ -186,75 +149,88 @@ public class ContextMenuManager {
         return colorPicker;
     }
 
-    @FunctionalInterface
-    private interface ColorChangeHandler {
-        void onColorChanged(Color color);
-    }
+    private static CustomMenuItem createStretchItem(ShapeInterface shape, StretchHandler stretchHandler) {
 
-    @FunctionalInterface
-    public interface ResizeHandler {
-        void onResize(double newWidth, double newHeight);
-    }
+        // Check if it's a text or a line
+        boolean isTextShape = shape.getText() != null;
+        boolean isLineShape = shape.getFillColor() == null;
 
-    private static CustomMenuItem createResizeNumericItem(ShapeInterface shape, ResizeHandler resizeHandler) {
-        TextField w = new TextField(String.format("%.1f", shape.getWidth()));
-        TextField h = new TextField(String.format("%.1f", shape.getHeight()));
+        // get old shape dimensions (WxH) do display in the textfield
+        TextField w = (isTextShape || isLineShape) ? new TextField("") : new TextField(String.format("%.1f",shape.getWidth()));
+        TextField h = (isTextShape || isLineShape) ? new TextField("") : new TextField(String.format("%.1f", shape.getHeight()));
         w.setPrefWidth(60); h.setPrefWidth(60);
 
         Button applyBtn = new Button("Apply");
         applyBtn.setPrefWidth(60);
 
-        HBox box = new HBox(10, new Label("W:"), w, new Label("H:"), h, applyBtn);
-        CustomMenuItem item = new CustomMenuItem(box);
+        // invalid input warning
+        Label warningLabel = new Label();
+        warningLabel.setStyle("-fx-text-fill: red;");
+
+        HBox inputsBox = new HBox(10, new Label("W:"), w, new Label("H:"), h, applyBtn);
+        VBox wrapper = new VBox(5, inputsBox, warningLabel);
+        CustomMenuItem item = new CustomMenuItem(wrapper);
         item.setHideOnClick(false);
 
         Runnable apply = () -> {
             try {
-                double nw = Double.parseDouble(w.getText());
-                double nh = Double.parseDouble(h.getText());
+                // get newWidth and newHeight value from the textfield
+                double newWidth = Double.parseDouble(w.getText());
+                double newHeight = Double.parseDouble(h.getText());
 
-                // Validation: checks for element > 300
-                boolean widthValid = nw > 0 && nw < 300;
-                boolean heightValid = nh > 0 && nh < 300;
 
+
+                double maxLimit = isTextShape ? 10.0 : 300.0;
+
+                // Validation: checks for element
+                boolean widthValid = newWidth > 0 && newWidth <= maxLimit;
+                boolean heightValid = newHeight > 0 && newHeight <= maxLimit;
+
+                // if newWidth and newHeight are too big
                 if (widthValid && heightValid) {
+                    Double oldWidth = shape.getStretchWidth();
+                    Double oldHeight = shape.getStretchHeight();
                     // Reset border for bad input
                     w.setStyle("");
                     h.setStyle("");
-                    resizeHandler.onResize(nw, nh);
+                    // Clear warning
+                    warningLabel.setText("");
+                    stretchHandler.onStretch(oldWidth, oldHeight, newWidth, newHeight);
                 } else {
-                    // Higlight field with bad values
+                    // Highlights only invalid fields
                     if (!widthValid) {
                         w.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
                     } else {
                         w.setStyle("");
                     }
-
                     if (!heightValid) {
                         h.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
                     } else {
                         h.setStyle("");
                     }
+                    // Shows warning
+                    if (isTextShape) {
+                        warningLabel.setText("Max stretch value must be positive and can't be over 10x10");
+                    } else {
+                        warningLabel.setText("Max stretch value must be positive and can't be over 300x300");
+                    }
                 }
-
             } catch (NumberFormatException e) {
-                // Red border
                 w.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
                 h.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
+                warningLabel.setText("Invalid number format.");
             }
         };
-
-        // Applica quando viene premuto il pulsante
+        // Apply changes when button gets pressed
         applyBtn.setOnAction(e -> apply.run());
-
-        // Gestisci l'evento Enter sui text field
+        // Handle enter event on textfields
         w.setOnAction(e -> apply.run());
         h.setOnAction(e -> apply.run());
 
         return item;
     }
 
-    private static CustomMenuItem createResizeVisualItem(ShapeInterface shape, ResizeHandler resizeHandler) {
+    private static CustomMenuItem createResizeItem(ShapeInterface shape, ResizeHandler resizeHandler) {
         double currentSize = shape.getEffectiveSize();
         double minSize = shape.getMinSliderSize();
         double maxSize = shape.getMaxSliderSize();
@@ -276,14 +252,31 @@ public class ContextMenuManager {
 
         // Apply changes only when Apply button is clicked
         applyBtn.setOnAction(e -> {
-            double finalSize = slider.getValue();
-            shape.scaleToSize(finalSize);
-            resizeHandler.onResize(shape.getWidth(), shape.getHeight());
+            //get previous shape dimensions (WxH)
+            double oldWidth = shape.getWidth();
+            double oldHeight = shape.getHeight();
+            double newSize = slider.getValue();
+            resizeHandler.onResize(oldWidth, oldHeight, newSize);
         });
 
         HBox box = new HBox(10, slider, valLabel, applyBtn);
         CustomMenuItem item = new CustomMenuItem(box);
         item.setHideOnClick(false);
         return item;
+    }
+
+    @FunctionalInterface
+    private interface ColorChangeHandler {
+        void onColorChanged(Color color);
+    }
+
+    @FunctionalInterface
+    public interface StretchHandler {
+        void onStretch(double oldWidth, double oldHeight, double newWidth, double newHeight);
+    }
+
+    @FunctionalInterface
+    public interface ResizeHandler {
+        void onResize(double oldWidth, double oldHeight, double newSize);
     }
 }

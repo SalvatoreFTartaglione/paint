@@ -25,12 +25,10 @@ public class LineShape implements ShapeInterface{
         lineShape.setStartY(this.points[1]);
         lineShape.setEndX(this.points[2]);
         lineShape.setEndY(this.points[3]);
-
         this.points[0] = X;
         this.points[1] = Y;
         this.points[2] = X + (lineShape.getEndX() - lineShape.getStartX());
         this.points[3] = Y + (lineShape.getEndY() - lineShape.getStartY());
-
         lineShape.setStartX(this.points[0]);
         lineShape.setStartY(this.points[1]);
         lineShape.setEndX(this.points[2]);
@@ -99,7 +97,7 @@ public class LineShape implements ShapeInterface{
 
     @Override
     public void setCustomStrokeWidth(double strokeWidth) {
-        throw new UnsupportedOperationException("Unsupported operation.");
+        lineShape.setStrokeWidth(strokeWidth);
     }
 
     @Override
@@ -188,7 +186,91 @@ public class LineShape implements ShapeInterface{
         lineShape.setEndY(lineShape.getStartY() + newDy);
     }
 
+    @Override
+    public void resize(double newSize) {
+        double currentLength = Math.hypot(getWidth(), getHeight());
 
+        if (currentLength <= 0) {
+            // Se la linea è degenerata, crea una linea orizzontale
+            lineShape.setEndX(lineShape.getStartX() + newSize);
+            lineShape.setEndY(lineShape.getStartY());
+        } else {
+            // Scala mantenendo l'orientamento
+            double scale = newSize / currentLength;
+            double newDx = getWidth() * scale;
+            double newDy = getHeight() * scale;
+
+            lineShape.setEndX(lineShape.getStartX() + newDx);
+            lineShape.setEndY(lineShape.getStartY() + newDy);
+        }
+
+        // Aggiorna l'array dei punti se esiste
+        if (this.points != null && this.points.length >= 4) {
+            this.points[2] = lineShape.getEndX();
+            this.points[3] = lineShape.getEndY();
+        }
+    }
+
+    @Override
+    public double getStretchWidth() {
+        double deltaX = lineShape.getEndX() - lineShape.getStartX();
+        double deltaY = lineShape.getEndY() - lineShape.getStartY();
+        return Math.hypot(deltaX, deltaY);
+    }
+
+    @Override
+    public double getStretchHeight() {
+        return lineShape.getStrokeWidth();
+    }
+
+    @Override
+    public void stretch(double width, double height) {
+        // Imposta lo spessore della linea
+        lineShape.setStrokeWidth(height);
+
+        // Calcola il centro attuale della linea
+        double centerX = (lineShape.getStartX() + lineShape.getEndX()) / 2.0;
+        double centerY = (lineShape.getStartY() + lineShape.getEndY()) / 2.0;
+
+        // Calcola la lunghezza attuale
+        double deltaX = lineShape.getEndX() - lineShape.getStartX();
+        double deltaY = lineShape.getEndY() - lineShape.getStartY();
+        double currentLength = Math.hypot(deltaX, deltaY);
+
+        if (currentLength <= 0) {
+            // Se la linea è degenerata, crea una linea orizzontale con la nuova lunghezza
+            // centrata nella posizione attuale
+            lineShape.setStartX(centerX - width / 2.0);
+            lineShape.setStartY(centerY);
+            lineShape.setEndX(centerX + width / 2.0);
+            lineShape.setEndY(centerY);
+        } else {
+            // Calcola il vettore unitario della direzione attuale
+            double unitX = deltaX / currentLength;
+            double unitY = deltaY / currentLength;
+
+            // Calcola i nuovi punti mantenendo il centro fisso
+            double halfWidth = width / 2.0;
+            lineShape.setStartX(centerX - unitX * halfWidth);
+            lineShape.setStartY(centerY - unitY * halfWidth);
+            lineShape.setEndX(centerX + unitX * halfWidth);
+            lineShape.setEndY(centerY + unitY * halfWidth);
+        }
+
+        // Aggiorna l'array dei punti se esiste
+        if (this.points != null && this.points.length >= 4) {
+            this.points[0] = lineShape.getStartX();
+            this.points[1] = lineShape.getStartY();
+            this.points[2] = lineShape.getEndX();
+            this.points[3] = lineShape.getEndY();
+        }
+    }
+
+    @Override
+    public void resetStretch(double width, double height) {
+        // Ripristina sia la lunghezza che lo spessore
+        stretch(width, height);
+    }
 
 
     @Override
@@ -203,7 +285,7 @@ public class LineShape implements ShapeInterface{
 
     @Override
     public void setFillColor(Color fill) {
-        throw new UnsupportedOperationException("The following feature is not supported");
+        throw new UnsupportedOperationException("Feature not supported.");
     }
 
 
@@ -229,37 +311,12 @@ public class LineShape implements ShapeInterface{
 
     @Override
     public double getMaxSliderSize() {
-        return Math.max(300, getEffectiveSize() * 3);
+        return Math.max(200, getEffectiveSize()*2);
     }
 
     @Override
     public double getMinSliderSize() {
-        return 10; // Lunghezza minima per una linea
-    }
-
-    @Override
-    public void scaleToSize(double newSize) {
-        double currentLength = Math.hypot(getWidth(), getHeight());
-
-        if (currentLength <= 0) {
-            // Se la linea è degenerata, crea una linea orizzontale
-            lineShape.setEndX(lineShape.getStartX() + newSize);
-            lineShape.setEndY(lineShape.getStartY());
-        } else {
-            // Scala mantenendo l'orientamento
-            double scale = newSize / currentLength;
-            double newDx = getWidth() * scale;
-            double newDy = getHeight() * scale;
-
-            lineShape.setEndX(lineShape.getStartX() + newDx);
-            lineShape.setEndY(lineShape.getStartY() + newDy);
-        }
-
-        // Aggiorna l'array dei punti se esiste
-        if (this.points != null && this.points.length >= 4) {
-            this.points[2] = lineShape.getEndX();
-            this.points[3] = lineShape.getEndY();
-        }
+        return 30;
     }
 
     @Override
@@ -269,7 +326,7 @@ public class LineShape implements ShapeInterface{
 
     @Override
     public String getText() {
-        throw new UnsupportedOperationException("Feature not supported.");
+        return null;
     }
 
     @Override
