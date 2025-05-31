@@ -1,5 +1,6 @@
 package org.example.model.shape;
 
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -26,6 +27,11 @@ public class RectangleShape implements ShapeInterface {
     @Override
     public void draw(Double[] points) {
         throw new UnsupportedOperationException("The following feature is not supported");
+    }
+
+    @Override
+    public boolean canHaveFill() {
+        return true;
     }
 
     @Override
@@ -61,6 +67,80 @@ public class RectangleShape implements ShapeInterface {
         double maxY = (paneHeight - getHeight() / 2 - margin) / zoom;
 
         return newX >= minX && newX <= maxX && newY >= minY && newY <= maxY;
+    }
+
+    @Override
+    public void mirrorUp() {
+        double centerY = getY() + getHeight() / 2;
+        double topY = getY();
+        double distance = centerY - topY;
+        double mirroredCenterY = topY - distance;
+        double newY = mirroredCenterY - getHeight() / 2;
+
+        rectangleShape.setY(newY);
+    }
+
+    @Override
+    public void mirrorDown() {
+        double centerY = getY() + getHeight() / 2;
+        double bottomY = getY() + getHeight();
+        double distance = bottomY - centerY;
+        double mirroredCenterY = bottomY + distance;
+        double newY = mirroredCenterY - getHeight() / 2;
+
+        rectangleShape.setY(newY);
+    }
+
+    @Override
+    public void mirrorLeft() {
+        double centerX = getX() + getWidth() / 2;
+        double leftX = getX();
+        double distance = centerX - leftX;
+        double mirroredCenterX = leftX - distance;
+        double newX = mirroredCenterX - getWidth() / 2;
+
+        rectangleShape.setX(newX);
+    }
+
+    @Override
+    public void mirrorRight() {
+        double centerX = getX() + getWidth() / 2;
+        double rightX = getX() + getWidth();
+        double distance = rightX - centerX;
+        double mirroredCenterX = rightX + distance;
+        double newX = mirroredCenterX - getWidth() / 2;
+
+        rectangleShape.setX(newX);
+    }
+
+    @Override
+    public void setTextScaleX(double scale) {
+        rectangleShape.setScaleX(scale);
+    }
+
+    @Override
+    public double getTextScaleX() {
+        return rectangleShape.getScaleX();
+    }
+
+    @Override
+    public void setTextScaleY(double scale) {
+        rectangleShape.setScaleY(scale);
+    }
+
+    @Override
+    public double getTextScaleY() {
+        return rectangleShape.getScaleY();
+    }
+
+    @Override
+    public void mirrorHorizontallyAroundCenter() {
+        rectangleShape.setScaleX(rectangleShape.getScaleX() * -1);
+    }
+
+    @Override
+    public void mirrorVerticallyAroundCenter() {
+        rectangleShape.setScaleY(rectangleShape.getScaleY() * -1);
     }
 
 

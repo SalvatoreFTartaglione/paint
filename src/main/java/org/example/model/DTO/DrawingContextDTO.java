@@ -20,6 +20,7 @@ public class DrawingContextDTO {
     private Color fillColor;
     private String textContent;
     private int fontSize;
+    private double selStartX, selStartY, selEndX, selEndY; //Per il rettangolo della selezione multipla
     private ScrollPane scrollPane;
     private Group mainCanvasContainer;
 
@@ -114,4 +115,14 @@ public class DrawingContextDTO {
     public void setFontSize(int fontSize) {
         this.fontSize = fontSize;
     }
+
+    //Metodi del rettangolo della selezione multipla
+    public double getSelStartX() { return selStartX; }
+    public void setSelStartX(double selStartX) { this.selStartX = selStartX; }
+    public double getSelStartY() { return selStartY; }
+    public void setSelStartY(double selStartY) { this.selStartY = selStartY; }
+    public double getSelEndX() { return selEndX; }
+    public void setSelEndX(double selEndX) { this.selEndX = selEndX; }
+    public double getSelEndY() { return selEndY; }
+    public void setSelEndY(double selEndY) { this.selEndY = selEndY; }
 }

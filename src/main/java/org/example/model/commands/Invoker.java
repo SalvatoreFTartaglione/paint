@@ -12,9 +12,16 @@ public class Invoker {
      */
     public void executeCommand(CommandInterface cmd) {
         cmd.executeCommand();
-        history.push(cmd);
+        // only push if meaningful
+        if (cmd instanceof AddShapeCommand) {
+            if (((AddShapeCommand) cmd).wasExecuted()) {
+                history.push(cmd);
+            }
+        } else {
+            history.push(cmd);
+        }
         // Debug print
-        //printStack("After EXECUTE");
+        printStack("After EXECUTE");
     }
 
     public void executeCopyCommand(CommandInterface cmd){
@@ -37,7 +44,7 @@ public class Invoker {
         if (!history.isEmpty()) {
             history.pop().undoCommand();
             //debug print
-            //printStack("After UNDO");
+            printStack("After UNDO");
         }
     }
 

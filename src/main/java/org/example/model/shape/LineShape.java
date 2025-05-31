@@ -1,5 +1,6 @@
 package org.example.model.shape;
 
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -36,6 +37,10 @@ public class LineShape implements ShapeInterface{
         lineShape.setEndY(this.points[3]);
     }
 
+    @Override
+    public boolean canHaveFill() {
+        return false;
+    }
 
     /**
      * @param points
@@ -305,6 +310,118 @@ public class LineShape implements ShapeInterface{
         return isWithinBounds;
     }
 
+    @Override
+    public void mirrorUp() {
+        Point2D end = new Point2D(lineShape.getStartX(), lineShape.getStartY());
+        Point2D start = new Point2D(lineShape.getEndX(), lineShape.getEndY());
+        Point2D upperPoint = start.getY() <= end.getY() ? start : end;
+
+        double centerY = (start.getY() + end.getY()) / 2;
+
+        double mirroredCenterY = upperPoint.getY() - (centerY - upperPoint.getY());
+
+        double offsetStartY = start.getY() - centerY;
+        double offsetEndY = end.getY() - centerY;
+        double newStartY = mirroredCenterY + offsetStartY;
+        double newEndY = mirroredCenterY + offsetEndY;
+
+        lineShape.setStartY(newStartY);
+        lineShape.setEndY(newEndY);
+    }
+
+
+    @Override
+    public void mirrorDown() {
+        Point2D end = new Point2D(lineShape.getStartX(), lineShape.getStartY());
+        Point2D start = new Point2D(lineShape.getEndX(), lineShape.getEndY());
+        Point2D lowerPoint = start.getY() >= end.getY() ? start : end;
+
+        double centerY = (start.getY() + end.getY()) / 2;
+
+        double mirroredCenterY = lowerPoint.getY() + (lowerPoint.getY() - centerY);
+
+        double offsetStartY = start.getY() - centerY;
+        double offsetEndY = end.getY() - centerY;
+        double newStartY = mirroredCenterY + offsetStartY;
+        double newEndY = mirroredCenterY + offsetEndY;
+
+        lineShape.setStartY(newStartY);
+        lineShape.setEndY(newEndY);
+    }
+
+
+    @Override
+    public void mirrorLeft() {
+        // Calcola centro
+        double centerX = (lineShape.getStartX() + lineShape.getEndX()) / 2;
+
+        // Calcola distanza orizzontale metà (distanza dal centro all'estremità)
+        double halfWidth = Math.abs(lineShape.getEndX() - lineShape.getStartX()) / 2;
+
+        // Asse di riflessione: centro - halfWidth
+        double axisX = centerX - halfWidth;
+
+        // Riflette entrambi i punti rispetto all'asse verticale
+        double newStartX = 2 * axisX - lineShape.getStartX();
+        double newEndX = 2 * axisX - lineShape.getEndX();
+
+        lineShape.setStartX(newStartX);
+        lineShape.setEndX(newEndX);
+    }
+
+    @Override
+    public void mirrorRight() {
+        double centerX = (lineShape.getStartX() + lineShape.getEndX()) / 2;
+        double halfWidth = Math.abs(lineShape.getEndX() - lineShape.getStartX()) / 2;
+
+        double axisX = centerX + halfWidth;
+
+        double newStartX = 2 * axisX - lineShape.getStartX();
+        double newEndX = 2 * axisX - lineShape.getEndX();
+
+        lineShape.setStartX(newStartX);
+        lineShape.setEndX(newEndX);
+    }
+
+    @Override
+    public void setTextScaleX(double scale) {
+        lineShape.setScaleX(scale);
+    }
+
+    @Override
+    public double getTextScaleX() {
+        return lineShape.getScaleX();
+    }
+
+    @Override
+    public void setTextScaleY(double scale) {
+        lineShape.setScaleY(scale);
+    }
+
+    @Override
+    public double getTextScaleY() {
+        return lineShape.getScaleY();
+    }
+
+    @Override
+    public void mirrorHorizontallyAroundCenter() {
+        double centerY = (lineShape.getStartY() + lineShape.getEndY()) / 2;
+        double offsetStartY = lineShape.getStartY() - centerY;
+        double offsetEndY = lineShape.getEndY() - centerY;
+
+        lineShape.setStartY(centerY - offsetStartY);
+        lineShape.setEndY(centerY - offsetEndY);
+    }
+
+    @Override
+    public void mirrorVerticallyAroundCenter() {
+        double centerX = (lineShape.getStartX() + lineShape.getEndX()) / 2;
+        double offsetStartX = lineShape.getStartX() - centerX;
+        double offsetEndX = lineShape.getEndX() - centerX;
+
+        lineShape.setStartX(centerX - offsetStartX);
+        lineShape.setEndX(centerX - offsetEndX);
+    }
 
 
 }

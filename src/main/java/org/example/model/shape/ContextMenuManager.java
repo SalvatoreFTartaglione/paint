@@ -41,9 +41,12 @@ public class ContextMenuManager {
         visualPanel.setVisible(false);
 
         // Fill Color (for line must be null)
-        if (shape.getFillColor() != null) {
-            fillPicker = createColorPickerItem(contextMenu, "Change Fill Color:", shape.getFillColor(), actions::onFillColorChanged);
-        }
+        fillPicker = createColorPickerItem(
+                contextMenu,
+                "Change Fill Color:",
+                shape.getFillColor() != null ? shape.getFillColor() : shape.getStrokeColor(),
+                newColor -> actions.onFillColorChanged(newColor)
+        );
 
         // Stroke Color
         createColorPickerItem(contextMenu, "Change Border Color:", shape.getStrokeColor(), actions::onStrokeColorChanged);
@@ -72,7 +75,7 @@ public class ContextMenuManager {
         MenuItem deleteItem = new MenuItem("Delete");
         deleteItem.setOnAction(e -> actions.onDelete());
 
-        // Toggle visibility of respective panels
+                    // Toggle visibility of respective panels
         Label numericLabel = new Label("Numerical Resize");
         CustomMenuItem numericBtn = new CustomMenuItem(numericLabel);
         numericBtn.setHideOnClick(false);
@@ -89,9 +92,83 @@ public class ContextMenuManager {
             visualPanel.setVisible(true);
         });
 
+//        // Vertical mirroring up
+//        Label verticalMirroringUpLabel = new Label("Vertical Mirroring Up");
+//        CustomMenuItem verticalMirroringUp = new CustomMenuItem(verticalMirroringUpLabel);
+//        verticalMirroringUp.setHideOnClick(false);
+//        verticalMirroringUp.setOnAction(e -> {actions.onMirrorUp();});
+//
+//        // Vertical mirroring down
+//        Label verticalMirroringLabel = new Label("Vertical Mirroring Down");
+//        CustomMenuItem verticalMirroringDown = new CustomMenuItem(verticalMirroringLabel);
+//        verticalMirroringDown.setHideOnClick(false);
+//        verticalMirroringDown.setOnAction(e -> {actions.onMirrorDown();});
+//
+//        // Horizontal mirroring left
+//        Label horizontalMirroringLeftLabel = new Label("Horizontal Mirroring Left");
+//        CustomMenuItem horizontalMirroringLeft = new CustomMenuItem(horizontalMirroringLeftLabel);
+//        horizontalMirroringLeft.setHideOnClick(false);
+//        horizontalMirroringLeft.setOnAction(e -> {actions.onMirrorLeft();});
+//
+//        // Horizontal mirroring right
+//        Label horizontalMirroringRightLabel = new Label("Horizontal Mirroring Right");
+//        CustomMenuItem horizontalMirroringRight = new CustomMenuItem(horizontalMirroringRightLabel);
+//        horizontalMirroringRight.setHideOnClick(false);
+//        horizontalMirroringRight.setOnAction(e -> {actions.onMirrorRight();});
+//
+//        // Horizontal mirroring around center
+//        Label horizontalMirroringAroundCenterLabel = new Label("Horizontal Mirroring Around Center");
+//        CustomMenuItem horizontalMirroringAroundCenter = new CustomMenuItem(horizontalMirroringAroundCenterLabel);
+//        horizontalMirroringAroundCenter.setHideOnClick(false);
+//        horizontalMirroringAroundCenter.setOnAction(e -> {actions.onMirrorHorizontalAroundCenter();});
+//
+//        // Vertical mirroring around center
+//        Label verticalMirroringAroundCenterLabel = new Label("Vertical Mirroring Around Center");
+//        CustomMenuItem verticalMirroringAroundCenter = new CustomMenuItem(verticalMirroringAroundCenterLabel);
+//        verticalMirroringAroundCenter.setHideOnClick(false);
+//        verticalMirroringAroundCenter.setOnAction(e -> {actions.onMirrorVerticalAroundCenter();});
+
+        Menu mirroringMenu = new Menu("Flip");
+
+        // Voci del sottomenù
+        MenuItem verticalUp = new MenuItem("Vertical Up");
+        verticalUp.setOnAction(e -> actions.onMirrorUp());
+
+        MenuItem verticalDown = new MenuItem("Vertical Down");
+        verticalDown.setOnAction(e -> actions.onMirrorDown());
+
+        MenuItem verticalCenter = new MenuItem("Vertical Around Center");
+        verticalCenter.setOnAction(e -> actions.onMirrorVerticalAroundCenter());
+
+        MenuItem horizontalLeft = new MenuItem("Horizontal Left");
+        horizontalLeft.setOnAction(e -> actions.onMirrorLeft());
+
+        MenuItem horizontalRight = new MenuItem("Horizontal Right");
+        horizontalRight.setOnAction(e -> actions.onMirrorRight());
+
+        MenuItem horizontalCenter = new MenuItem("Horizontal Around Center");
+        horizontalCenter.setOnAction(e -> actions.onMirrorHorizontalAroundCenter());
+
+
+
+        // Aggiunta voci al sottomenù
+        mirroringMenu.getItems().addAll(
+                verticalUp, verticalDown,
+                verticalCenter, horizontalLeft,
+                horizontalRight,
+                horizontalCenter
+        );
+
+
+        // Save shape as favorite
+        Label addToFavoritesLabel = new Label("Add to Favorites");
+        CustomMenuItem addToFavorites = new CustomMenuItem(addToFavoritesLabel);
+        addToFavorites.setHideOnClick(false);
+        addToFavorites.setOnAction(e -> {actions.onAddToFavorites();});
+
         // Add items
-        contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem);
+        //contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
+        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }

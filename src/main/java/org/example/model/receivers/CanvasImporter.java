@@ -40,7 +40,7 @@ public class CanvasImporter {
                         double strokeWidthL = Double.parseDouble(parts[6]);
 
                         LineCreator lineCreator = new LineCreator();
-                        lineCreator.creationOfShape(strokeColorL, (Color) null, (int) strokeWidthL, 0, 0, null); // width/height not used
+                        lineCreator.creationOfShape(strokeColorL, (Color) null, (int) strokeWidthL, 0, 0, null, 0.0, 0.0); // width/height not used
                         shape = lineCreator.getShape();
                         shape.setStrokeColor(strokeColorL);
                         shape.draw(new Double[]{startX, startY, endX, endY});
@@ -57,7 +57,7 @@ public class CanvasImporter {
                         double yR = Double.parseDouble(parts[7]);
 
                         RectangleCreator rectangleCreator = new RectangleCreator();
-                        rectangleCreator.creationOfShape(strokeColorR, fillColorR, (int) strokeWidthR, widthR, heightR, null);
+                        rectangleCreator.creationOfShape(strokeColorR, fillColorR, (int) strokeWidthR, widthR, heightR, null, 0.0, 0.0);
                         shape = rectangleCreator.getShape();
                         shape.draw(xR, yR);
                         break;
@@ -73,22 +73,24 @@ public class CanvasImporter {
                         double centerY = Double.parseDouble(parts[7]);
 
                         EllipseCreator ellipseCreator = new EllipseCreator();
-                        ellipseCreator.creationOfShape(strokeColorE, fillColorE, (int) strokeWidthE, radiusX, radiusY, null);
+                        ellipseCreator.creationOfShape(strokeColorE, fillColorE, (int) strokeWidthE, radiusX, radiusY, null, 0.0, 0.0);
                         shape = ellipseCreator.getShape();
                         shape.draw(centerX, centerY);
                         break;
 
                     case "Text":
-                        if (parts.length != 7) continue;
+                        if (parts.length != 9) continue;
                         String textT = parts[1];
                         Color strokeColorT = Color.web(parts[2]);
                         Color fillColorT = Color.web(parts[3]);
                         double xT = Double.parseDouble(parts[4]);
                         double yT = Double.parseDouble(parts[5]);
                         double fontSize = Double.parseDouble(parts[6]);        // aka strokeWidth
+                        double scaleX = Double.parseDouble(parts[7]);
+                        double scaleY = Double.parseDouble(parts[8]);
 
                         TextCreator textCreator = new TextCreator();
-                        textCreator.creationOfShape(strokeColorT, fillColorT, (int) fontSize, xT, yT, textT);
+                        textCreator.creationOfShape(strokeColorT, fillColorT, (int) fontSize, xT, yT, textT, scaleX, scaleY);
                         shape = textCreator.getShape();
                         shape.draw(xT, yT);
                         break;

@@ -2,7 +2,7 @@ package org.example.model.commands;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import org.example.model.receivers.PoistionManagerReceiver;
+import org.example.model.receivers.PositionManagerReceiver;
 import org.example.model.shape.RectangleShape;
 import org.example.model.shape.ShapeInterface;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Integration test for SendBackwardCommand using real Pane, ShapeInterface, and PoistionManagerReceiver.
+ * Integration test for SendBackwardCommand using real Pane, ShapeInterface, and PositionManagerReceiver.
  *
  * This test verifies that:
  * 1. executeCommand() sends the node to the back of the pane.
@@ -44,7 +44,7 @@ public class SendBackwardCommandTest {
         assertEquals(shapeBack.getNode(), drawingPane.getChildren().get(0));
         assertEquals(shapeFront.getNode(), drawingPane.getChildren().get(1));
 
-        PoistionManagerReceiver receiver = new PoistionManagerReceiver(shapeFront);
+        PositionManagerReceiver receiver = new PositionManagerReceiver(shapeFront);
         SendBackwardCommand command = new SendBackwardCommand(receiver);
 
         command.executeCommand();
@@ -56,7 +56,7 @@ public class SendBackwardCommandTest {
 
     @Test
     public void testUndoCommandRestoresOriginalOrder() {
-        PoistionManagerReceiver receiver = new PoistionManagerReceiver(shapeFront);
+        PositionManagerReceiver receiver = new PositionManagerReceiver(shapeFront);
         SendBackwardCommand command = new SendBackwardCommand(receiver);
 
         command.executeCommand();
@@ -71,7 +71,7 @@ public class SendBackwardCommandTest {
     public void testExecuteCommandThrowsIfNodeHasNoPaneParent() {
         // Create shape not added to any Pane
         ShapeInterface orphan = new RectangleShape(Color.BLACK, Color.GRAY, 80, 40, 2);
-        PoistionManagerReceiver receiver = new PoistionManagerReceiver(orphan);
+        PositionManagerReceiver receiver = new PositionManagerReceiver(orphan);
         SendBackwardCommand command = new SendBackwardCommand(receiver);
 
         Exception exception = assertThrows(IllegalStateException.class, command::executeCommand);

@@ -1,11 +1,9 @@
 package org.example.model.shape;
 
-import javafx.collections.ObservableList;
-import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
-import javafx.scene.shape.Rectangle;
 
 
 public class EllipseShape implements ShapeInterface {
@@ -24,6 +22,11 @@ public class EllipseShape implements ShapeInterface {
     public void draw(double x, double y) {
         ellipseShape.setCenterX(x);
         ellipseShape.setCenterY(y);
+    }
+
+    @Override
+    public boolean canHaveFill() {
+        return true;
     }
 
     @Override
@@ -53,6 +56,80 @@ public class EllipseShape implements ShapeInterface {
         double maxY = (paneHeight - getHeight() / 2 - margin) / zoom;
 
         return newX >= minX && newX <= maxX && newY >= minY && newY <= maxY;
+    }
+
+    @Override
+    public void mirrorUp() {
+        Point2D centerOfEllipse = new Point2D(getX(), getY());
+        Point2D pointYUpFromCenterOfEllipse = new Point2D(centerOfEllipse.getX(), centerOfEllipse.getY() - (getHeight()));
+
+        double distance = centerOfEllipse.getY() - pointYUpFromCenterOfEllipse.getY();
+        double mirroredY = pointYUpFromCenterOfEllipse.getY() - distance;
+
+        ellipseShape.setCenterY(mirroredY);
+    }
+
+    @Override
+    public void mirrorDown() {
+        Point2D centerOfEllipse = new Point2D(getX(), getY());
+        Point2D pointXDownFromCenterOfEllipse = new Point2D(centerOfEllipse.getX(), centerOfEllipse.getY() + (getHeight()));
+
+        double distance = pointXDownFromCenterOfEllipse.getY() - centerOfEllipse.getY();
+        double mirroredY = pointXDownFromCenterOfEllipse.getY() + distance;
+
+        ellipseShape.setCenterY(mirroredY);
+    }
+
+    @Override
+    public void mirrorLeft() {
+        Point2D centerOfEllipse = new Point2D(getX(), getY());
+        Point2D pointLeft = new Point2D(centerOfEllipse.getX() - getWidth(), centerOfEllipse.getY());
+
+        double distance = centerOfEllipse.getX() - pointLeft.getX();
+        double mirroredX = pointLeft.getX() - distance;
+
+        ellipseShape.setCenterX(mirroredX);
+    }
+
+    @Override
+    public void mirrorRight() {
+        Point2D centerOfEllipse = new Point2D(getX(), getY());
+        Point2D pointRight = new Point2D(centerOfEllipse.getX() + getWidth(), centerOfEllipse.getY());
+
+        double distance = pointRight.getX() - centerOfEllipse.getX();
+        double mirroredX = pointRight.getX() + distance;
+
+        ellipseShape.setCenterX(mirroredX);
+    }
+
+    @Override
+    public void setTextScaleX(double scale) {
+        ellipseShape.setScaleX(scale);
+    }
+
+    @Override
+    public double getTextScaleX() {
+        return ellipseShape.getScaleX();
+    }
+
+    @Override
+    public void setTextScaleY(double scale) {
+        ellipseShape.setScaleY(scale);
+    }
+
+    @Override
+    public double getTextScaleY() {
+        return ellipseShape.getScaleY();
+    }
+
+    @Override
+    public void mirrorHorizontallyAroundCenter() {
+        ellipseShape.setScaleX(ellipseShape.getScaleX() * -1);
+    }
+
+    @Override
+    public void mirrorVerticallyAroundCenter() {
+        ellipseShape.setScaleY(ellipseShape.getScaleY() * -1);
     }
 
 

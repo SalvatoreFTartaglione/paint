@@ -12,7 +12,7 @@ public class LineCreator extends AbstractShape{
      * Create a new shape of type line by setting all the properties passed as a parameter
      */
     @Override
-    public ShapeInterface createShape(Color strokeColor, Color fillingColor, int strokeWidth, double width, double height, String content) {
+    public ShapeInterface createShape(Color strokeColor, Color fillingColor, int strokeWidth, double width, double height, String content, double scaleX, double scaleY) {
         return new LineShape(strokeColor, strokeWidth);
     }
 
