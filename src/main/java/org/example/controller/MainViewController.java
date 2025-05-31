@@ -136,8 +136,6 @@ public class MainViewController implements Initializable {
     private static final double CLICK_MARGIN = 5.0; // distanza minima dai bordi
     private Pane gridPane = new Pane();
     private ObservableList<ShapeInterface> favoritesShapeList = FXCollections.observableArrayList();
-
-
     //Usati per il rettangolo della selezione multipla
     private Rectangle selectionRect;
     private Point2D selectionStart;
@@ -538,7 +536,75 @@ public class MainViewController implements Initializable {
         ContextMenuManager.MenuComponents menuComponents = ContextMenuManager.createContextMenu(shape, actions);
         contextMenu = menuComponents.contextMenu;
 
-        // Show context menu
+        // 3) Se siamo in multi-selezione e sto cliccando su una shape selezionata,
+        //    aggiungi “Group” invece delle restanti opzioni
+        if (currentSelection.size() >= 2 && currentSelection.contains(shape)) {
+            MenuItem groupItem = new MenuItem("Group");
+            groupItem.setOnAction(e -> {
+                // Costruisci e esegui il GroupCommand come fai di consueto
+                List<ShapeInterface> toGroup = new ArrayList<>(currentSelection);
+                GroupCommand cmd = new GroupCommand(grpReceiver, toGroup);
+                invoker.executeCommand(cmd);
+                CompositeShapeInterface composite = cmd.getCreatedGroup();
+                // pick-on-bounds + figli mouse-transparent
+                Node groupNode = composite.getNode();
+                groupNode.setPickOnBounds(true);
+                for (ShapeInterface s : composite.getChildren()) {
+                    s.getNode().setMouseTransparent(true);
+                }
+                attachEventHandlersToShape(groupNode);
+                makeDraggable(composite);
+                clearSelection();
+            });
+            ContextMenu onlyGroup = new ContextMenu(groupItem);
+            onlyGroup.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+            return;
+        }
+
+        if(shape.isGroup()){
+            MenuItem ungroupItem = new MenuItem("UnGroup");
+            ungroupItem.setOnAction(e -> {
+                CompositeShapeInterface groupShape = (CompositeShapeInterface) shape;
+                UngroupCommand cmd = new UngroupCommand(grpReceiver, groupShape);
+                invoker.executeCommand(cmd);
+
+                // 2) Ottengo le shape scomposte
+                List<ShapeInterface> ungroupedChildren = cmd.getChildren();
+                // 3) Ottengo le posizioni salvate, che sono in coordinate di scena
+                Map<ShapeInterface, Point2D> savedScene = cmd.getOriginalScenePositions();
+
+                // 4) PER OGNI CHILD:
+                //    a) Converto savedScene.get(child) (sceneX, sceneY) in localX, localY del drawingPane
+                //    b) Imposto childNode.setLayoutX(localX) e setLayoutY(localY)
+                //    c) Ripristino interattività (mouseTransparent, pickOnBounds, handlers, drag)
+
+                for (ShapeInterface child : ungroupedChildren) {
+                    Node childNode = child.getNode();
+
+                    // a) prendo la Point2D in sceneCoordinate salvata
+                    Point2D scenePt = savedScene.get(child);
+                    if (scenePt != null) {
+                        // converto in coordinate local del drawingPane
+                        // ATTENZIONE: uso drawingPane.sceneToLocal(...) per ottenere localX/localY
+                        Point2D localOnPane = drawingPane.sceneToLocal(scenePt);
+
+                        // b) imposto esplicitamente layoutX, layoutY
+                        childNode.setLayoutX(localOnPane.getX());
+                        childNode.setLayoutY(localOnPane.getY());
+                    }
+
+                    // c1) ripristino mouseTransparent / pickOnBounds
+                    childNode.setMouseTransparent(false);
+                    childNode.setPickOnBounds(true);
+
+                    // c2) riattacco listener e drag
+                    attachEventHandlersToShape(childNode);
+                    makeDraggable(child);
+                }
+            });
+            contextMenu.getItems().add(ungroupItem);
+        }
+        //contextMenu.getItems().removeAll()
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
     }
 

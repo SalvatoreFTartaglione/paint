@@ -202,7 +202,7 @@ public class CompositeShape implements CompositeShapeInterface {
 
     @Override
     public String getText() {
-        throw new UnsupportedOperationException("Feature not supported.");
+        return null;
     }
 
     @Override
@@ -210,7 +210,6 @@ public class CompositeShape implements CompositeShapeInterface {
         throw new UnsupportedOperationException("Feature not supported.");
     }
 
-    //QUIII
     @Override
     public double getMaxSliderSize() {
         // Default fornito dall’interfaccia
