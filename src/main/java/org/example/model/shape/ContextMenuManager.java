@@ -91,7 +91,8 @@ public class ContextMenuManager {
         numericBtn.setOnAction(e -> {
             stretchPanel.setVisible(true);
         });
-Menu mirroringMenu = new Menu("Flip");
+
+        Menu mirroringMenu = new Menu("Flip");
 
         // Voci del sottomenù
         MenuItem verticalUp = new MenuItem("Vertical Up");
@@ -131,7 +132,7 @@ Menu mirroringMenu = new Menu("Flip");
 
         // Add items
         contextMenu.getItems().addAll(numericBtn, visualBtn, resizePanel, stretchPanel);
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem);
+        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }
