@@ -37,6 +37,10 @@ public class LineShape implements ShapeInterface{
         lineShape.setEndY(this.points[3]);
     }
 
+    @Override
+    public boolean canHaveFill() {
+        return false;
+    }
 
     /**
      * @param points

@@ -4,6 +4,9 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
+import java.util.Collections;
+import java.util.List;
+
 public interface ShapeInterface {
 
     // utils method
@@ -11,6 +14,17 @@ public interface ShapeInterface {
 
     // Shape color management
     void setStrokeColor(Color color);
+
+    /** Restituisce i figli di un composite; per le forme semplici torna lista vuota. */
+    default List<ShapeInterface> getChildren() {
+        return Collections.emptyList();
+    }
+
+    default boolean isGroup() {
+        return false;
+    }
+
+    boolean canHaveFill();
 
     Color getStrokeColor();
 

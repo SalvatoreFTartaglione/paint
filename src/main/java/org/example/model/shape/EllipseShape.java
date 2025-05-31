@@ -25,6 +25,11 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
+    public boolean canHaveFill() {
+        return true;
+    }
+
+    @Override
     public void draw(Double[] points) {
         throw new UnsupportedOperationException("The following feature is not supported");
     }

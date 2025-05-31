@@ -30,6 +30,11 @@ public class RectangleShape implements ShapeInterface {
     }
 
     @Override
+    public boolean canHaveFill() {
+        return true;
+    }
+
+    @Override
     public ShapeInterface cloneShape() {
         RectangleShape clone = new RectangleShape(
                 this.getStrokeColor(),

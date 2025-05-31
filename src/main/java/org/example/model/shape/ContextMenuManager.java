@@ -41,9 +41,12 @@ public class ContextMenuManager {
         visualPanel.setVisible(false);
 
         // Fill Color (for line must be null)
-        if (shape.getFillColor() != null) {
-            fillPicker = createColorPickerItem(contextMenu, "Change Fill Color:", shape.getFillColor(), actions::onFillColorChanged);
-        }
+        fillPicker = createColorPickerItem(
+                contextMenu,
+                "Change Fill Color:",
+                shape.getFillColor() != null ? shape.getFillColor() : shape.getStrokeColor(),
+                newColor -> actions.onFillColorChanged(newColor)
+        );
 
         // Stroke Color
         createColorPickerItem(contextMenu, "Change Border Color:", shape.getStrokeColor(), actions::onStrokeColorChanged);
@@ -72,7 +75,7 @@ public class ContextMenuManager {
         MenuItem deleteItem = new MenuItem("Delete");
         deleteItem.setOnAction(e -> actions.onDelete());
 
-        // Toggle visibility of respective panels
+                    // Toggle visibility of respective panels
         Label numericLabel = new Label("Numerical Resize");
         CustomMenuItem numericBtn = new CustomMenuItem(numericLabel);
         numericBtn.setHideOnClick(false);

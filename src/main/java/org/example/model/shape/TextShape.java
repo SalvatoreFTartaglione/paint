@@ -29,6 +29,11 @@ public class TextShape implements ShapeInterface {
     }
 
     @Override
+    public boolean canHaveFill() {
+        return true;
+    }
+
+    @Override
     public void draw(double X, double Y) {
         textNode.setX(X);
         textNode.setY(Y);

@@ -12,7 +12,14 @@ public class Invoker {
      */
     public void executeCommand(CommandInterface cmd) {
         cmd.executeCommand();
-        history.push(cmd);
+        // only push if meaningful
+        if (cmd instanceof AddShapeCommand) {
+            if (((AddShapeCommand) cmd).wasExecuted()) {
+                history.push(cmd);
+            }
+        } else {
+            history.push(cmd);
+        }
         // Debug print
         printStack("After EXECUTE");
     }

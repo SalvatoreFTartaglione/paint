@@ -7,14 +7,22 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -27,15 +35,16 @@ import org.example.model.receivers.*;
 import org.example.model.receivers.ChangesOnShapeReceiver;
 import org.example.model.receivers.DraggingReceiver;
 import org.example.model.receivers.ShapeReceiver;
+import org.example.model.shape.*;
+import javafx.scene.shape.Rectangle;
+import javafx.geometry.Point2D;
 import org.example.model.shape.ContextMenuActions;
 import org.example.model.shape.ContextMenuManager;
 import org.example.model.shape.ShapeInterface;
 import org.example.model.ZoomableScrollPane;
 
 import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import static java.lang.Math.round;
 
@@ -127,6 +136,14 @@ public class MainViewController implements Initializable {
     private ObservableList<ShapeInterface> favoritesShapeList = FXCollections.observableArrayList();
 
 
+    //Usati per il rettangolo della selezione multipla
+    private Rectangle selectionRect;
+    private Point2D selectionStart;
+    private final List<ShapeInterface> currentSelection = new ArrayList<>();
+    private GroupReceiver grpReceiver;
+
+    private final Point2D[] dragStart = new Point2D[1];
+    private final Point2D[] shapeStartPosition = new Point2D[1];
     /**
      * Initializes the controller after the root element has been completely processed.
      *
@@ -140,6 +157,30 @@ public class MainViewController implements Initializable {
         initializeZoomControls();
         initializeGridControls();
 
+
+        initMultiSelectCommand();
+        grpReceiver = new GroupReceiver(drawingPane);
+
+        // --- NUOVO FILTER per deselezionare solo sul click sinistro in background ---
+        drawingPane.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
+            // 1) se sto disegnando il rettangolo di selezione, non toccare nulla
+            if (selectionRect.isVisible()) return;
+
+            // 2) solo sul click sinistro
+            if (evt.getButton() != MouseButton.PRIMARY) return;
+
+            // 3) se ho già selezionato delle shape e il click non è sopra una di esse, allora clear
+            if (!currentSelection.isEmpty()) {
+                boolean clickSuSelezionate = currentSelection.stream()
+                        .map(ShapeInterface::getNode)
+                        .anyMatch(node ->
+                                node.contains(node.sceneToLocal(evt.getSceneX(), evt.getSceneY()))
+                        );
+                if (!clickSuSelezionate) {
+                    clearSelection();
+                }
+            }
+        });
 
         fontSizeComboBox.setValue(56);
         fontSizeComboBox.setOnAction(event -> {
@@ -157,40 +198,27 @@ public class MainViewController implements Initializable {
             isDragging = true;
         });
 
-        drawingPane.setOnMouseReleased(event -> {
-            double x = event.getX();
-            double y = event.getY();
-            double paneWidth = drawingPane.getWidth();
-            double paneHeight = drawingPane.getHeight();
-
-            // Verifica che il click non sia troppo vicino ai bordi
-            boolean isWithinSafeArea =
-                    x > CLICK_MARGIN && x < (paneWidth - CLICK_MARGIN) &&
-                            y > CLICK_MARGIN && y < (paneHeight - CLICK_MARGIN);
-
-            if (!isWithinSafeArea) {
-                return; // Ignora il click
+        drawingPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
+            // 1) se sto ancora disegnando il rettangolo di selezione, chiudo quella logica
+            if (selectionRect.isVisible()) {
+                onSelectionReleased(event);
+                return;
             }
 
+            // 2) altrimenti, se click sinistro senza drag, disegno la nuova forma
             if (!isDragging && event.getButton() == MouseButton.PRIMARY) {
-                // Se clic sinistro, disegna
                 DrawOnCanvas(event);
-            } else if (event.getButton() == MouseButton.SECONDARY) {
-                // Se clic destro, verifica se hai cliccato uno shape
-                boolean clickedOnShape = false;
-
-                for (Node node : drawingPane.getChildren()) {
-                    if (node.contains(node.sceneToLocal(event.getSceneX(), event.getSceneY()))) {
-                        clickedOnShape = true;
-                        break;
-                    }
-                }
-
+            }
+            // 3) se click destro in background, mostro il menu di “Paste”
+            else if (event.getButton() == MouseButton.SECONDARY) {
+                boolean clickedOnShape = drawingPane.getChildren().stream()
+                        .anyMatch(node -> node.contains(node.sceneToLocal(event.getSceneX(), event.getSceneY())));
                 if (!clickedOnShape) {
                     showPasteOnlyContextMenu(event);
                 }
             }
         });
+
 
 
         // stops dragging with mouse of the drawing pane
@@ -255,6 +283,87 @@ public class MainViewController implements Initializable {
         updateZoomLabel(1.0);
     }
 
+    private void initMultiSelectCommand() {
+        contextDTO.setDrawingPane(drawingPane);
+        selectionRect = new Rectangle();
+        selectionRect.setStroke(Color.web("#0099FF"));
+        selectionRect.getStrokeDashArray().addAll(5.0, 5.0);
+        selectionRect.setFill(Color.web("#0099FF", 0.1));
+        selectionRect.setVisible(false);
+        drawingPane.getChildren().add(selectionRect);
+
+        drawingPane.addEventFilter(MouseEvent.MOUSE_PRESSED, this::onSelectionPressed);
+        drawingPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, this::onSelectionDragged);
+        drawingPane.addEventFilter(MouseEvent.MOUSE_RELEASED, this::onSelectionReleased);
+    }
+
+    private void onSelectionPressed(MouseEvent e) {
+        // se clicco sullo sfondo (non sopra una shape)
+        boolean clickedShape = drawingPane.getChildren().stream()
+                .filter(n -> n.getUserData() instanceof ShapeInterface)
+                .anyMatch(n -> n.contains(n.sceneToLocal(e.getSceneX(), e.getSceneY())));
+        if (!clickedShape && e.getButton() == MouseButton.PRIMARY) {
+            selectionStart = new Point2D(e.getX(), e.getY());
+            selectionRect.setX(selectionStart.getX());
+            selectionRect.setY(selectionStart.getY());
+            selectionRect.setWidth(0);
+            selectionRect.setHeight(0);
+            selectionRect.setVisible(true);
+        }
+    }
+
+    private void onSelectionDragged(MouseEvent e) {
+        if (!selectionRect.isVisible()) return;
+        double x = Math.min(selectionStart.getX(), e.getX());
+        double y = Math.min(selectionStart.getY(), e.getY());
+        selectionRect.setX(x);
+        selectionRect.setY(y);
+        selectionRect.setWidth(Math.abs(e.getX() - selectionStart.getX()));
+        selectionRect.setHeight(Math.abs(e.getY() - selectionStart.getY()));
+    }
+
+    private void onSelectionReleased(MouseEvent e) {
+        if (!selectionRect.isVisible()) return;
+
+        double x1 = selectionRect.getX();
+        double y1 = selectionRect.getY();
+        double w  = selectionRect.getWidth();
+        double h  = selectionRect.getHeight();
+
+        currentSelection.clear();
+        for (Node node : drawingPane.getChildren()) {
+            if (node.getUserData() instanceof ShapeInterface) {
+                Bounds b = node.getBoundsInParent();
+                if (b.intersects(x1, y1, w, h)) {
+                    node.setEffect(new DropShadow(10, Color.web("#0099FF")));
+                    currentSelection.add((ShapeInterface)node.getUserData());
+                }
+            }
+        }
+
+        warningLabel.setText(currentSelection.size() + " forme selezionate");
+        selectionRect.setVisible(false);
+    }
+
+
+    private void applyZoom(double zoomLevel) {
+        currentZoom = zoomLevel;
+
+        double hValue = scrollPane.getHvalue();
+        double vValue = scrollPane.getVvalue();
+
+        drawingPane.setScaleX(zoomLevel);
+        drawingPane.setScaleY(zoomLevel);
+
+        double originalWidth = 1500.0;
+        double originalHeight = 1500.0;
+
+        Platform.runLater(() -> {
+            scrollPane.setHvalue(hValue);
+            scrollPane.setVvalue(vValue);
+        });
+    }
+
     private void updateZoomLabel(double zoomLevel) {
         int percentage = (int) round(zoomLevel * 100);
         zoomValueLabel.setText(percentage + "%");
@@ -297,15 +406,13 @@ public class MainViewController implements Initializable {
      * Show context menu for selected shape
      */
     private void showContextMenu(ShapeInterface shape, MouseEvent event) {
-
-
-
         // Create context menu actions
         ContextMenuActions actions = new ContextMenuActions() {
             double oldWidth = shape.getWidth();
             double oldHeight = shape.getHeight();
 
             @Override
+            //Per evitare che se nel gruppo è presente una linea e si fa il fillColor, alla linea non succeda niente
             public void onFillColorChanged(Color newColor) {
                 CommandInterface cmd = new ChangeFillColorCommand(shape, newColor, changesOnShapeReceiver);
                 invoker.executeCommand(cmd);
@@ -425,7 +532,75 @@ public class MainViewController implements Initializable {
         ContextMenuManager.MenuComponents menuComponents = ContextMenuManager.createContextMenu(shape, actions);
         contextMenu = menuComponents.contextMenu;
 
-        // Show context menu
+        // 3) Se siamo in multi-selezione e sto cliccando su una shape selezionata,
+        //    aggiungi “Group” invece delle restanti opzioni
+        if (currentSelection.size() >= 2 && currentSelection.contains(shape)) {
+            MenuItem groupItem = new MenuItem("Group");
+            groupItem.setOnAction(e -> {
+                // Costruisci e esegui il GroupCommand come fai di consueto
+                List<ShapeInterface> toGroup = new ArrayList<>(currentSelection);
+                GroupCommand cmd = new GroupCommand(grpReceiver, toGroup);
+                invoker.executeCommand(cmd);
+                CompositeShapeInterface composite = cmd.getCreatedGroup();
+                // pick-on-bounds + figli mouse-transparent
+                Node groupNode = composite.getNode();
+                groupNode.setPickOnBounds(true);
+                for (ShapeInterface s : composite.getChildren()) {
+                    s.getNode().setMouseTransparent(true);
+                }
+                attachEventHandlersToShape(groupNode);
+                makeDraggable(composite);
+                clearSelection();
+            });
+            ContextMenu onlyGroup = new ContextMenu(groupItem);
+            onlyGroup.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+            return;
+        }
+
+        if(shape.isGroup()){
+            MenuItem ungroupItem = new MenuItem("UnGroup");
+            ungroupItem.setOnAction(e -> {
+                CompositeShapeInterface groupShape = (CompositeShapeInterface) shape;
+                UngroupCommand cmd = new UngroupCommand(grpReceiver, groupShape);
+                invoker.executeCommand(cmd);
+
+                // 2) Ottengo le shape scomposte
+                List<ShapeInterface> ungroupedChildren = cmd.getChildren();
+                // 3) Ottengo le posizioni salvate, che sono in coordinate di scena
+                Map<ShapeInterface, Point2D> savedScene = cmd.getOriginalScenePositions();
+
+                // 4) PER OGNI CHILD:
+                //    a) Converto savedScene.get(child) (sceneX, sceneY) in localX, localY del drawingPane
+                //    b) Imposto childNode.setLayoutX(localX) e setLayoutY(localY)
+                //    c) Ripristino interattività (mouseTransparent, pickOnBounds, handlers, drag)
+
+                for (ShapeInterface child : ungroupedChildren) {
+                    Node childNode = child.getNode();
+
+                    // a) prendo la Point2D in sceneCoordinate salvata
+                    Point2D scenePt = savedScene.get(child);
+                    if (scenePt != null) {
+                        // converto in coordinate local del drawingPane
+                        // ATTENZIONE: uso drawingPane.sceneToLocal(...) per ottenere localX/localY
+                        Point2D localOnPane = drawingPane.sceneToLocal(scenePt);
+
+                        // b) imposto esplicitamente layoutX, layoutY
+                        childNode.setLayoutX(localOnPane.getX());
+                        childNode.setLayoutY(localOnPane.getY());
+                    }
+
+                    // c1) ripristino mouseTransparent / pickOnBounds
+                    childNode.setMouseTransparent(false);
+                    childNode.setPickOnBounds(true);
+
+                    // c2) riattacco listener e drag
+                    attachEventHandlersToShape(childNode);
+                    makeDraggable(child);
+                }
+            });
+            contextMenu.getItems().add(ungroupItem);
+        }
+        //contextMenu.getItems().removeAll()
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
     }
 
@@ -555,23 +730,35 @@ public class MainViewController implements Initializable {
         });
     }
 
+    //Ho dovuto modificarlo perchè facendo il Draggable sulla figura Component non andava bene
     private void makeDraggable(ShapeInterface shape) {
-        final Point2D[] dragStart = new Point2D[1];
-        final Point2D[] shapeStartPosition = new Point2D[1];
+        // Array temporanei per tracciare posizioni
+        final Point2D[] dragStartScene = new Point2D[1];
+        final Point2D[] nodeStartTranslate = new Point2D[1];
         Node node = shape.getNode();
 
+        // Al click iniziale salvo:
+        //  - dragStart[0]: coordinate di mouse in scena
+        //  - shapeStartPosition[0]: posizione logica della shape (x,y)
+        //  - dragStartScene[0]: coordinate di mouse in scena (per feedback visivo)
+        //  - nodeStartTranslate[0]: translateX/Y correnti del nodo
         node.setOnMousePressed(event -> {
             dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
             shapeStartPosition[0] = new Point2D(shape.getX(), shape.getY());
+
+            dragStartScene[0] = new Point2D(event.getSceneX(), event.getSceneY());
+            nodeStartTranslate[0] = new Point2D(node.getTranslateX(), node.getTranslateY());
             event.consume();
         });
 
+        // Durante il drag:
+        // 1) sposto la shape logicamente via shape.moveBy(...)
+        // 2) applico un feedback visivo con node.setTranslateX/Y
         node.setOnMouseDragged(event -> {
-            if (!isDragging0) {
-                isDragging0 = true;
-            }
+            isDragging0 = true;
             hasDragged = true;
 
+            // 1) Calcolo delta logico in coordinate di scena
             double deltaX = event.getSceneX() - dragStart[0].getX();
             double deltaY = event.getSceneY() - dragStart[0].getY();
 
@@ -580,30 +767,57 @@ public class MainViewController implements Initializable {
             double paneHeight = drawingPane.getPrefHeight() * zoom;
             double extraMargin = 20;
 
+            // Se la shape può muoversi in quel delta, sposto logicamente
             if (shape.canMoveBy(deltaX, deltaY, paneWidth, paneHeight, zoom, extraMargin)) {
                 shape.moveBy(deltaX, deltaY);
-                dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY()); // aggiorna con scene coords
+                dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
             }
+
+            // 2) Feedback visivo: normalizzo delta su fattore zoom e applico come translate
+            double visDX = (event.getSceneX() - dragStartScene[0].getX()) / currentZoom;
+            double visDY = (event.getSceneY() - dragStartScene[0].getY()) / currentZoom;
+            node.setTranslateX(nodeStartTranslate[0].getX() + visDX);
+            node.setTranslateY(nodeStartTranslate[0].getY() + visDY);
 
             event.consume();
         });
 
+        // Al rilascio, costruisco il DragCommand effettivo basato sulla differenza di translate
         node.setOnMouseReleased(event -> {
-            if (hasDragged) {
-                Point2D currentPosition = new Point2D(shape.getX(), shape.getY());
-                double totalDeltaX = currentPosition.getX() - shapeStartPosition[0].getX();
-                double totalDeltaY = currentPosition.getY() - shapeStartPosition[0].getY();
+            double totalDX = node.getTranslateX() - nodeStartTranslate[0].getX();
+            double totalDY = node.getTranslateY() - nodeStartTranslate[0].getY();
 
-                if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
-                    shape.moveBy(-totalDeltaX, -totalDeltaY); // rollback
-                    DragCommand dragCommand = new DragCommand(shape, totalDeltaX, totalDeltaY, draggingReceiver);
-                    invoker.executeCommand(dragCommand);
+            if (Math.abs(totalDX) > 0.5 || Math.abs(totalDY) > 0.5) {
+                // 1) Ripristino il nodo nella sua posizione visiva originaria
+                node.setTranslateX(nodeStartTranslate[0].getX());
+                node.setTranslateY(nodeStartTranslate[0].getY());
+
+                // 2) Eseguo il comando di spostamento vero (DragCommand)
+                DragCommand dragCmd = new DragCommand(shape, totalDX, totalDY, draggingReceiver);
+                invoker.executeCommand(dragCmd);
+
+                // 3) Se la shape è stata effettivamente spostata (hasDragged), controllo
+                //    se serve un rollback/undo parcializzato:
+                if (hasDragged) {
+                    Point2D currentPos = new Point2D(shape.getX(), shape.getY());
+                    double totalDeltaX = currentPos.getX() - shapeStartPosition[0].getX();
+                    double totalDeltaY = currentPos.getY() - shapeStartPosition[0].getY();
+
+                    if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
+                        // rollback logico
+                        shape.moveBy(-totalDeltaX, -totalDeltaY);
+                        // e poi comando di Drag per rendere coerente l'history
+                        DragCommand rollbackCmd =
+                                new DragCommand(shape, totalDeltaX, totalDeltaY, draggingReceiver);
+                        invoker.executeCommand(rollbackCmd);
+                    }
+
+                    // Resetto i flag di dragging dopo un tick JavaFX
+                    Platform.runLater(() -> {
+                        isDragging0 = false;
+                        hasDragged = false;
+                    });
                 }
-
-                Platform.runLater(() -> {
-                    isDragging0 = false;
-                    hasDragged = false;
-                });
             }
             event.consume();
         });
@@ -727,9 +941,35 @@ public class MainViewController implements Initializable {
      */
     private void attachEventHandlersToAllShapes() {
         for (Node node : drawingPane.getChildren()) {
+            Object ud = node.getUserData();
+            if (!(ud instanceof ShapeInterface)) continue;
+            ShapeInterface s = (ShapeInterface) ud;
+
+            boolean isComposite = !s.getChildren().isEmpty();
+
+            // Se è un gruppo (ha figli), il Group cattura i click
+            node.setMouseTransparent(false);
+            node.setPickOnBounds(isComposite);
+
+            if (isComposite) {
+                // i figli NON devono intercettare il click
+                for (ShapeInterface child : s.getChildren()) {
+                    child.getNode().setMouseTransparent(true);
+                }
+            }
+
             attachEventHandlersToShape(node);
-            makeDraggable((ShapeInterface) node.getUserData());
+            makeDraggable(s);
         }
+    }
+
+    private void clearSelection() {
+        // rimuove l’effetto DropShadow da tutte le shape selezionate
+        for (ShapeInterface s : currentSelection) {
+            s.getNode().setEffect(null);
+        }
+        currentSelection.clear();
+        warningLabel.setText("");
     }
 
 
@@ -767,13 +1007,15 @@ public class MainViewController implements Initializable {
 
 
     /**
-     * Handles the Undo button action to undo the last executed command.
-     *
-     * @param actionEvent the action event triggered by the undo button
-     */
+             * Handles the Undo button action to undo the last executed command.
+             *
+             * @param actionEvent the action event triggered by the undo button
+             */
     @FXML
     public void undoClicked(ActionEvent actionEvent) {
         invoker.undo();
+        attachEventHandlersToAllShapes();
+        clearSelection();
     }
 
     public void toggleGrid(ActionEvent actionEvent) {
