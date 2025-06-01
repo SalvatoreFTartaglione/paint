@@ -21,7 +21,12 @@ public class Invoker {
             history.push(cmd);
         }
         // Debug print
-        //printStack("After EXECUTE");
+        printStack("After EXECUTE");
+    }
+
+    public void executeSaveFavoriteCommand(CommandInterface cmd) {cmd.executeCommand();}
+    public void executeCopyCommand(CommandInterface cmd){
+        cmd.executeCommand();
     }
 
     public void executeLoadCommand(CommandInterface cmd) {
@@ -40,7 +45,7 @@ public class Invoker {
         if (!history.isEmpty()) {
             history.pop().undoCommand();
             //debug print
-            //printStack("After UNDO");
+            printStack("After UNDO");
         }
     }
 

@@ -26,7 +26,8 @@ public class AddToCanvasReceiver {
     }
 
 
-    public ShapeInterface addShape() {
+    public ShapeInterface
+    addShape() {
         ShapeInterface shape = null;
         ShapeOption selectedShape = drawingDTO.getShapeOption();
         canAdd = false;
@@ -106,6 +107,7 @@ public class AddToCanvasReceiver {
             }
 
             case "Polygon": {
+                //drawingDTO.setShapeOption(null);
                 // show preview of the points
                 // get last point from the list of points
                 Circle c = new Circle( drawingDTO.getPolygonPoints().get(drawingDTO.getPolygonPoints().size() - 1).getX(), drawingDTO.getPolygonPoints().get(drawingDTO.getPolygonPoints().size() - 1).getY(), 4, Color.BLUE );
@@ -140,20 +142,24 @@ public class AddToCanvasReceiver {
                     // Reset start point for line
                     drawingDTO.setStartPoint(null);
                     canAdd = true;
+                    break;
                 }
             }
             case "Favorite": {
                 ShapeInterface favoriteShape = drawingDTO.getShape();
+                //System.out.println("[DEBUG] CASE FAVORITE shape: " + favoriteShape.toString());
                 if (favoriteShape != null) {
-                   Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-                   favoriteShape.draw(localCoords.getX(), localCoords.getY());
-                   shape = favoriteShape;
-                   break;
+                    ShapeInterface clonedShape = favoriteShape.cloneShape();
+                    Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                    clonedShape.draw(localCoords.getX(), localCoords.getY());
+                    shape = clonedShape;
+                    canAdd = true;
+                    break;
                 }
             }
 
         }
-        if (shape != null && canAdd) {
+        if (shape != null) {
             shape.getNode().setUserData(shape);
             drawingDTO.getDrawingPane().getChildren().add(shape.getNode());
             return shape;

@@ -147,8 +147,10 @@ public class ContextMenuManager {
         addToFavorites.setHideOnClick(false);
         addToFavorites.setOnAction(e -> {
             TextInputDialog dialog = new TextInputDialog("MyFavorite");
-            dialog.setHeaderText("Enter a name for favorite shape:");
-            dialog.showAndWait().ifPresent(actions::onAddToFavoritesWithName);
+            dialog.setHeaderText("Enter a name for this favorite shape:");
+            dialog.showAndWait().ifPresent(name -> {
+                actions.onAddToFavoritesWithName(name);
+            });
         });
 
         // Add items
