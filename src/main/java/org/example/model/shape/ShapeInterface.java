@@ -7,6 +7,8 @@ import javafx.scene.paint.Color;
 import java.util.Collections;
 import java.util.List;
 
+import java.util.Optional;
+
 public interface ShapeInterface {
 
     // utils method
@@ -98,4 +100,6 @@ public interface ShapeInterface {
     double getTextScaleY();
     void mirrorHorizontallyAroundCenter();
     void mirrorVerticallyAroundCenter();
+
+    Optional<Point2D> simulateMirror(MirrorDirectionEnum direction);
 }

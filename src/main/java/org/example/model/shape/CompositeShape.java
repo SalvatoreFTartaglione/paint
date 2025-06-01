@@ -9,6 +9,7 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class CompositeShape implements CompositeShapeInterface {
     private final Group groupNode = new Group();
@@ -343,7 +344,12 @@ public class CompositeShape implements CompositeShapeInterface {
         groupNode.setTranslateY(groupNode.getTranslateY() + 2 * centerY);
     }
 
- ///fino a qui
+    @Override
+    public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {
+        return Optional.empty();
+    }
+
+    ///fino a qui
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Group:\n");

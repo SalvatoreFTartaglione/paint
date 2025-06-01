@@ -11,16 +11,10 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
@@ -37,9 +31,9 @@ import org.example.model.receivers.DraggingReceiver;
 import org.example.model.receivers.ShapeReceiver;
 import org.example.model.shape.*;
 import javafx.scene.shape.Rectangle;
-import javafx.geometry.Point2D;
 import org.example.model.shape.ContextMenuActions;
 import org.example.model.shape.ContextMenuManager;
+import org.example.model.shape.MirrorDirectionEnum;
 import org.example.model.shape.ShapeInterface;
 import org.example.model.ZoomableScrollPane;
 
@@ -141,6 +135,7 @@ public class MainViewController implements Initializable {
     private Point2D selectionStart;
     private final List<ShapeInterface> currentSelection = new ArrayList<>();
     private GroupReceiver grpReceiver;
+    private Alert mirrorOutsideCanvasAlert = new Alert(Alert.AlertType.ERROR);
 
     private final Point2D[] dragStart = new Point2D[1];
     private final Point2D[] shapeStartPosition = new Point2D[1];
@@ -156,6 +151,7 @@ public class MainViewController implements Initializable {
         initializeShapeChoiceBox();
         initializeZoomControls();
         initializeGridControls();
+        initializeAlerts();
 
 
         initMultiSelectCommand();
@@ -225,6 +221,14 @@ public class MainViewController implements Initializable {
         scrollPane.setPannable(false);
         scrollPane.setTarget(mainCanvasContainer);
 
+    }
+
+    private void initializeAlerts() {
+        mirrorOutsideCanvasAlert.setTitle("Shape outside of canvas");
+        mirrorOutsideCanvasAlert.setHeaderText("Can not mirror here.");
+        mirrorOutsideCanvasAlert.setContentText("The following action will translate the figure outside the canvas...Try again.");
+        ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
+        mirrorOutsideCanvasAlert.getButtonTypes().setAll(okButton);
     }
 
     private void initializeGridControls() {
@@ -453,43 +457,67 @@ public class MainViewController implements Initializable {
             @Override
             public void onMirrorUp() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
-                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, true, false, false, false, false, false);
-                invoker.executeCommand(cmd);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.UP, contextDTO);
+                if (cmd.isExecutable()) {
+                    invoker.executeCommand(cmd);
+                }else {
+                    mirrorOutsideCanvasAlert.showAndWait();
+                }
             }
 
             @Override
             public void onMirrorDown() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
-                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, true, false,false, false, false);
-                invoker.executeCommand(cmd);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.DOWN, contextDTO);
+                if (cmd.isExecutable()) {
+                    invoker.executeCommand(cmd);
+                }else {
+                    mirrorOutsideCanvasAlert.showAndWait();
+                }
             }
 
             @Override
             public void onMirrorLeft() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
-                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, true, false, false, false);
-                invoker.executeCommand(cmd);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.LEFT, contextDTO);
+                if (cmd.isExecutable()) {
+                    invoker.executeCommand(cmd);
+                }else {
+                    mirrorOutsideCanvasAlert.showAndWait();
+                }
             }
 
             @Override
             public void onMirrorRight() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
-                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, false, true, false, false);
-                invoker.executeCommand(cmd);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.RIGHT, contextDTO);
+                if (cmd.isExecutable()) {
+                    invoker.executeCommand(cmd);
+                }else {
+                    mirrorOutsideCanvasAlert.showAndWait();
+                }
             }
 
             @Override
             public void onMirrorHorizontalAroundCenter() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
-                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, false, false, true, false);
-                invoker.executeCommand(cmd);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.HORIZONTAL, contextDTO);
+                if (cmd.isExecutable()) {
+                    invoker.executeCommand(cmd);
+                }else {
+                    mirrorOutsideCanvasAlert.showAndWait();
+                }
             }
 
             @Override
             public void onMirrorVerticalAroundCenter() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
-                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, false, false, false, false, false, true);
-                invoker.executeCommand(cmd);
+                CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.VERTICAL, contextDTO);
+                if (cmd.isExecutable()) {
+                    invoker.executeCommand(cmd);
+                }else {
+                    mirrorOutsideCanvasAlert.showAndWait();
+                }
             }
 
             @Override

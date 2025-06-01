@@ -1,7 +1,10 @@
 package org.example.model.shape;
 
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
+
+import java.util.Optional;
 
 public class PolygonShape implements ShapeInterface {
     @Override
@@ -197,5 +200,10 @@ public class PolygonShape implements ShapeInterface {
     @Override
     public void mirrorVerticallyAroundCenter() {
 
+    }
+
+    @Override
+    public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {
+        return Optional.empty();
     }
 }

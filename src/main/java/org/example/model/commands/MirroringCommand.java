@@ -1,78 +1,60 @@
 package org.example.model.commands;
 
+import javafx.geometry.Point2D;
+import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.PositionManagerReceiver;
+import org.example.model.shape.MirrorDirectionEnum;
+
+import java.util.Optional;
 
 public class MirroringCommand implements CommandInterface{
 
     private PositionManagerReceiver positionManagerReceiver;
-    private boolean up;
-    private boolean down;
-    private boolean left;
-    private boolean right;
-    private boolean horizontal;
-    private boolean vertical;
+    private MirrorDirectionEnum mirrorDirection;
+    private DrawingContextDTO contextDTO;
 
-    public MirroringCommand(PositionManagerReceiver positionManagerReceiver, boolean up, boolean down, boolean left, boolean right, boolean horizontal, boolean vertical) {
+    public MirroringCommand(PositionManagerReceiver positionManagerReceiver, MirrorDirectionEnum mirrorDirection, DrawingContextDTO contextDTO) {
         this.positionManagerReceiver = positionManagerReceiver;
-        this.up = up;
-        this.left = left;
-        this.right = right;
-        this.down = down;
-        this.horizontal = horizontal;
-        this.vertical = vertical;
+        this.mirrorDirection = mirrorDirection;
+        this.contextDTO = contextDTO;
     }
 
     @Override
     public void executeCommand() {
-        if (up){
-            positionManagerReceiver.mirrorUp();
-            return;
-        }
-        if (down){
-            positionManagerReceiver.mirrorDown();
-            return;
-        }
-        if (left){
-            positionManagerReceiver.mirrorLeft();
-            return;
-        }
-        if (right){
-            positionManagerReceiver.mirrorRight();
-            return;
-        }
-        if (horizontal){
-            positionManagerReceiver.mirrorHorizontal();
-            return;
-        }
-        if (vertical){
-            positionManagerReceiver.mirrorVertical();
+        switch (mirrorDirection) {
+            case UP: positionManagerReceiver.mirrorUp(); break;
+            case DOWN: positionManagerReceiver.mirrorDown(); break;
+            case LEFT: positionManagerReceiver.mirrorLeft(); break;
+            case RIGHT: positionManagerReceiver.mirrorRight(); break;
+            case VERTICAL: positionManagerReceiver.mirrorVertical(); break;
+            case HORIZONTAL: positionManagerReceiver.mirrorHorizontal(); break;
         }
 
     }
 
     @Override
     public void undoCommand() {
-        if (up){
-            positionManagerReceiver.mirrorDown();
-            return;
+        switch (mirrorDirection) {
+            case UP: positionManagerReceiver.mirrorDown(); break;
+            case DOWN: positionManagerReceiver.mirrorUp(); break;
+            case LEFT: positionManagerReceiver.mirrorRight(); break;
+            case RIGHT: positionManagerReceiver.mirrorLeft(); break;
+            case VERTICAL: positionManagerReceiver.mirrorHorizontal(); break;
+            case HORIZONTAL: positionManagerReceiver.mirrorVertical(); break;
         }
-        if (down){
-            positionManagerReceiver.mirrorUp();
-            return;
-        }
-        if (left){
-            positionManagerReceiver.mirrorRight();
-            return;
-        }
-        if (right){
-            positionManagerReceiver.mirrorLeft();
-            return;
-        } if (horizontal){
-            positionManagerReceiver.mirrorHorizontal();
-            return;
-        }
-        if (vertical){
-            positionManagerReceiver.mirrorVertical();
-        }
+    }
+
+    @Override
+    public boolean isExecutable() {
+        Optional<Point2D> simulated = positionManagerReceiver.simulateMirror(mirrorDirection);
+        if (simulated.isEmpty()) return true;
+
+        double x = simulated.get().getX();
+        double y = simulated.get().getY();
+        double canvasWidth = contextDTO.getDrawingPane().getWidth();
+        double canvasHeight = contextDTO.getDrawingPane().getHeight();
+
+        return x >= 0 && x <= canvasWidth && y >= 0 && y <= canvasHeight;
+
     }
 }

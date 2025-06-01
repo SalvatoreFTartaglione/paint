@@ -5,6 +5,8 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import java.util.Optional;
+
 public class RectangleShape implements ShapeInterface {
 
     private Rectangle rectangleShape;
@@ -142,6 +144,61 @@ public class RectangleShape implements ShapeInterface {
     public void mirrorVerticallyAroundCenter() {
         rectangleShape.setScaleY(rectangleShape.getScaleY() * -1);
     }
+
+    @Override
+    public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {
+        double x = getX();
+        double y = getY();
+        double width = getWidth();
+        double height = getHeight();
+
+        double centerX = x + width / 2;
+        double centerY = y + height / 2;
+
+        double mirroredCenterX = centerX;
+        double mirroredCenterY = centerY;
+
+        switch (direction) {
+            case UP: {
+                double topY = y;
+                double distance = centerY - topY;
+                mirroredCenterY = topY - distance;
+                break;
+            }
+
+            case DOWN: {
+                double bottomY = y + height;
+                double distance = bottomY - centerY;
+                mirroredCenterY = bottomY + distance;
+                break;
+            }
+
+            case LEFT: {
+                double leftX = x;
+                double distance = centerX - leftX;
+                mirroredCenterX = leftX - distance;
+                break;
+            }
+
+            case RIGHT: {
+                double rightX = x + width;
+                double distance = rightX - centerX;
+                mirroredCenterX = rightX + distance;
+                break;
+            }
+
+            case HORIZONTAL:
+            case VERTICAL:
+                return Optional.of(new Point2D(centerX, centerY));
+        }
+
+        // Calcolo nuovo angolo superiore sinistro
+        double newX = mirroredCenterX - width / 2;
+        double newY = mirroredCenterY - height / 2;
+
+        return Optional.of(new Point2D(newX, newY));
+    }
+
 
 
     @Override

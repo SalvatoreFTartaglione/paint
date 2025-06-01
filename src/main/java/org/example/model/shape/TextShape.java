@@ -6,6 +6,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+import java.util.Optional;
+
 public class TextShape implements ShapeInterface {
 
     private final Text textShape;
@@ -318,6 +320,40 @@ public class TextShape implements ShapeInterface {
     @Override
     public void mirrorVerticallyAroundCenter() {
         textShape.setScaleY(textShape.getScaleY() * -1);
+    }
+
+    @Override
+    public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {
+        double x = textShape.getX();
+        double y = textShape.getY();
+
+        double mirroredX = x;
+        double mirroredY = y;
+
+        switch (direction) {
+            case UP: {
+                mirroredY = y - 2 * getHeight(); // ipotetico specchio sopra
+                break;
+            }
+            case DOWN: {
+                mirroredY = y + 2 * getHeight(); // ipotetico specchio sotto
+                break;
+            }
+            case LEFT: {
+                mirroredX = x - 2 * getWidth(); // ipotetico specchio a sinistra
+                break;
+            }
+            case RIGHT: {
+                mirroredX = x + 2 * getWidth(); // ipotetico specchio a destra
+                break;
+            }
+            case HORIZONTAL:
+            case VERTICAL:
+                // Il testo si riflette sul posto → nessuno spostamento
+                return Optional.of(new Point2D(x, y));
+        }
+
+        return Optional.of(new Point2D(mirroredX, mirroredY));
     }
 
 

@@ -5,6 +5,8 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 
+import java.util.Optional;
+
 
 public class EllipseShape implements ShapeInterface {
 
@@ -130,6 +132,39 @@ public class EllipseShape implements ShapeInterface {
     @Override
     public void mirrorVerticallyAroundCenter() {
         ellipseShape.setScaleY(ellipseShape.getScaleY() * -1);
+    }
+
+    @Override
+    public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {
+        double centerX = getX();
+        double centerY = getY();
+        double mirroredX = centerX;
+        double mirroredY = centerY;
+
+        switch (direction) {
+            case UP:
+                mirroredY = centerY - 2 * getHeight();
+                break;
+
+            case DOWN:
+                mirroredY = centerY + 2 * getHeight();
+                break;
+
+            case LEFT:
+                mirroredX = centerX - 2 * getWidth();
+                break;
+
+            case RIGHT:
+                mirroredX = centerX + 2 * getWidth();
+                break;
+
+            case HORIZONTAL:
+            case VERTICAL:
+                return Optional.of(new Point2D(centerX, centerY));
+        }
+
+        return Optional.of(new Point2D(mirroredX, mirroredY));
+
     }
 
 

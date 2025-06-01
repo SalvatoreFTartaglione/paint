@@ -1,7 +1,11 @@
 package org.example.model.receivers;
 
 import javafx.scene.Node;
+import javafx.geometry.Point2D;
+import org.example.model.shape.MirrorDirectionEnum;
 import org.example.model.shape.ShapeInterface;
+
+import java.util.Optional;
 
 public class PositionManagerReceiver {
 
@@ -63,4 +67,7 @@ public class PositionManagerReceiver {
     public void mirrorVertical(){
         shape.mirrorVerticallyAroundCenter();
     }
+
+    public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {return shape.simulateMirror(direction);}
+
 }

@@ -5,6 +5,8 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
+import java.util.Optional;
+
 
 public class LineShape implements ShapeInterface{
 
@@ -478,6 +480,53 @@ public class LineShape implements ShapeInterface{
 
         lineShape.setStartX(centerX - offsetStartX);
         lineShape.setEndX(centerX - offsetEndX);
+    }
+
+    @Override
+    public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {
+        double startX = lineShape.getStartX();
+        double startY = lineShape.getStartY();
+        double endX = lineShape.getEndX();
+        double endY = lineShape.getEndY();
+
+        double centerX = (startX + endX) / 2;
+        double centerY = (startY + endY) / 2;
+
+        double mirroredCenterX = centerX;
+        double mirroredCenterY = centerY;
+
+        switch (direction) {
+            case UP: {
+                double upperY = Math.min(startY, endY);
+                double distance = centerY - upperY;
+                mirroredCenterY = upperY - distance;
+                break;
+            }
+            case DOWN: {
+                double lowerY = Math.max(startY, endY);
+                double distance = lowerY - centerY;
+                mirroredCenterY = lowerY + distance;
+                break;
+            }
+            case LEFT: {
+                double leftX = Math.min(startX, endX);
+                double distance = centerX - leftX;
+                mirroredCenterX = leftX - distance;
+                break;
+            }
+            case RIGHT: {
+                double rightX = Math.max(startX, endX);
+                double distance = rightX - centerX;
+                mirroredCenterX = rightX + distance;
+                break;
+            }
+            case HORIZONTAL:
+            case VERTICAL:
+                // Nessun cambiamento della posizione nel canvas
+                return Optional.of(new Point2D(centerX, centerY));
+        }
+
+        return Optional.of(new Point2D(mirroredCenterX, mirroredCenterY));
     }
 
 
