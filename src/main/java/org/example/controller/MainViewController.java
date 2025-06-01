@@ -240,7 +240,7 @@ public class MainViewController implements Initializable {
         // stops dragging with mouse of the drawing pane
         scrollPane.setPannable(false);
         scrollPane.setTarget(mainCanvasContainer);
-        drawingPane.getChildren().clear();
+        //drawingPane.getChildren().clear();
 
         // favoriteShapesComboBox section
         FavoriteShapeRegistry.getInstance().addObserver(this::onFavoriteListChanged);
@@ -1050,14 +1050,17 @@ public class MainViewController implements Initializable {
     private void loadFile(ActionEvent event) {
         canvasImporter = new CanvasImporter(drawingPane);
         // Check if canvas is empty
-        if ( ! drawingPane.getChildren().isEmpty() ) {
+        if (drawingPane.getChildren().stream()
+                .anyMatch(node -> node.getUserData() instanceof ShapeInterface)) {
             loadManager(canvasImporter);
             // Assign event handlers to all loaded shapes
             attachEventHandlersToAllShapes();
+            initMultiSelectCommand();
         }
         else {
             // Clear workspace from older shapes
             drawingPane.getChildren().clear();
+            initMultiSelectCommand();
             // Execute load
             LoadCommand load = new LoadCommand(canvasImporter);
             invoker.executeLoadCommand(load);
