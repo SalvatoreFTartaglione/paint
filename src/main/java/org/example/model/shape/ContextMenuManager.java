@@ -128,11 +128,19 @@ public class ContextMenuManager {
         Label addToFavoritesLabel = new Label("Add to Favorites");
         CustomMenuItem addToFavorites = new CustomMenuItem(addToFavoritesLabel);
         addToFavorites.setHideOnClick(false);
-        addToFavorites.setOnAction(e -> {actions.onAddToFavorites();});
+        addToFavorites.setOnAction(e -> {
+            TextInputDialog dialog = new TextInputDialog("MyFavorite");
+            dialog.setHeaderText("Enter a name for this favorite shape:");
+            dialog.showAndWait().ifPresent(name -> {
+                actions.onAddToFavoritesWithName(name);  // da definire nel controller
+            });
+        });
 
         // Add items
         contextMenu.getItems().addAll(numericBtn, visualBtn, resizePanel, stretchPanel);
         contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu);
+        //contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
+        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu, addToFavorites);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }
@@ -204,6 +212,7 @@ public class ContextMenuManager {
                     } else {
                         w.setStyle("");
                     }
+
                     if (!heightValid) {
                         h.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
                     } else {

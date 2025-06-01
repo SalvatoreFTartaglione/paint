@@ -31,6 +31,7 @@ import org.example.model.receivers.DraggingReceiver;
 import org.example.model.receivers.ShapeReceiver;
 import org.example.model.shape.*;
 import javafx.scene.shape.Rectangle;
+import org.example.model.registry.FavoriteShapeRegistry;
 import org.example.model.shape.ContextMenuActions;
 import org.example.model.shape.ContextMenuManager;
 import org.example.model.shape.MirrorDirectionEnum;
@@ -38,6 +39,10 @@ import org.example.model.shape.ShapeInterface;
 import org.example.model.ZoomableScrollPane;
 
 import java.net.URL;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.*;
 
 import static java.lang.Math.round;
@@ -46,7 +51,7 @@ public class MainViewController implements Initializable {
 
 
     @FXML
-    private ComboBox<ShapeInterface> favoritesShapeComboBox;
+    private ComboBox<String> favoritesShapeComboBox;
     @FXML
     private CheckBox checkBoxGrid;
     @FXML
@@ -139,6 +144,10 @@ public class MainViewController implements Initializable {
 
     private final Point2D[] dragStart = new Point2D[1];
     private final Point2D[] shapeStartPosition = new Point2D[1];
+    //private ObservableList<ShapeInterface> favoritesShapeList = FXCollections.observableArrayList();
+    //@FXML     DA CAPIRE SE USARE STRING O SHAPE INTERFACE COME TIPO !!!
+    //private ComboBox<ShapeInterface> favoritesShapeComboBox;
+
     /**
      * Initializes the controller after the root element has been completely processed.
      *
@@ -162,6 +171,8 @@ public class MainViewController implements Initializable {
             // 1) se sto disegnando il rettangolo di selezione, non toccare nulla
             if (selectionRect.isVisible()) return;
 
+        // disabilita il menu delle figure preferite all inizio
+        favoritesShapeComboBox.setDisable(true);
             // 2) solo sul click sinistro
             if (evt.getButton() != MouseButton.PRIMARY) return;
 
@@ -221,6 +232,57 @@ public class MainViewController implements Initializable {
         scrollPane.setPannable(false);
         scrollPane.setTarget(mainCanvasContainer);
 
+        // favoriteShapesComboBox section
+        FavoriteShapeRegistry.getInstance().addObserver(this::onFavoriteListChanged);
+
+        //vecchio
+//        favoritesShapeComboBox.setOnAction(e -> {
+//            String selected = favoritesShapeComboBox.getSelectionModel().getSelectedItem();
+//            if (selected != null) {
+//                ShapeInterface shape = FavoriteShapeRegistry.getInstance().get(selected);
+//                if (shape != null) {
+//                    addToCanvasReceiver.addClonedShape(shape);  // oppure invoker.execute(new AddShapeCommand(...))
+//                }
+//            }
+//        });
+        favoritesShapeComboBox.setOnAction(e -> {
+            String selected = favoritesShapeComboBox.getSelectionModel().getSelectedItem();
+            System.out.println("[DEBUG] Selezionato dal comboBox: " + selected);
+
+            if (selected != null) {
+                ShapeInterface shape = FavoriteShapeRegistry.getInstance().get(selected);
+                System.out.println("[DEBUG] Recuperata shape dal registry: " + shape);
+
+                if (shape != null) {
+                    ShapeInterface copy = shape.cloneShape();
+                    System.out.println("[DEBUG] Clonata shape: " + copy);
+                    contextDTO.setShape(copy);
+                    contextDTO.setShapeOption(new ShapeOption("Favorite", ""));
+                    AddToCanvasReceiver receiver = new AddToCanvasReceiver(contextDTO);
+                    System.out.println("[DEBUG] Creato receiver con contextDTO: " + contextDTO);
+
+                    CommandInterface cmd = new AddShapeCommand(contextDTO, receiver);
+                    System.out.println("[DEBUG] Creato comando AddShapeCommand");
+
+                    invoker.executeCommand(cmd);
+                    System.out.println("[DEBUG] Eseguito comando: inserita copia nel canvas");
+
+                    attachEventHandlersToShape(copy.getNode());     //Aggiunge al nodo i gestori di eventi
+                    makeDraggable(copy);
+                    System.out.println("[DEBUG] Handlers assegnati alla shape, drag abilitato");
+                } else {
+                    System.out.println("[DEBUG] Nessuna shape trovata nel registry per: " + selected);
+                }
+            }
+        });
+
+
+
+
+    }
+    // favoriteShapesComboBox section
+    private void onFavoriteListChanged(Set<String> updatedNames) {
+        Platform.runLater(() -> favoritesShapeComboBox.getItems().setAll(updatedNames));
     }
 
     private void initializeAlerts() {
@@ -520,11 +582,17 @@ public class MainViewController implements Initializable {
                 }
             }
 
+
             @Override
-            public void onAddToFavorites() {
+            public void onAddToFavoritesWithName(String name) {
+                if (shape != null) {
+                    CommandInterface cmd = new SaveFavoriteCommand(
+                            new FavoriteManagerReceiver(), shape, name
 
+                    );
+                    invoker.executeCommand(cmd);
+                }
             }
-
 
             @Override
             public void onCopy() {
@@ -685,8 +753,17 @@ public class MainViewController implements Initializable {
                 new ShapeOption("Ellipse", "/org/example/images/ellipse.png"),
                 new ShapeOption("Line", "/org/example/images/segment.png"),
                 new ShapeOption("Rectangle", "/org/example/images/rectangle.png"),
-                new ShapeOption("Text", "/org/example/images/text.png")
+                new ShapeOption("Text", "/org/example/images/text.png"),
+                new ShapeOption("Favorite", "")
         );
+
+        shapeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && "Favorite".equals(newVal.getName())) {
+                favoritesShapeComboBox.setDisable(false);  // abilita il menu
+            } else {
+                favoritesShapeComboBox.setDisable(true);   // disabilita altrimenti
+            }
+        });
 
         shapeComboBox.getItems().addAll(shapes);
 

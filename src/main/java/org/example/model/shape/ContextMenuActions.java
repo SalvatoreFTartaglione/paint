@@ -19,5 +19,5 @@ public interface ContextMenuActions {
     void onMirrorRight();
     void onMirrorHorizontalAroundCenter();
     void onMirrorVerticalAroundCenter();
-    void onAddToFavorites();
+    void onAddToFavoritesWithName(String name);
 }

@@ -8,6 +8,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import org.example.controller.ShapeOption;
+import org.example.model.shape.ShapeInterface;
 
 
 public class DrawingContextDTO {
@@ -23,6 +24,9 @@ public class DrawingContextDTO {
     private double selStartX, selStartY, selEndX, selEndY; //Per il rettangolo della selezione multipla
     private ScrollPane scrollPane;
     private Group mainCanvasContainer;
+
+    // utils for favorite shapes
+    private ShapeInterface shape;
 
     public Group getMainCanvasContainer() {
         return mainCanvasContainer;
@@ -125,4 +129,12 @@ public class DrawingContextDTO {
     public void setSelEndX(double selEndX) { this.selEndX = selEndX; }
     public double getSelEndY() { return selEndY; }
     public void setSelEndY(double selEndY) { this.selEndY = selEndY; }
+
+    public ShapeInterface getShape() {
+        return shape;
+    }
+
+    public void setShape(ShapeInterface shape) {
+        this.shape = shape;
+    }
 }

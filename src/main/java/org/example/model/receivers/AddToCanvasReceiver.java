@@ -57,11 +57,21 @@ public class AddToCanvasReceiver {
             }
             case "Text": {
                 Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-                AbstractShape abstractText = createText(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), drawingDTO.getFontSize(), 40, 20, drawingDTO.getText() );
+                AbstractShape abstractText = createText(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), drawingDTO.getFontSize(), 40, 20, drawingDTO.getText());
                 shape = abstractText.getShape();
                 shape.draw(localCoords.getX(), localCoords.getY());
                 break;
             }
+            case "Favorite": {
+                ShapeInterface favoriteShape = drawingDTO.getShape();
+                if (favoriteShape != null) {
+                   Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
+                   favoriteShape.draw(localCoords.getX(), localCoords.getY());
+                   shape = favoriteShape;
+                   break;
+                }
+            }
+
         }
 
         if (shape != null) {
