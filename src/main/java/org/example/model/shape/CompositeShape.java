@@ -15,6 +15,14 @@ public class CompositeShape implements CompositeShapeInterface {
     private final Group groupNode = new Group();
     private final List<ShapeInterface> children = new ArrayList<>();
 
+    public CompositeShape() {
+        // Metti il gruppo all’origine (0,0) e abiliti il pickOnBounds
+        groupNode.setLayoutX(0);
+        groupNode.setLayoutY(0);
+        groupNode.setPickOnBounds(true);
+        groupNode.setUserData(this);
+    }
+
     public CompositeShape(List<ShapeInterface> shapes) {
         // 1) calcola l’origin del gruppo
         double minX = shapes.stream()
@@ -75,12 +83,40 @@ public class CompositeShape implements CompositeShapeInterface {
 
     @Override
     public ShapeInterface cloneShape() {
-        List<ShapeInterface> clones = new ArrayList<>();
-        for (ShapeInterface s : children) {
-            clones.add(s.cloneShape());
+        // 1) calcolo il bounding box dell’intero gruppo originale
+        Bounds oldBounds = groupNode.getBoundsInParent();
+        double oldMinX = oldBounds.getMinX();
+        double oldMinY = oldBounds.getMinY();
+
+        // 2) creo un nuovo gruppo vuoto
+        CompositeShapeInterface copyGroup = new CompositeShape();
+
+        // 3) per ciascun figlio del gruppo originale...
+        for (ShapeInterface child : this.getChildren()) {
+            //    a) clono il figlio
+            ShapeInterface childClone = child.cloneShape();
+
+            //    b) recupero la sua posizione assoluta corrente
+            double childX = child.getX();
+            double childY = child.getY();
+
+            //    c) calcolo le coordinate “relative” all’interno del nuovo gruppo
+            double relX = childX - oldMinX;
+            double relY = childY - oldMinY;
+
+            //    d) disegno il clone nel nuovo gruppo usando il metodo generico draw(X,Y)
+            childClone.draw(relX, relY);
+
+            //    e) aggiungo il nodo grafico del clone al groupNode del gruppo di destinazione
+            ((Group) copyGroup.getNode()).getChildren().add(childClone.getNode());
+            copyGroup.getChildren().add(childClone);
         }
-        return new CompositeShape(clones);
+
+        // 4) restituisco il gruppo “ancorato a (0,0)” in locale
+        return (ShapeInterface) copyGroup;
     }
+
+
 
     @Override
     public void moveBy(double dx, double dy) {
@@ -346,8 +382,9 @@ public class CompositeShape implements CompositeShapeInterface {
 
     @Override
     public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {
-        return Optional.empty();
+       return Optional.empty();
     }
+
 
     ///fino a qui
     @Override

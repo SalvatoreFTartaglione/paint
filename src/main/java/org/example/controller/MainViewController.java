@@ -176,7 +176,7 @@ public class MainViewController implements Initializable {
             // 2) solo sul click sinistro
             if (evt.getButton() != MouseButton.PRIMARY) return;
 
-            // 3) se ho già selezionato delle shape e il click non è sopra una di esse, allora clear
+            // 2) se ho già selezionato delle shape e il click non è sopra una di esse, allora clear
             if (!currentSelection.isEmpty()) {
                 boolean clickSuSelezionate = currentSelection.stream()
                         .map(ShapeInterface::getNode)
@@ -226,6 +226,12 @@ public class MainViewController implements Initializable {
             }
         });
 
+        drawingPane.addEventHandler(MouseEvent.MOUSE_PRESSED, evt -> {
+            // Se c’è un contextMenu aperto, lo chiudo
+            if (contextMenu != null && contextMenu.isShowing()) {
+                contextMenu.hide();
+            }
+        });
 
 
         // stops dragging with mouse of the drawing pane
@@ -594,6 +600,7 @@ public class MainViewController implements Initializable {
                 }
             }
 
+
             @Override
             public void onCopy() {
                 CommandInterface cmd = new CopyCommand(shape, shapeReceiver);
@@ -652,8 +659,8 @@ public class MainViewController implements Initializable {
                 makeDraggable(composite);
                 clearSelection();
             });
-            ContextMenu onlyGroup = new ContextMenu(groupItem);
-            onlyGroup.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+            contextMenu = new ContextMenu(groupItem);
+            contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
             return;
         }
 
@@ -841,97 +848,103 @@ public class MainViewController implements Initializable {
 
     //Ho dovuto modificarlo perchè facendo il Draggable sulla figura Component non andava bene
     private void makeDraggable(ShapeInterface shape) {
-        // Array temporanei per tracciare posizioni
-        final Point2D[] dragStartScene = new Point2D[1];
+        final Point2D[] shapeStartPosition = new Point2D[1];
         final Point2D[] nodeStartTranslate = new Point2D[1];
+        final Point2D[] dragStartScene = new Point2D[1];
+        final Bounds[] initialBounds = new Bounds[1];
+
         Node node = shape.getNode();
 
-        // Al click iniziale salvo:
-        //  - dragStart[0]: coordinate di mouse in scena
-        //  - shapeStartPosition[0]: posizione logica della shape (x,y)
-        //  - dragStartScene[0]: coordinate di mouse in scena (per feedback visivo)
-        //  - nodeStartTranslate[0]: translateX/Y correnti del nodo
         node.setOnMousePressed(event -> {
-            dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
-            shapeStartPosition[0] = new Point2D(shape.getX(), shape.getY());
-
+            // 1) Posizione iniziale del mouse
             dragStartScene[0] = new Point2D(event.getSceneX(), event.getSceneY());
+            // 2) Posizione logica iniziale della shape (usata poi nel DragCommand)
+            shapeStartPosition[0] = new Point2D(shape.getX(), shape.getY());
+            // 3) Bounds iniziali (per i calcoli di clamp del drag)
+            initialBounds[0] = node.getBoundsInParent();
+            // 4) Translate corrente del nodo (di solito 0)
             nodeStartTranslate[0] = new Point2D(node.getTranslateX(), node.getTranslateY());
+
             event.consume();
         });
 
-        // Durante il drag:
-        // 1) sposto la shape logicamente via shape.moveBy(...)
-        // 2) applico un feedback visivo con node.setTranslateX/Y
         node.setOnMouseDragged(event -> {
             isDragging0 = true;
             hasDragged = true;
 
-            // 1) Calcolo delta logico in coordinate di scena
-            double deltaX = event.getSceneX() - dragStart[0].getX();
-            double deltaY = event.getSceneY() - dragStart[0].getY();
+            // Delta in pixel sullo schermo
+            double deltaSceneX = event.getSceneX() - dragStartScene[0].getX();
+            double deltaSceneY = event.getSceneY() - dragStartScene[0].getY();
 
-            // Dati del pane per il controllo dei limiti
+            // Delta logico (divido per zoom)
             double zoom = drawingPane.getScaleX();
-            double paneWidth = drawingPane.getPrefWidth() * zoom;
-            double paneHeight = drawingPane.getPrefHeight() * zoom;
-            double extraMargin = 20;
+            double rawVisDX = deltaSceneX / zoom;
+            double rawVisDY = deltaSceneY / zoom;
 
-            // Se la shape può muoversi in quel delta, sposto logicamente
-            if (shape.canMoveBy(deltaX, deltaY, paneWidth, paneHeight, zoom, extraMargin)) {
-                shape.moveBy(deltaX, deltaY);
-                dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
-            }
+            // Limiti visivi consentiti per non uscire dai bordi neri (5px)
+            Bounds b0 = initialBounds[0];
+            double initMinX = b0.getMinX();
+            double initMaxX = b0.getMaxX();
+            double initMinY = b0.getMinY();
+            double initMaxY = b0.getMaxY();
 
-            // 2) Feedback visivo: normalizzo delta su fattore zoom e applico come translate
-            double visDX = (event.getSceneX() - dragStartScene[0].getX()) / currentZoom;
-            double visDY = (event.getSceneY() - dragStartScene[0].getY()) / currentZoom;
-            node.setTranslateX(nodeStartTranslate[0].getX() + visDX);
-            node.setTranslateY(nodeStartTranslate[0].getY() + visDY);
+            double BORDER = 5.0;
+            double innerMinX = BORDER;
+            double innerMinY = BORDER;
+            double innerMaxX = drawingPane.getWidth()  - BORDER;
+            double innerMaxY = drawingPane.getHeight() - BORDER;
+
+            double minVisDX = innerMinX - initMinX;
+            double maxVisDX = innerMaxX - initMaxX;
+            double minVisDY = innerMinY - initMinY;
+            double maxVisDY = innerMaxY - initMaxY;
+
+            double clampedVisDX = Math.max(minVisDX, Math.min(rawVisDX, maxVisDX));
+            double clampedVisDY = Math.max(minVisDY, Math.min(rawVisDY, maxVisDY));
+
+            // Applico il solo feedback visivo (translate), senza toccare shape.moveBy
+            node.setTranslateX(nodeStartTranslate[0].getX() + clampedVisDX);
+            node.setTranslateY(nodeStartTranslate[0].getY() + clampedVisDY);
 
             event.consume();
         });
 
-        // Al rilascio, costruisco il DragCommand effettivo basato sulla differenza di translate
         node.setOnMouseReleased(event -> {
+            // Calcolo quanto abbiamo spostato “visivamente”
             double totalDX = node.getTranslateX() - nodeStartTranslate[0].getX();
             double totalDY = node.getTranslateY() - nodeStartTranslate[0].getY();
 
-            if (Math.abs(totalDX) > 0.5 || Math.abs(totalDY) > 0.5) {
-                // 1) Ripristino il nodo nella sua posizione visiva originaria
-                node.setTranslateX(nodeStartTranslate[0].getX());
-                node.setTranslateY(nodeStartTranslate[0].getY());
-
-                // 2) Eseguo il comando di spostamento vero (DragCommand)
-                DragCommand dragCmd = new DragCommand(shape, totalDX, totalDY, draggingReceiver);
-                invoker.executeCommand(dragCmd);
-
-                // 3) Se la shape è stata effettivamente spostata (hasDragged), controllo
-                //    se serve un rollback/undo parcializzato:
-                if (hasDragged) {
-                    Point2D currentPos = new Point2D(shape.getX(), shape.getY());
-                    double totalDeltaX = currentPos.getX() - shapeStartPosition[0].getX();
-                    double totalDeltaY = currentPos.getY() - shapeStartPosition[0].getY();
-
-                    if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
-                        // rollback logico
-                        shape.moveBy(-totalDeltaX, -totalDeltaY);
-                        // e poi comando di Drag per rendere coerente l'history
-                        DragCommand rollbackCmd =
-                                new DragCommand(shape, totalDeltaX, totalDeltaY, draggingReceiver);
-                        invoker.executeCommand(rollbackCmd);
-                    }
-
-                    // Resetto i flag di dragging dopo un tick JavaFX
-                    Platform.runLater(() -> {
-                        isDragging0 = false;
-                        hasDragged = false;
-                    });
-                }
+            // Se non ci siamo mossi abbastanza, usciamo senza creare comandi
+            if (Math.abs(totalDX) < 0.5 && Math.abs(totalDY) < 0.5) {
+                node.setTranslateX(0);
+                node.setTranslateY(0);
+                Platform.runLater(() -> {
+                    isDragging0 = false;
+                    hasDragged = false;
+                });
+                event.consume();
+                return;
             }
+
+            // 1) Ripulisco il feedback visivo: riporto translateX/Y a zero
+            node.setTranslateX(nodeStartTranslate[0].getX());
+            node.setTranslateY(nodeStartTranslate[0].getY());
+
+            // 2) Eseguo un unico DragCommand (che sposta “veramente” la shape)
+            DragCommand dragCmd = new DragCommand(shape, totalDX, totalDY, draggingReceiver);
+            invoker.executeCommand(dragCmd);
+
+            // 3) Reset dei flag di dragging
+            Platform.runLater(() -> {
+                isDragging0 = false;
+                hasDragged = false;
+            });
+
             event.consume();
         });
     }
+
+
 
 
 
@@ -1031,21 +1044,18 @@ public class MainViewController implements Initializable {
     @FXML
     private void loadFile(ActionEvent event) {
         canvasImporter = new CanvasImporter(drawingPane);
-        // Check if canvas is empty
-        if ( ! drawingPane.getChildren().isEmpty() ) {
-            loadManager(canvasImporter);
-            // Assign event handlers to all loaded shapes
-            attachEventHandlersToAllShapes();
-        }
-        else {
-            // Clear workspace from older shapes
-            drawingPane.getChildren().clear();
-            // Execute load
-            LoadCommand load = new LoadCommand(canvasImporter);
-            invoker.executeLoadCommand(load);
-            // Assign event handlers to all loaded shapes and make nodes draggable
-            attachEventHandlersToAllShapes();
-        }
+        // Rimuovo SOLO i nodi “shape” già presenti, lasciando selectionRect al suo posto
+        drawingPane.getChildren().removeIf(node -> node.getUserData() instanceof ShapeInterface);
+
+        // Eseguo il caricamento
+        LoadCommand load = new LoadCommand(canvasImporter);
+        invoker.executeLoadCommand(load);
+
+        // Riattacco gli handler e rendo i nodi trascinabili
+        attachEventHandlersToAllShapes();
+
+        // Assicuro che selectionRect rimanga in primo piano
+        selectionRect.toFront();
     }
 
     /**

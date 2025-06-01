@@ -38,7 +38,17 @@ public class EllipseShape implements ShapeInterface {
 
     @Override
     public ShapeInterface cloneShape() {
-        return new EllipseShape(this.getStrokeColor(), this.getFillColor(), this.getCustomStrokeWidth(), this.getWidth(), this.getHeight());
+        EllipseShape clone = new EllipseShape(
+                this.getStrokeColor(),
+                this.getFillColor(),
+                this.getCustomStrokeWidth(),
+                this.getWidth(),
+                this.getHeight()
+        );
+
+        clone.setX(this.getX());
+        clone.setY(this.getY());
+        return clone;
     }
 
     @Override
