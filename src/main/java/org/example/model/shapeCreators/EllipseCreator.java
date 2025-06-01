@@ -19,8 +19,8 @@ public class EllipseCreator extends AbstractShape {
      * @return a new instance of {@code EllipseShape}
      */
     @Override
-    public ShapeInterface createShape(Color stroke, Color fillingColor, int strokeWidth, double width, double height, String content, double scaleX, double scaleY) {
-        return new EllipseShape(stroke, fillingColor, strokeWidth, width, height);
+    public ShapeInterface createShape(Color stroke, Color fillingColor, int strokeWidth, double width, double height, String content, double scaleX, double scaleY, double angle) {
+        return new EllipseShape(stroke, fillingColor, strokeWidth, width, height, angle);
     }
 
 }

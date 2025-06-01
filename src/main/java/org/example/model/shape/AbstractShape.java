@@ -22,7 +22,7 @@ public abstract class AbstractShape {
      * @param height the shape height
      * @return the created shape
      */
-    public abstract ShapeInterface createShape(Color strokeColor, Color fillingColor, int strokeColorWidth, double width, double height, String content, double scaleX, double scaleY);
+    public abstract ShapeInterface createShape(Color strokeColor, Color fillingColor, int strokeColorWidth, double width, double height, String content, double scaleX, double scaleY, double angle);
 
     /**
      * Creates and stores a shape using the subclass-defined {@code createShape} method.
@@ -34,8 +34,8 @@ public abstract class AbstractShape {
      * @param height the height of the shape
      */
     // Concrete method that creates a shape
-    public void creationOfShape(Color strokeColor, Color fillingColor, int strokeColorWidth, double width, double height, String content, double scaleX, double scaleY) {
-        shape = this.createShape(strokeColor, fillingColor, strokeColorWidth, width, height, content, scaleX, scaleY);
+    public void creationOfShape(Color strokeColor, Color fillingColor, int strokeColorWidth, double width, double height, String content, double scaleX, double scaleY, double angle) {
+        shape = this.createShape(strokeColor, fillingColor, strokeColorWidth, width, height, content, scaleX, scaleY, angle);
     }
 
     public ShapeInterface getShape() {

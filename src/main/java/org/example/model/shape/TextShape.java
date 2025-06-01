@@ -17,7 +17,7 @@ public class TextShape implements ShapeInterface {
     private boolean isFlippedX = false;
     private boolean isFlippedY = false;
 
-    public TextShape(String content, Color strokeColor, Color fillingColor, double width, double height, double strokeWidth, double scaleX, double scaleY) {
+    public TextShape(String content, Color strokeColor, Color fillingColor, double width, double height, double strokeWidth, double scaleX, double scaleY, double angle) {
         textShape = new Text(content);
         textShape.setStroke(strokeColor);
         textShape.setFill(fillingColor);
@@ -26,6 +26,7 @@ public class TextShape implements ShapeInterface {
         textShape.setFont(Font.font(strokeWidth));
         baseWidth = textShape.getLayoutBounds().getWidth();
         baseHeight = textShape.getLayoutBounds().getHeight();
+        textShape.setRotate(angle);
         setScaleX(scaleX);
         setScaleY(scaleY);
     }
@@ -58,7 +59,7 @@ public class TextShape implements ShapeInterface {
 
     @Override
     public ShapeInterface cloneShape() {
-        TextShape clone = new TextShape(getText(), getStrokeColor(), getFillColor(), getWidth(), getHeight(), getCustomStrokeWidth(), getScaleX(), getScaleY());
+        TextShape clone = new TextShape(getText(), getStrokeColor(), getFillColor(), getWidth(), getHeight(), getCustomStrokeWidth(), getScaleX(), getScaleY(), getAngle());
         clone.draw(getX(), getY());
         return clone;
     }
@@ -323,6 +324,16 @@ public class TextShape implements ShapeInterface {
     }
 
     @Override
+    public void setAngle(double angle) {
+        textShape.setRotate(angle);
+    }
+
+    @Override
+    public double getAngle() {
+        return textShape.getRotate();
+    }
+
+    @Override
     public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {
         double x = textShape.getX();
         double y = textShape.getY();
@@ -360,7 +371,8 @@ public class TextShape implements ShapeInterface {
     @Override
     public String toString() {
         return "Text;" + textShape.getText() + ";" + textShape.getStroke() + ";" + textShape.getFill() + ";" +
-                textShape.getX() + ";" + textShape.getY() + ";" + getCustomStrokeWidth() + ";" + getScaleX() + ";" + getScaleY() + "\n";
+                textShape.getX() + ";" + textShape.getY() + ";" + getCustomStrokeWidth() + ";" + getScaleX() + ";"
+                + getScaleY() + ";" + this.getAngle() + '\n';
     }
 
 

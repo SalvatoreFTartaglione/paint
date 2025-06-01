@@ -14,10 +14,11 @@ public class LineShape implements ShapeInterface{
     private Double[] points;
 
 
-    public LineShape(Color stroke, double strokeWidth) {
+    public LineShape(Color stroke, double strokeWidth, double angle) {
         lineShape = new Line();
         lineShape.setStroke(stroke);
         lineShape.setStrokeWidth(strokeWidth);
+        lineShape.setRotate(angle);
     }
 
 
@@ -77,7 +78,7 @@ public class LineShape implements ShapeInterface{
 
     @Override
     public ShapeInterface cloneShape() {
-        LineShape cloned = new LineShape(this.getStrokeColor(), this.getCustomStrokeWidth());
+        LineShape cloned = new LineShape(this.getStrokeColor(), this.getCustomStrokeWidth(), this.getAngle());
 
         if (this.points != null && this.points.length == 4) {
             // Copia profonda dell'array dei punti
@@ -336,17 +337,6 @@ public class LineShape implements ShapeInterface{
         throw new UnsupportedOperationException("Feature not supported.");
     }
 
-    /**
-     * @return String
-     * Prints the propeties of the shape
-     */
-    @Override
-    public String toString() {
-        return "Line" + ";" + lineShape.getStroke() + ";" + lineShape.getEndX() + ";" + lineShape.getEndY() + ";"
-                + lineShape.getStartX() + ";" + lineShape.getStartY() + ";" + lineShape.getStrokeWidth()+ "\n";
-    }
-
-
     @Override
     public boolean canMoveBy(double deltaX, double deltaY, double paneWidth, double paneHeight, double zoom, double margin) {
         // Ottieni i punti attuali
@@ -528,6 +518,28 @@ public class LineShape implements ShapeInterface{
 
         return Optional.of(new Point2D(mirroredCenterX, mirroredCenterY));
     }
+
+    @Override
+    public void setAngle(double angle) {
+        lineShape.setRotate(angle);
+    }
+
+    @Override
+    public double getAngle() {
+        return lineShape.getRotate();
+    }
+
+    /**
+     * @return String
+     * Prints the propeties of the shape
+     */
+    @Override
+    public String toString() {
+        return "Line" + ";" + lineShape.getStroke() + ";" + lineShape.getEndX() + ";" + lineShape.getEndY() + ";"
+                + lineShape.getStartX() + ";" + lineShape.getStartY() + ";" + lineShape.getStrokeWidth() + ";"
+                + this.getAngle() + '\n';
+    }
+
 
 
 }

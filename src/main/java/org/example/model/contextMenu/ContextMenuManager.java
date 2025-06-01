@@ -1,9 +1,10 @@
-package org.example.model.shape;
+package org.example.model.contextMenu;
 
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import org.example.model.shape.ShapeInterface;
 
 public class ContextMenuManager {
 
@@ -31,15 +32,15 @@ public class ContextMenuManager {
         ColorPicker fillPicker = null;
         ColorPicker strokePicker = new ColorPicker(shape.getStrokeColor());
 
-        // Resize mode buttons
-        MenuItem stretch = new MenuItem("Stretch");
-        MenuItem resize  = new MenuItem("Resize");
-
         // Resize panels (initially hidden)
         CustomMenuItem stretchPanel = createStretchItem(shape, actions::onStretch);
         CustomMenuItem resizePanel  = createResizeItem(shape, actions::onResize);
         stretchPanel.setVisible(false);
         resizePanel.setVisible(false);
+
+        // Rotate panel (initially hidden)
+        CustomMenuItem rotatePanel  = createRotateItem(shape, actions::onRotate);
+        rotatePanel.setVisible(false);
 
         MenuItem ungroupItem = null;
 
@@ -101,9 +102,19 @@ public class ContextMenuManager {
             stretchPanel.setVisible(true);
         });
 
+        // Rotate shape
+        Label rotateLabel = new Label("Rotate");
+        CustomMenuItem rotateBtn = new CustomMenuItem(rotateLabel);
+        rotateBtn.setHideOnClick(false);
+        rotateBtn.setOnAction(e -> {
+            System.out.println("Rotating shape");
+            rotatePanel.setVisible(true);
+        });
+
+        // Mirroring
         Menu mirroringMenu = new Menu("Flip");
 
-        // Voci del sottomenù
+        // Submenu items
         MenuItem verticalUp = new MenuItem("Vertical Up");
         verticalUp.setOnAction(e -> actions.onMirrorUp());
 
@@ -122,9 +133,7 @@ public class ContextMenuManager {
         MenuItem horizontalCenter = new MenuItem("Horizontal Around Center");
         horizontalCenter.setOnAction(e -> actions.onMirrorHorizontalAroundCenter());
 
-
-
-        // Aggiunta voci al sottomenù
+        // Add elements to submenu
         mirroringMenu.getItems().addAll(
                 verticalUp, verticalDown,
                 verticalCenter, horizontalLeft,
@@ -132,29 +141,24 @@ public class ContextMenuManager {
                 horizontalCenter
         );
 
-
         // Save shape as favorite
         Label addToFavoritesLabel = new Label("Add to Favorites");
         CustomMenuItem addToFavorites = new CustomMenuItem(addToFavoritesLabel);
         addToFavorites.setHideOnClick(false);
         addToFavorites.setOnAction(e -> {
             TextInputDialog dialog = new TextInputDialog("MyFavorite");
-            dialog.setHeaderText("Enter a name for this favorite shape:");
-            dialog.showAndWait().ifPresent(name -> {
-                actions.onAddToFavoritesWithName(name);  // da definire nel controller
-            });
+            dialog.setHeaderText("Enter a name for favorite shape:");
+            dialog.showAndWait().ifPresent(actions::onAddToFavoritesWithName);
         });
 
         // Add items
-        contextMenu.getItems().addAll(numericBtn, visualBtn, resizePanel, stretchPanel);
+        contextMenu.getItems().addAll(numericBtn, visualBtn, resizePanel, stretchPanel, rotatePanel);
         if(ungroupItem != null) {
-            contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu, ungroupItem, addToFavorites);
+            contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, ungroupItem, rotateBtn, addToFavorites, mirroringMenu);
         }
         else{
-            contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu, addToFavorites);
+            contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, rotateBtn, addToFavorites, mirroringMenu);
         }
-        //contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
-        //contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu, addToFavorites);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }
@@ -288,6 +292,56 @@ public class ContextMenuManager {
         return item;
     }
 
+    private static CustomMenuItem createRotateItem(ShapeInterface shape, RotateHandler rotateHandler) {
+
+        double currentAngle = shape.getAngle();
+        TextField angleField = new TextField(String.format("%.1f", currentAngle));
+        angleField.setPrefWidth(80);
+
+        Button applyBtn = new Button("Apply");
+        applyBtn.setPrefWidth(60);
+
+        // Warning label per input non validi
+        Label warningLabel = new Label();
+        warningLabel.setStyle("-fx-text-fill: red;");
+
+        HBox inputsBox = new HBox(10, new Label("Angle (°):"), angleField, applyBtn);
+        VBox wrapper = new VBox(5, inputsBox, warningLabel);
+        CustomMenuItem item = new CustomMenuItem(wrapper);
+        item.setHideOnClick(false);
+
+        Runnable apply = () -> {
+            try {
+                double newAngle = Double.parseDouble(angleField.getText());
+
+                // Validazione: deve essere tra 0 e 360
+                if (newAngle >= 0 && newAngle <= 360) {
+                    double oldAngle = shape.getAngle();
+
+                    // Reset stile per input valido
+                    angleField.setStyle("");
+                    warningLabel.setText("");
+
+                    rotateHandler.onRotate(oldAngle, newAngle);
+                } else {
+                    // Highlight invalid field
+                    angleField.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
+                    warningLabel.setText("Angle must be between 0 and 360 degrees");
+                }
+            } catch (NumberFormatException e) {
+                angleField.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
+                warningLabel.setText("Invalid number format.");
+            }
+        };
+
+        // Apply changes when button is pressed
+        applyBtn.setOnAction(e -> apply.run());
+        // Gestisce l'evento Enter sul campo di testo
+        angleField.setOnAction(e -> apply.run());
+
+        return item;
+    }
+
     @FunctionalInterface
     private interface ColorChangeHandler {
         void onColorChanged(Color color);
@@ -301,5 +355,10 @@ public class ContextMenuManager {
     @FunctionalInterface
     public interface ResizeHandler {
         void onResize(double oldWidth, double oldHeight, double newSize);
+    }
+
+    @FunctionalInterface
+    public interface RotateHandler {
+        void onRotate(double oldAngle, double newAngle);
     }
 }

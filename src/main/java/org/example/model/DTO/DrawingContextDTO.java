@@ -28,7 +28,7 @@ public class DrawingContextDTO {
     private ScrollPane scrollPane;
     private Group mainCanvasContainer;
     private List<Point2D> polygonPoints = new ArrayList<>();
-    private static final double TOLERANCE = 7.0;
+    private static final double TOLERANCE = 3.0;
     private ShapeInterface shape;                                           // utils for favorite shapes
 
     public Group getMainCanvasContainer() {

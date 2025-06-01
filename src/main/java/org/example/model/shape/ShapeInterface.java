@@ -101,4 +101,8 @@ public interface ShapeInterface {
     void mirrorHorizontallyAroundCenter();
     void mirrorVerticallyAroundCenter();
 
+    // Angle utils
+    void setAngle(double angle);
+    double getAngle();
+
 }

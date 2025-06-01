@@ -38,6 +38,7 @@ public class PositionManagerReceiver {
     public void stretch(double newWidth, double newHeight){
         shape.stretch(newWidth, newHeight);
     }
+
     public void resetResize(double oldWidth, double oldHeight){
         shape.setSize(oldWidth, oldHeight);
     }
@@ -61,13 +62,19 @@ public class PositionManagerReceiver {
     public void mirrorRight(){
         shape.mirrorRight();
     }
+
     public void mirrorHorizontal(){
         shape.mirrorHorizontallyAroundCenter();
     }
+
     public void mirrorVertical(){
         shape.mirrorVerticallyAroundCenter();
     }
 
     public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {return shape.simulateMirror(direction);}
+
+    public void setAngle(double angle){
+        shape.getNode().setRotate(angle);
+    }
 
 }

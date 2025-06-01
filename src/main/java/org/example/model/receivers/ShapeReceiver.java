@@ -12,6 +12,7 @@ import org.example.model.shape.TextShape;
 import java.util.Stack;
 
 public class ShapeReceiver {
+
     private ShapeInterface shape;
     private boolean isCutted = false;
     private DrawingContextDTO drawingDTO;
@@ -110,60 +111,12 @@ public class ShapeReceiver {
         }
     }
 
-    // deletedShapes section:
-    /*public void delete(DrawingContextDTO drawingDTO, ShapeInterface shape) {
-        this.deletedShapesStack.push(shape);
-
-        int indexNodeToDelete = drawingDTO.getDrawingPane().getChildren().indexOf(shape.getNode());
-        if (indexNodeToDelete != -1) {
-            drawingDTO.getDrawingPane().getChildren().remove(indexNodeToDelete);
-        }
-
-    }*/
-
     public void delete(DrawingContextDTO drawingDTO, ShapeInterface shape) {
         deletedShapesStack.push(shape);
         deletedShapePositions.push(shape.getRestorePosition());
 
         drawingDTO.getDrawingPane().getChildren().remove(shape.getNode());
     }
-
-
-    /*public void undoDelete(DrawingContextDTO drawingDTO) {
-        if (!deletedShapesStack.isEmpty()) {
-            ShapeInterface restoredShape = deletedShapesStack.pop();
-
-            if (restoredShape != null) {
-
-                double x = restoredShape.getX();
-                System.out.println("X: " + x);
-                double y = restoredShape.getY();
-                System.out.println("Y: " + y);
-
-                if (restoredShape instanceof LineShape) {
-                    restoredShape.draw(restoredShape.getPoints());
-                } else {
-                    if (restoredShape instanceof TextShape){
-                        System.out.println("Sto restorando un text");
-                        TextShape textShape = (TextShape) restoredShape;
-                        System.out.println("ScaleX: " + textShape.getScaleX() + " ScaleY: " + textShape.getScaleY());
-                    }
-                    restoredShape.draw(x, y);
-                }
-
-//                // Inserisci la forma nel DTO
-//                drawingDTO.setStartPoint(null); // reset per sicurezza
-//                drawingDTO.setDrawingPane(drawingDTO.getDrawingPane());
-//                drawingDTO.setBorderColor(restoredShape.getStrokeColor());
-//                drawingDTO.setFillColor(restoredShape.getFillColor());
-
-                 //AddToCanvasReceiver addToCanvasReceiver = new AddToCanvasReceiver(drawingDTO);
-//                addToCanvasReceiver.addClonedShape(restoredShape);
-                drawingDTO.getDrawingPane().getChildren().add(restoredShape.getNode());
-            }
-
-        }
-    }*/
 
     public void undoDelete(DrawingContextDTO drawingDTO) {
         if (!deletedShapesStack.isEmpty()) {

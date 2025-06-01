@@ -37,7 +37,7 @@ public class AddToCanvasReceiver {
                 drawingDTO.getDrawingPane().getChildren().removeAll(previewCircles);
                 previewCircles.clear();
                 Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-                AbstractShape abstractEllipse = createEllipse(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 100, 50);
+                AbstractShape abstractEllipse = createEllipse(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 100, 50, 0);
                 shape = abstractEllipse.getShape();
                 Point2D clampedCoords = clampPosition(localCoords.getX(), localCoords.getY(), shape.getWidth(), shape.getHeight());
                 shape.draw(clampedCoords.getX(), clampedCoords.getY());
@@ -49,7 +49,7 @@ public class AddToCanvasReceiver {
                 drawingDTO.getDrawingPane().getChildren().removeAll(previewCircles);
                 previewCircles.clear();
                 Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-                AbstractShape abstractRectangle = createRectangle(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 120, 60);
+                AbstractShape abstractRectangle = createRectangle(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 120, 60, 0);
                 shape = abstractRectangle.getShape();
                 Point2D clampedCoords = clampPosition(localCoords.getX(), localCoords.getY(), shape.getWidth(), shape.getHeight());
                 shape.draw(clampedCoords.getX(), clampedCoords.getY());
@@ -68,7 +68,7 @@ public class AddToCanvasReceiver {
                     canAdd = false;
                     return null;
                 } else {
-                    AbstractShape abstractLine = createLine(drawingDTO.getBorderColor(), 9);
+                    AbstractShape abstractLine = createLine(drawingDTO.getBorderColor(), 9, 0);
                     shape = abstractLine.getShape();
                     Double[] points = {
                             localCoords.getX(), localCoords.getY(),
@@ -98,7 +98,7 @@ public class AddToCanvasReceiver {
                 drawingDTO.getDrawingPane().getChildren().removeAll(previewCircles);
                 previewCircles.clear();
                 Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-                AbstractShape abstractText = createText(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), drawingDTO.getFontSize(), 40, 20, drawingDTO.getText());
+                AbstractShape abstractText = createText(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), drawingDTO.getFontSize(), 40, 20, drawingDTO.getText(), 0);
                 shape = abstractText.getShape();
                 shape.draw(localCoords.getX(), localCoords.getY());
                 canAdd = true;
@@ -125,7 +125,7 @@ public class AddToCanvasReceiver {
                     Double[] doublePoints = doubleList.toArray(new Double[0]);
                     // Draw the polygon on the canvas
                     // Invoke the polygon creator
-                    AbstractShape abstractPolygon = createPolygon(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40);
+                    AbstractShape abstractPolygon = createPolygon(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40, 0);
                     shape = abstractPolygon.getShape();
                     shape.draw(doublePoints);
                     // Remove previews after 500ms from add
@@ -193,33 +193,33 @@ public class AddToCanvasReceiver {
         node.toFront();
     }
 
-    private AbstractShape createRectangle(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
+    private AbstractShape createRectangle(Color strokeColor, Color fillColor, int borderWidth, double width, double height, double angle) {
         AbstractShape rectangle = new RectangleCreator();
-        rectangle.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null, 0.0, 0.0);
+        rectangle.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null, 0.0, 0.0, angle);
         return rectangle;
     }
 
-    private AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
+    private AbstractShape createEllipse(Color strokeColor, Color fillColor, int borderWidth, double width, double height, double angle) {
         AbstractShape ellipse = new EllipseCreator();
-        ellipse.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null, 0.0, 0.0);
+        ellipse.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null, 0.0, 0.0, angle);
         return ellipse;
     }
 
-    private AbstractShape createLine(Color strokeColor, double strokeWidth){
+    private AbstractShape createLine(Color strokeColor, double strokeWidth, double angle){
         AbstractShape line = new LineCreator();
-        line.creationOfShape(strokeColor, null, (int) strokeWidth, 0, 0, null, 1.0, 1.0);
+        line.creationOfShape(strokeColor, null, (int) strokeWidth, 0, 0, null, 1.0, 1.0, angle);
         return line;
     }
 
-    private AbstractShape createText(Color strokeColor, Color fillColor, int borderWidth, double width, double height, String content) {
+    private AbstractShape createText(Color strokeColor, Color fillColor, int borderWidth, double width, double height, String content, double angle) {
         AbstractShape textCreator = new TextCreator();
-        textCreator.creationOfShape(strokeColor, fillColor, borderWidth, width, height, content, 1.0, 1.0);
+        textCreator.creationOfShape(strokeColor, fillColor, borderWidth, width, height, content, 1.0, 1.0, angle);
         return textCreator;
     }
 
-    private AbstractShape createPolygon(Color strokeColor, Color fillColor, int borderWidth, double width, double height) {
+    private AbstractShape createPolygon(Color strokeColor, Color fillColor, int borderWidth, double width, double height, double angle) {
         AbstractShape polygonCreator = new PolygonCreator();
-        polygonCreator.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null, 1.0, 1.0);
+        polygonCreator.creationOfShape(strokeColor, fillColor, borderWidth, width, height, null, 1.0, 1.0, angle);
         return polygonCreator;
     }
 }

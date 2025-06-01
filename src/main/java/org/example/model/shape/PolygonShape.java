@@ -12,13 +12,14 @@ public class PolygonShape implements ShapeInterface {
     private final Polygon polygonShape;
     private Double[] points;
 
-    public PolygonShape(Color stroke, Color fill, double strokeWidth, double ScaleX, double ScaleY) {
+    public PolygonShape(Color stroke, Color fill, double strokeWidth, double ScaleX, double ScaleY, double angle) {
         this.polygonShape = new Polygon();
         polygonShape.setStroke(stroke);
         polygonShape.setFill(fill);
         polygonShape.setStrokeWidth(strokeWidth);
         polygonShape.setScaleX(ScaleX);
         polygonShape.setScaleY(ScaleY);
+        polygonShape.setRotate(angle);
     }
 
     @Override
@@ -65,7 +66,7 @@ public class PolygonShape implements ShapeInterface {
 
     @Override
     public ShapeInterface cloneShape() {
-        PolygonShape clone = new PolygonShape(this.getStrokeColor(), this.getFillColor(), this.getCustomStrokeWidth(), this.getScaleX(), this.getScaleY());
+        PolygonShape clone = new PolygonShape(this.getStrokeColor(), this.getFillColor(), this.getCustomStrokeWidth(), this.getScaleX(), this.getScaleY(), this.getAngle());
         clone.draw(getPoints());
         return clone;
     }
@@ -396,9 +397,20 @@ public class PolygonShape implements ShapeInterface {
     }
 
     @Override
+    public void setAngle(double angle) {
+        polygonShape.setRotate(angle);
+    }
+
+    @Override
+    public double getAngle() {
+        return polygonShape.getRotate();
+    }
+
+    @Override
     public String toString() {
         return "Polygon" + ";" + this.getStrokeColor() + ";" + this.getFillColor() + ";" +
-                this.getCustomStrokeWidth() + ";" + this.getScaleX() + ";" + this.getScaleY() + ";" + Arrays.toString(this.getPoints()) + "\n";
+                this.getCustomStrokeWidth() + ";" + this.getScaleX() + ";" + this.getScaleY() + ";" + Arrays.toString(this.getPoints())
+                + ";" + this.getAngle() + '\n';
     }
 
 }

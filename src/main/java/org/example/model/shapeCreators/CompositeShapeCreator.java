@@ -52,7 +52,8 @@ public class CompositeShapeCreator extends AbstractShape {
                                       double height,
                                       String content,
                                       double scaleX,
-                                      double scaleY) {
+                                      double scaleY,
+                                      double angle) {
         // Semplicemente restituisce un nuovo CompositeShape costruito con la lista di figli
         return new CompositeShape(children);
     }

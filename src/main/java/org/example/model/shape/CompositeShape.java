@@ -380,6 +380,16 @@ public class CompositeShape implements CompositeShapeInterface {
     }
 
     @Override
+    public void setAngle(double angle) {
+        groupNode.setRotate(angle);
+    }
+
+    @Override
+    public double getAngle() {
+        return groupNode.getRotate();
+    }
+
+    @Override
     public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {
        return Optional.empty();
     }

@@ -1,4 +1,4 @@
-package org.example.model.shape;
+package org.example.model.contextMenu;
 
 import javafx.scene.paint.Color;
 
@@ -21,4 +21,5 @@ public interface ContextMenuActions {
     void onMirrorVerticalAroundCenter();
     void onAddToFavoritesWithName(String name);
     void onUngroup();
+    void onRotate(double oldAngle, double newAngle);
 }

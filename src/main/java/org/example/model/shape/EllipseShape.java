@@ -12,13 +12,14 @@ public class EllipseShape implements ShapeInterface {
 
     private Ellipse ellipseShape;
 
-    public EllipseShape(Color stroke, Color fill, double strokeWidth, double width, double height) {
+    public EllipseShape(Color stroke, Color fill, double strokeWidth, double width, double height, double angle) {
         this.ellipseShape = new Ellipse();
         ellipseShape.setStroke(stroke);
         ellipseShape.setFill(fill);
         ellipseShape.setRadiusX(width);
         ellipseShape.setRadiusY(height);
         ellipseShape.setStrokeWidth(strokeWidth);
+        ellipseShape.setRotate(angle);
     }
 
     public void draw(double x, double y) {
@@ -43,7 +44,8 @@ public class EllipseShape implements ShapeInterface {
                 this.getFillColor(),
                 this.getCustomStrokeWidth(),
                 this.getWidth(),
-                this.getHeight()
+                this.getHeight(),
+                this.getAngle()
         );
 
         clone.setX(this.getX());
@@ -310,8 +312,19 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
+    public void setAngle(double angle) {
+        ellipseShape.setRotate(angle);
+    }
+
+    @Override
+    public double getAngle() {
+        return ellipseShape.getRotate();
+    }
+
+    @Override
     public String toString() {
         return "Ellipse" + ";" + ellipseShape.getStroke() + ";" + ellipseShape.getFill() + ";" + ellipseShape.getStrokeWidth() + ";"
-                + ellipseShape.getRadiusX() + ";" + ellipseShape.getRadiusY() + ";" + ellipseShape.getCenterX() + ";" + ellipseShape.getCenterY() + "\n";
+                + ellipseShape.getRadiusX() + ";" + ellipseShape.getRadiusY() + ";" + ellipseShape.getCenterX() + ";" +
+                ellipseShape.getCenterY() + ";" + this.getAngle() + "\n";
     }
 }

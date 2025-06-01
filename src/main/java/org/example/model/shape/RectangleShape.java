@@ -11,13 +11,14 @@ public class RectangleShape implements ShapeInterface {
 
     private Rectangle rectangleShape;
 
-    public RectangleShape(Color stroke, Color fill, double width, double height, double strokeWidth) {
+    public RectangleShape(Color stroke, Color fill, double width, double height, double strokeWidth, double angle) {
         rectangleShape = new Rectangle();
         rectangleShape.setStroke(stroke);
         rectangleShape.setFill(fill);
         rectangleShape.setWidth(width);
         rectangleShape.setHeight(height);
         rectangleShape.setStrokeWidth(strokeWidth);
+        rectangleShape.setRotate(angle);
     }
 
     @Override
@@ -43,7 +44,8 @@ public class RectangleShape implements ShapeInterface {
                 this.getFillColor(),
                 this.getWidth(),
                 this.getHeight(),
-                this.getCustomStrokeWidth()
+                this.getCustomStrokeWidth(),
+                this.getAngle()
         );
 
         clone.setX(this.getX());
@@ -336,10 +338,21 @@ public class RectangleShape implements ShapeInterface {
     }
 
     @Override
+    public void setAngle(double angle) {
+        rectangleShape.setRotate(angle);
+    }
+
+    @Override
+    public double getAngle() {
+        return rectangleShape.getRotate();
+    }
+
+    @Override
     public String toString() {
         return "Rectangle" + ";" + rectangleShape.getStroke() + ";" + rectangleShape.getFill() + ";"
                 + rectangleShape.getStrokeWidth() + ";" + rectangleShape.getWidth() + ";"
-                + rectangleShape.getHeight() + ";" + rectangleShape.getX() + ";" + rectangleShape.getY() + "\n";
+                + rectangleShape.getHeight() + ";" + rectangleShape.getX() + ";" + rectangleShape.getY()  + ";"
+                + this.getAngle() + '\n';
     }
 
 

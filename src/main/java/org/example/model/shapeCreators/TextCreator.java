@@ -8,7 +8,7 @@ import org.example.model.shape.TextShape;
 public class TextCreator extends AbstractShape {
 
     @Override
-    public ShapeInterface createShape(Color strokeColor, Color fillingColor, int strokeWidth, double width, double height, String content, double scaleX, double scaleY) {
-        return new TextShape(content, strokeColor, fillingColor, width, height, strokeWidth, scaleX, scaleY);
+    public ShapeInterface createShape(Color strokeColor, Color fillingColor, int strokeWidth, double width, double height, String content, double scaleX, double scaleY, double angle) {
+        return new TextShape(content, strokeColor, fillingColor, width, height, strokeWidth, scaleX, scaleY, angle);
     }
 }

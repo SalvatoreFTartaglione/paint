@@ -32,23 +32,24 @@ public class CanvasImporter {
 
                 switch (shapeType) {
                     case "Line":
-                        if (parts.length != 7) continue; // Line + 6 params
+                        if (parts.length != 8) continue; // Line + 6 params
                         Color strokeColorL = Color.web(parts[1]);
                         double endX = Double.parseDouble(parts[2]);
                         double endY = Double.parseDouble(parts[3]);
                         double startX = Double.parseDouble(parts[4]);
                         double startY = Double.parseDouble(parts[5]);
                         double strokeWidthL = Double.parseDouble(parts[6]);
+                        double angleL = Double.parseDouble(parts[7]);
 
                         LineCreator lineCreator = new LineCreator();
-                        lineCreator.creationOfShape(strokeColorL, (Color) null, (int) strokeWidthL, 0, 0, null, 0.0, 0.0); // width/height not used
+                        lineCreator.creationOfShape(strokeColorL, (Color) null, (int) strokeWidthL, 0, 0, null, 0.0, 0.0, angleL);
                         shape = lineCreator.getShape();
                         shape.setStrokeColor(strokeColorL);
                         shape.draw(new Double[]{startX, startY, endX, endY});
                         break;
 
                     case "Rectangle":
-                        if (parts.length != 8) continue; // Rectangle + 7 params
+                        if (parts.length != 9) continue; // Rectangle + 7 params
                         Color strokeColorR = Color.web(parts[1]);
                         Color fillColorR = Color.web(parts[2]);
                         double strokeWidthR = Double.parseDouble(parts[3]);
@@ -56,15 +57,16 @@ public class CanvasImporter {
                         double heightR = Double.parseDouble(parts[5]);
                         double xR = Double.parseDouble(parts[6]);
                         double yR = Double.parseDouble(parts[7]);
+                        double angleR = Double.parseDouble(parts[8]);
 
                         RectangleCreator rectangleCreator = new RectangleCreator();
-                        rectangleCreator.creationOfShape(strokeColorR, fillColorR, (int) strokeWidthR, widthR, heightR, null, 0.0, 0.0);
+                        rectangleCreator.creationOfShape(strokeColorR, fillColorR, (int) strokeWidthR, widthR, heightR, null, 0.0, 0.0, angleR);
                         shape = rectangleCreator.getShape();
                         shape.draw(xR, yR);
                         break;
 
                     case "Ellipse":
-                        if (parts.length != 8) continue;
+                        if (parts.length != 9) continue;
                         Color strokeColorE = Color.web(parts[1]);
                         Color fillColorE = Color.web(parts[2]);
                         double strokeWidthE = Double.parseDouble(parts[3]);
@@ -72,15 +74,16 @@ public class CanvasImporter {
                         double radiusY = Double.parseDouble(parts[5]);
                         double centerX = Double.parseDouble(parts[6]);
                         double centerY = Double.parseDouble(parts[7]);
+                        double angleE = Double.parseDouble(parts[8]);
 
                         EllipseCreator ellipseCreator = new EllipseCreator();
-                        ellipseCreator.creationOfShape(strokeColorE, fillColorE, (int) strokeWidthE, radiusX, radiusY, null, 0.0, 0.0);
+                        ellipseCreator.creationOfShape(strokeColorE, fillColorE, (int) strokeWidthE, radiusX, radiusY, null, 0.0, 0.0, angleE);
                         shape = ellipseCreator.getShape();
                         shape.draw(centerX, centerY);
                         break;
 
                     case "Text":
-                        if (parts.length != 9) continue;
+                        if (parts.length != 10) continue;
                         String textT = parts[1];
                         Color strokeColorT = Color.web(parts[2]);
                         Color fillColorT = Color.web(parts[3]);
@@ -89,21 +92,22 @@ public class CanvasImporter {
                         double fontSize = Double.parseDouble(parts[6]);        // aka strokeWidth
                         double scaleX = Double.parseDouble(parts[7]);
                         double scaleY = Double.parseDouble(parts[8]);
+                        double angleT = Double.parseDouble(parts[9]);
 
                         TextCreator textCreator = new TextCreator();
-                        textCreator.creationOfShape(strokeColorT, fillColorT, (int) fontSize, xT, yT, textT, scaleX, scaleY);
+                        textCreator.creationOfShape(strokeColorT, fillColorT, (int) fontSize, xT, yT, textT, scaleX, scaleY, angleT);
                         shape = textCreator.getShape();
                         shape.draw(xT, yT);
                         break;
 
                     case "Polygon":
-                        if (parts.length != 7) continue;
+                        if (parts.length != 8) continue;
                         Color strokeColorP = Color.web(parts[1]);
                         Color fillColorP = Color.web(parts[2]);
                         double strokeWidthP = Double.parseDouble(parts[3]);
                         double scaleXP = Double.parseDouble(parts[4]);
                         double scaleYP = Double.parseDouble(parts[5]);
-
+                        double angleP = Double.parseDouble(parts[7]);
                         String pointStr = parts[6].replace("[", "").replace("]", "");
                         String[] pointValues = pointStr.split(",");
                         Double[] pointsP = new Double[pointValues.length];
@@ -112,7 +116,7 @@ public class CanvasImporter {
                         }
 
                         PolygonCreator polygonCreator = new PolygonCreator();
-                        polygonCreator.creationOfShape(strokeColorP, fillColorP, (int) strokeWidthP, 0, 0, null, scaleXP, scaleYP);
+                        polygonCreator.creationOfShape(strokeColorP, fillColorP, (int) strokeWidthP, 0, 0, null, scaleXP, scaleYP, angleP);
                         shape = polygonCreator.getShape();
                         shape.draw(pointsP);
                         break;

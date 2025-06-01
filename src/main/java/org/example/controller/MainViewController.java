@@ -33,8 +33,8 @@ import org.example.model.receivers.ShapeReceiver;
 import org.example.model.shape.*;
 import javafx.scene.shape.Rectangle;
 import org.example.model.registry.FavoriteShapeRegistry;
-import org.example.model.shape.ContextMenuActions;
-import org.example.model.shape.ContextMenuManager;
+import org.example.model.contextMenu.ContextMenuActions;
+import org.example.model.contextMenu.ContextMenuManager;
 import org.example.model.shape.MirrorDirectionEnum;
 import org.example.model.shape.ShapeInterface;
 import org.example.model.ZoomableScrollPane;
@@ -474,8 +474,6 @@ public class MainViewController implements Initializable {
     private void showContextMenu(ShapeInterface shape, MouseEvent event) {
         // Create context menu actions
         ContextMenuActions actions = new ContextMenuActions() {
-            double oldWidth = shape.getWidth();
-            double oldHeight = shape.getHeight();
 
             @Override
             //Per evitare che se nel gruppo è presente una linea e si fa il fillColor, alla linea non succeda niente
@@ -516,6 +514,7 @@ public class MainViewController implements Initializable {
                 CommandInterface cmd = new StretchCommand(positionManagerReceiver, newWidth, newHeight, oldWidth, oldHeight);
                 invoker.executeCommand(cmd);
             }
+
             @Override
             public void onMirrorUp() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
@@ -575,6 +574,17 @@ public class MainViewController implements Initializable {
             public void onMirrorVerticalAroundCenter() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.VERTICAL, contextDTO);
+                if (cmd.isExecutable()) {
+                    invoker.executeCommand(cmd);
+                }else {
+                    mirrorOutsideCanvasAlert.showAndWait();
+                }
+            }
+
+            @Override
+            public void onRotate(double oldAngle, double newAngle) {
+                positionManagerReceiver = new PositionManagerReceiver(shape);
+                CommandInterface cmd = new RotateCommand(positionManagerReceiver, oldAngle, newAngle);
                 if (cmd.isExecutable()) {
                     invoker.executeCommand(cmd);
                 }else {
