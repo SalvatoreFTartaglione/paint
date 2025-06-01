@@ -1,6 +1,10 @@
 package org.example.model.receivers;
 
 import javafx.scene.paint.Color;
+import org.example.model.shapeCreators.EllipseCreator;
+import org.example.model.shapeCreators.LineCreator;
+import org.example.model.shapeCreators.RectangleCreator;
+import org.example.model.shapeCreators.TextCreator;
 import org.example.model.shape.*;
 
 import java.io.BufferedReader;

@@ -146,7 +146,7 @@ public class ShapeReceiver {
                     if (restoredShape instanceof TextShape){
                         System.out.println("Sto restorando un text");
                         TextShape textShape = (TextShape) restoredShape;
-                        System.out.println("ScaleX: " + textShape.getTextScaleX() + " ScaleY: " + textShape.getTextScaleY());
+                        System.out.println("ScaleX: " + textShape.getScaleX() + " ScaleY: " + textShape.getScaleY());
                     }
                     restoredShape.draw(x, y);
                 }

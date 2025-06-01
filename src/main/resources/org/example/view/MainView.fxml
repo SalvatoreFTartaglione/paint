@@ -64,7 +64,7 @@
                                 </ComboBox>
                                 <ColorPicker fx:id="fillColorPicker" editable="true" layoutX="620.0" layoutY="27.0">
                                     <value>
-                                        <Color red="0.5986841917037964" green="0.5848257541656494" blue="0.5848257541656494" />
+                                        <Color red="1.0" />
                                     </value>
                                 </ColorPicker>
                                 <ImageView fx:id="chooseColorPhoto" fitHeight="45.0" fitWidth="53.0" layoutX="567.0" layoutY="45.0" pickOnBounds="true" preserveRatio="true">
@@ -115,8 +115,8 @@
                                 </Label>
                                 <Button fx:id="resetGridButton" layoutX="920.0" layoutY="81.0" mnemonicParsing="false" onAction="#resetGrid" prefWidth="60.0" text="Reset" />
                                 <CheckBox fx:id="checkBoxGrid" layoutX="952.0" layoutY="8.0" mnemonicParsing="false" onAction="#toggleGrid" />
-                        <Button fx:id="saveLibraryButton" layoutX="459.0" layoutY="15.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="97.0" text="Save Library" onAction="#saveLibrary"/>
-                        <Button layoutX="459.0" layoutY="49.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="97.0" text="Import Library" onAction="#importLibrary"/>
+                        <Button fx:id="saveLibraryButton" layoutX="459.0" layoutY="15.0" mnemonicParsing="false" onAction="#saveLibrary" prefHeight="25.0" prefWidth="97.0" text="Save Library" />
+                        <Button layoutX="459.0" layoutY="49.0" mnemonicParsing="false" onAction="#importLibrary" prefHeight="25.0" prefWidth="97.0" text="Import Library" />
 
                             </children>
                         </AnchorPane>

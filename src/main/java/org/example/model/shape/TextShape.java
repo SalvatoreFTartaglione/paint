@@ -26,8 +26,8 @@ public class TextShape implements ShapeInterface {
         textShape.setFont(Font.font(strokeWidth));
         baseWidth = textShape.getLayoutBounds().getWidth();
         baseHeight = textShape.getLayoutBounds().getHeight();
-        setTextScaleX(scaleX);
-        setTextScaleY(scaleY);
+        setScaleX(scaleX);
+        setScaleY(scaleY);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class TextShape implements ShapeInterface {
 
     @Override
     public ShapeInterface cloneShape() {
-        TextShape clone = new TextShape(getText(), getStrokeColor(), getFillColor(), getWidth(), getHeight(), getCustomStrokeWidth(), getTextScaleX(), getTextScaleY());
+        TextShape clone = new TextShape(getText(), getStrokeColor(), getFillColor(), getWidth(), getHeight(), getCustomStrokeWidth(), getScaleX(), getScaleY());
         clone.draw(getX(), getY());
         return clone;
     }
@@ -273,22 +273,22 @@ public class TextShape implements ShapeInterface {
     }
 
     @Override
-    public void setTextScaleX(double scale) {
+    public void setScaleX(double scale) {
         textShape.setScaleX(scale);
     }
 
     @Override
-    public double getTextScaleX() {
+    public double getScaleX() {
         return textShape.getScaleX();
     }
 
     @Override
-    public void setTextScaleY(double scale) {
+    public void setScaleY(double scale) {
         textShape.setScaleY(scale);
     }
 
     @Override
-    public double getTextScaleY() {
+    public double getScaleY() {
         return textShape.getScaleY();
     }
 
@@ -360,7 +360,7 @@ public class TextShape implements ShapeInterface {
     @Override
     public String toString() {
         return "Text;" + textShape.getText() + ";" + textShape.getStroke() + ";" + textShape.getFill() + ";" +
-                textShape.getX() + ";" + textShape.getY() + ";" + getCustomStrokeWidth() + ";" + getTextScaleX() + ";" + getTextScaleY() + "\n";
+                textShape.getX() + ";" + textShape.getY() + ";" + getCustomStrokeWidth() + ";" + getScaleX() + ";" + getScaleY() + "\n";
     }
 
 

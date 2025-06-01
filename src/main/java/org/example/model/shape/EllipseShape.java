@@ -115,22 +115,22 @@ public class EllipseShape implements ShapeInterface {
     }
 
     @Override
-    public void setTextScaleX(double scale) {
+    public void setScaleX(double scale) {
         ellipseShape.setScaleX(scale);
     }
 
     @Override
-    public double getTextScaleX() {
+    public double getScaleX() {
         return ellipseShape.getScaleX();
     }
 
     @Override
-    public void setTextScaleY(double scale) {
+    public void setScaleY(double scale) {
         ellipseShape.setScaleY(scale);
     }
 
     @Override
-    public double getTextScaleY() {
+    public double getScaleY() {
         return ellipseShape.getScaleY();
     }
 

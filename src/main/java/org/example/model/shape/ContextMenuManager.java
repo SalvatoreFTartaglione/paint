@@ -51,7 +51,12 @@ public class ContextMenuManager {
 
         // Fill Color (for line must be null)
         if (shape.getFillColor() != null) {
-                fillPicker = createColorPickerItem(contextMenu, "Change Fill Color:", shape.getFillColor(), actions::onFillColorChanged);
+            fillPicker = createColorPickerItem(
+                    contextMenu,
+                    "Change Fill Color:",
+                    shape.getFillColor() != null ? shape.getFillColor() : shape.getStrokeColor(),
+                    newColor -> actions.onFillColorChanged(newColor)
+            );
         }
         // Stroke Color
         createColorPickerItem(contextMenu, "Change Border Color:", shape.getStrokeColor(), actions::onStrokeColorChanged);
@@ -221,7 +226,6 @@ public class ContextMenuManager {
                     } else {
                         w.setStyle("");
                     }
-
                     if (!heightValid) {
                         h.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
                     } else {

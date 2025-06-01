@@ -26,8 +26,8 @@ public interface ShapeInterface {
         return false;
     }
 
+    // Color utils
     boolean canHaveFill();
-
     Color getStrokeColor();
     void setCustomStrokeWidth(double strokeWidth);
     double getCustomStrokeWidth();
@@ -36,7 +36,6 @@ public interface ShapeInterface {
 
     // Resize and stretch
     double getWidth();
-
     double getHeight();
     void resize(double newSize);
     void setSize(double width, double height);
@@ -86,20 +85,20 @@ public interface ShapeInterface {
     String getText();
     void setText(String content);
 
+    // Mirroring utils
     boolean canMoveBy(double deltaX, double deltaY, double paneWidth, double paneHeight, double zoom, double margin);
-
     void mirrorUp();
     void mirrorDown();
     void mirrorLeft();
     void mirrorRight();
+    Optional<Point2D> simulateMirror(MirrorDirectionEnum direction);
 
     // Utils for load and save command for text shape
-    void setTextScaleX(double scale);
-    double getTextScaleX();
-    void setTextScaleY(double scale);
-    double getTextScaleY();
+    void setScaleX(double scale);
+    double getScaleX();
+    void setScaleY(double scale);
+    double getScaleY();
     void mirrorHorizontallyAroundCenter();
     void mirrorVerticallyAroundCenter();
 
-    Optional<Point2D> simulateMirror(MirrorDirectionEnum direction);
 }

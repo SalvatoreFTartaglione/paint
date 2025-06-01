@@ -1,6 +1,10 @@
-package org.example.model.shape;
+package org.example.model.shapeCreators;
 
 import javafx.scene.paint.Color;
+import org.example.model.shape.AbstractShape;
+import org.example.model.shape.CompositeShape;
+import org.example.model.shape.ShapeInterface;
+
 import java.util.List;
 
 /**

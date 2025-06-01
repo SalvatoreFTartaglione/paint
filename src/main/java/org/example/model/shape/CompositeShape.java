@@ -7,7 +7,6 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -329,29 +328,29 @@ public class CompositeShape implements CompositeShapeInterface {
     }
 
     @Override
-    public void setTextScaleX(double scale) {
+    public void setScaleX(double scale) {
         // Applica la scala X del testo a ciascun figlio
         for (ShapeInterface s : children) {
-            s.setTextScaleX(scale);
+            s.setScaleX(scale);
         }
     }
 
     @Override
-    public double getTextScaleX() {
-        return children.isEmpty() ? 1.0 : children.get(0).getTextScaleX();
+    public double getScaleX() {
+        return children.isEmpty() ? 1.0 : children.get(0).getScaleX();
     }
 
     @Override
-    public void setTextScaleY(double scale) {
+    public void setScaleY(double scale) {
         // Applica la scala Y del testo a ciascun figlio
         for (ShapeInterface s : children) {
-            s.setTextScaleY(scale);
+            s.setScaleY(scale);
         }
     }
 
     @Override
-    public double getTextScaleY() {
-        return children.isEmpty() ? 1.0 : children.get(0).getTextScaleY();
+    public double getScaleY() {
+        return children.isEmpty() ? 1.0 : children.get(0).getScaleY();
     }
 
     @Override

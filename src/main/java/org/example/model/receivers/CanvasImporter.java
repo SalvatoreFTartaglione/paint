@@ -3,6 +3,7 @@ package org.example.model.receivers;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import org.example.model.shapeCreators.*;
 import org.example.model.shape.*;
 
 import java.io.BufferedReader;
@@ -93,6 +94,27 @@ public class CanvasImporter {
                         textCreator.creationOfShape(strokeColorT, fillColorT, (int) fontSize, xT, yT, textT, scaleX, scaleY);
                         shape = textCreator.getShape();
                         shape.draw(xT, yT);
+                        break;
+
+                    case "Polygon":
+                        if (parts.length != 7) continue;
+                        Color strokeColorP = Color.web(parts[1]);
+                        Color fillColorP = Color.web(parts[2]);
+                        double strokeWidthP = Double.parseDouble(parts[3]);
+                        double scaleXP = Double.parseDouble(parts[4]);
+                        double scaleYP = Double.parseDouble(parts[5]);
+
+                        String pointStr = parts[6].replace("[", "").replace("]", "");
+                        String[] pointValues = pointStr.split(",");
+                        Double[] pointsP = new Double[pointValues.length];
+                        for (int i = 0; i < pointValues.length; i++) {
+                            pointsP[i] = Double.parseDouble(pointValues[i].trim());
+                        }
+
+                        PolygonCreator polygonCreator = new PolygonCreator();
+                        polygonCreator.creationOfShape(strokeColorP, fillColorP, (int) strokeWidthP, 0, 0, null, scaleXP, scaleYP);
+                        shape = polygonCreator.getShape();
+                        shape.draw(pointsP);
                         break;
 
                     default:

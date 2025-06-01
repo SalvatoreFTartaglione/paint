@@ -10,6 +10,9 @@ import javafx.scene.shape.Circle;
 import org.example.controller.ShapeOption;
 import org.example.model.shape.ShapeInterface;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class DrawingContextDTO {
     private Pane drawingPane;
@@ -24,9 +27,9 @@ public class DrawingContextDTO {
     private double selStartX, selStartY, selEndX, selEndY; //Per il rettangolo della selezione multipla
     private ScrollPane scrollPane;
     private Group mainCanvasContainer;
-
-    // utils for favorite shapes
-    private ShapeInterface shape;
+    private List<Point2D> polygonPoints = new ArrayList<>();
+    private static final double TOLERANCE = 7.0;
+    private ShapeInterface shape;                                           // utils for favorite shapes
 
     public Group getMainCanvasContainer() {
         return mainCanvasContainer;
@@ -137,4 +140,29 @@ public class DrawingContextDTO {
     public void setShape(ShapeInterface shape) {
         this.shape = shape;
     }
+
+    // Polygon methods
+    public List<Point2D> getPolygonPoints() {
+        return polygonPoints;
+    }
+
+    public void setPolygonPoint(Point2D point) {
+        polygonPoints.add(point);
+    }
+
+    /*
+    Checks if the user has added more than two points and if the starting point is the same as the
+    ending point
+     */
+    public boolean canCreatePolygon() {
+        Point2D firstPoint = polygonPoints.get(0);
+        Point2D lastPoint = polygonPoints.get(polygonPoints.size() - 1);
+        // Check if points are approximately equal within tolerance
+        boolean isApproxEqual = Math.abs(firstPoint.getX() - lastPoint.getX()) <= TOLERANCE &&
+                Math.abs(firstPoint.getY() - lastPoint.getY()) <= TOLERANCE;
+
+        return polygonPoints != null &&  polygonPoints.size() >= 4 && isApproxEqual;
+    }
+
+    public void clearPolygonPoints() { polygonPoints.clear(); }
 }

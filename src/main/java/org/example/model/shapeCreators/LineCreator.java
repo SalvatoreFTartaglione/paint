@@ -1,8 +1,11 @@
-package org.example.model.shape;
+package org.example.model.shapeCreators;
 
 import javafx.scene.paint.Color;
+import org.example.model.shape.AbstractShape;
+import org.example.model.shape.LineShape;
+import org.example.model.shape.ShapeInterface;
 
-public class LineCreator extends AbstractShape{
+public class LineCreator extends AbstractShape {
 
 
     /**

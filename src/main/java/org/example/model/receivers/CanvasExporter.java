@@ -24,6 +24,7 @@ public class CanvasExporter {
 
     public void exportAsText(File file) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            System.out.println("Dimension = " + canvas.getChildren().size());
             for (Node node : canvas.getChildren()) {
                 Object userData = node.getUserData();
                 if (userData instanceof ShapeInterface) {

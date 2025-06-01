@@ -116,22 +116,22 @@ public class RectangleShape implements ShapeInterface {
     }
 
     @Override
-    public void setTextScaleX(double scale) {
+    public void setScaleX(double scale) {
         rectangleShape.setScaleX(scale);
     }
 
     @Override
-    public double getTextScaleX() {
+    public double getScaleX() {
         return rectangleShape.getScaleX();
     }
 
     @Override
-    public void setTextScaleY(double scale) {
+    public void setScaleY(double scale) {
         rectangleShape.setScaleY(scale);
     }
 
     @Override
-    public double getTextScaleY() {
+    public double getScaleY() {
         return rectangleShape.getScaleY();
     }
 

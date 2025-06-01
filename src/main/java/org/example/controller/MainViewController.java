@@ -133,12 +133,10 @@ public class MainViewController implements Initializable {
     private LibraryExporterReceiver libraryExporterReceiver;
     private LibraryImporterReceiver libraryImporterReceiver;
     private FavoriteManagerReceiver favoriteManagerReceiver;
-    // State flag to understand if user is dragging and avoid accidentally adding new shapes to the canvas
-    private boolean isDragging0 = false;
+    private boolean isDragging0 = false;                                                                                // State flag to understand if user is dragging and avoid accidentally adding new shapes to the canvas
     private boolean hasDragged = false;
     private ShapeReceiver shapeReceiver = new ShapeReceiver(null);
     private double currentZoom = 1.0;
-    private static final double CLICK_MARGIN = 5.0; // distanza minima dai bordi
     private Pane gridPane = new Pane();
     private ObservableList<ShapeInterface> favoritesShapeList = FXCollections.observableArrayList();
     //Usati per il rettangolo della selezione multipla
@@ -150,10 +148,6 @@ public class MainViewController implements Initializable {
 
     private final Point2D[] dragStart = new Point2D[1];
     private final Point2D[] shapeStartPosition = new Point2D[1];
-    //private ObservableList<ShapeInterface> favoritesShapeList = FXCollections.observableArrayList();
-    //@FXML     DA CAPIRE SE USARE STRING O SHAPE INTERFACE COME TIPO !!!
-    //private ComboBox<ShapeInterface> favoritesShapeComboBox;
-
     /**
      * Initializes the controller after the root element has been completely processed.
      *
@@ -246,6 +240,7 @@ public class MainViewController implements Initializable {
         // stops dragging with mouse of the drawing pane
         scrollPane.setPannable(false);
         scrollPane.setTarget(mainCanvasContainer);
+        drawingPane.getChildren().clear();
 
         // favoriteShapesComboBox section
         FavoriteShapeRegistry.getInstance().addObserver(this::onFavoriteListChanged);
@@ -587,7 +582,6 @@ public class MainViewController implements Initializable {
                 }
             }
 
-
             @Override
             public void onAddToFavoritesWithName(String name) {
                 if (shape != null) {
@@ -753,7 +747,8 @@ public class MainViewController implements Initializable {
                 new ShapeOption("Line", "/org/example/images/segment.png"),
                 new ShapeOption("Rectangle", "/org/example/images/rectangle.png"),
                 new ShapeOption("Text", "/org/example/images/text.png"),
-                new ShapeOption("Favorite", "")
+                new ShapeOption("Polygon", "/org/example/images/polygon.png"),
+                new ShapeOption("Favorite", "/org/example/images/favorite.png")
         );
 
         shapeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -844,9 +839,12 @@ public class MainViewController implements Initializable {
         final Point2D[] nodeStartTranslate = new Point2D[1];
         final Point2D[] dragStartScene = new Point2D[1];
         final Bounds[] initialBounds = new Bounds[1];
-
-        Node node = shape.getNode();
-
+        Node node;
+        if (shape != null && shape.getNode() != null) {
+            node = shape.getNode();
+        } else {
+            return;
+        }
         node.setOnMousePressed(event -> {
             // 1) Posizione iniziale del mouse
             dragStartScene[0] = new Point2D(event.getSceneX(), event.getSceneY());
@@ -982,6 +980,10 @@ public class MainViewController implements Initializable {
                     contextDTO.setText(text);
                     contextDTO.setFontSize(fontSizeComboBox.getValue());
                 }
+                if ("Polygon".equals(shapeComboBox.getValue().getName())) {
+                    // Add clicked points for polygon to DTO
+                    contextDTO.setPolygonPoint(new Point2D(mouseEvent.getX(), mouseEvent.getY()));
+                }
 
                 setParameters(mouseEvent, shapeComboBox, drawingPane, contextDTO.getStartPoint(), borderColorPicker, fillColorPicker);
                 addToCanvasReceiver = new AddToCanvasReceiver(contextDTO);
@@ -1053,6 +1055,7 @@ public class MainViewController implements Initializable {
             attachEventHandlersToAllShapes();
         }
     }
+
 
     /**
      * Assign event handlers to all shapes in the drawingPane and make nodes draggable
