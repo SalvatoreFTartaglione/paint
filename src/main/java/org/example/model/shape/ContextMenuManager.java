@@ -41,14 +41,18 @@ public class ContextMenuManager {
         stretchPanel.setVisible(false);
         resizePanel.setVisible(false);
 
-        // Fill Color (for line must be null)
-        fillPicker = createColorPickerItem(
-                contextMenu,
-                "Change Fill Color:",
-                shape.getFillColor() != null ? shape.getFillColor() : shape.getStrokeColor(),
-                newColor -> actions.onFillColorChanged(newColor)
-        );
+        MenuItem ungroupItem = null;
 
+        //UngroupMenu
+        if(shape.isGroup()){
+            ungroupItem = new MenuItem("Ungroup");
+            ungroupItem.setOnAction(e->actions.onUngroup());
+        }
+
+        // Fill Color (for line must be null)
+        if (shape.getFillColor() != null) {
+                fillPicker = createColorPickerItem(contextMenu, "Change Fill Color:", shape.getFillColor(), actions::onFillColorChanged);
+        }
         // Stroke Color
         createColorPickerItem(contextMenu, "Change Border Color:", shape.getStrokeColor(), actions::onStrokeColorChanged);
 
@@ -138,9 +142,14 @@ public class ContextMenuManager {
 
         // Add items
         contextMenu.getItems().addAll(numericBtn, visualBtn, resizePanel, stretchPanel);
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu);
+        if(ungroupItem != null) {
+            contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu, ungroupItem, addToFavorites);
+        }
+        else{
+            contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu, addToFavorites);
+        }
         //contextMenu.getItems().addAll(numericBtn, visualBtn, numericPanel, visualPanel);
-        contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu, addToFavorites);
+        //contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, mirroringMenu, addToFavorites);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }

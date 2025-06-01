@@ -375,6 +375,7 @@ public class MainViewController implements Initializable {
                 .filter(n -> n.getUserData() instanceof ShapeInterface)
                 .anyMatch(n -> n.contains(n.sceneToLocal(e.getSceneX(), e.getSceneY())));
         if (!clickedShape && e.getButton() == MouseButton.PRIMARY) {
+            clearSelection();
             selectionStart = new Point2D(e.getX(), e.getY());
             selectionRect.setX(selectionStart.getX());
             selectionRect.setY(selectionStart.getY());
@@ -386,12 +387,20 @@ public class MainViewController implements Initializable {
 
     private void onSelectionDragged(MouseEvent e) {
         if (!selectionRect.isVisible()) return;
-        double x = Math.min(selectionStart.getX(), e.getX());
-        double y = Math.min(selectionStart.getY(), e.getY());
+        double rawX = e.getX();
+        double rawY = e.getY();
+        double clampedX = Math.max(0, Math.min(rawX, drawingPane.getWidth()));
+        double clampedY = Math.max(0, Math.min(rawY, drawingPane.getHeight()));
+
+        double x = Math.min(selectionStart.getX(), clampedX);
+        double y = Math.min(selectionStart.getY(), clampedY);
+        double w = Math.abs(clampedX - selectionStart.getX());
+        double h = Math.abs(clampedY - selectionStart.getY());
+
         selectionRect.setX(x);
         selectionRect.setY(y);
-        selectionRect.setWidth(Math.abs(e.getX() - selectionStart.getX()));
-        selectionRect.setHeight(Math.abs(e.getY() - selectionStart.getY()));
+        selectionRect.setWidth(w);
+        selectionRect.setHeight(h);
     }
 
     private void onSelectionReleased(MouseEvent e) {
@@ -633,40 +642,9 @@ public class MainViewController implements Initializable {
                 CommandInterface cmd = new DeleteCommand(contextDTO, shape, shapeReceiver);
                 invoker.executeCommand(cmd);
             }
-        };
 
-        // Create context menu
-        ContextMenuManager.MenuComponents menuComponents = ContextMenuManager.createContextMenu(shape, actions);
-        contextMenu = menuComponents.contextMenu;
-
-        // 3) Se siamo in multi-selezione e sto cliccando su una shape selezionata,
-        //    aggiungi “Group” invece delle restanti opzioni
-        if (currentSelection.size() >= 2 && currentSelection.contains(shape)) {
-            MenuItem groupItem = new MenuItem("Group");
-            groupItem.setOnAction(e -> {
-                // Costruisci e esegui il GroupCommand come fai di consueto
-                List<ShapeInterface> toGroup = new ArrayList<>(currentSelection);
-                GroupCommand cmd = new GroupCommand(grpReceiver, toGroup);
-                invoker.executeCommand(cmd);
-                CompositeShapeInterface composite = cmd.getCreatedGroup();
-                // pick-on-bounds + figli mouse-transparent
-                Node groupNode = composite.getNode();
-                groupNode.setPickOnBounds(true);
-                for (ShapeInterface s : composite.getChildren()) {
-                    s.getNode().setMouseTransparent(true);
-                }
-                attachEventHandlersToShape(groupNode);
-                makeDraggable(composite);
-                clearSelection();
-            });
-            contextMenu = new ContextMenu(groupItem);
-            contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
-            return;
-        }
-
-        if(shape.isGroup()){
-            MenuItem ungroupItem = new MenuItem("UnGroup");
-            ungroupItem.setOnAction(e -> {
+            @Override
+            public void onUngroup(){
                 CompositeShapeInterface groupShape = (CompositeShapeInterface) shape;
                 UngroupCommand cmd = new UngroupCommand(grpReceiver, groupShape);
                 invoker.executeCommand(cmd);
@@ -704,10 +682,37 @@ public class MainViewController implements Initializable {
                     attachEventHandlersToShape(childNode);
                     makeDraggable(child);
                 }
+            }
+        };
+
+        // Create context menu
+        ContextMenuManager.MenuComponents menuComponents = ContextMenuManager.createContextMenu(shape, actions);
+        contextMenu = menuComponents.contextMenu;
+
+        // 3) Se siamo in multi-selezione e sto cliccando su una shape selezionata,
+        //    aggiungi “Group” invece delle restanti opzioni
+        if (currentSelection.size() >= 2 && currentSelection.contains(shape)) {
+            MenuItem groupItem = new MenuItem("Group");
+            groupItem.setOnAction(e -> {
+                // Costruisci e esegui il GroupCommand come fai di consueto
+                List<ShapeInterface> toGroup = new ArrayList<>(currentSelection);
+                GroupCommand cmd = new GroupCommand(grpReceiver, toGroup);
+                invoker.executeCommand(cmd);
+                CompositeShapeInterface composite = cmd.getCreatedGroup();
+                // pick-on-bounds + figli mouse-transparent
+                Node groupNode = composite.getNode();
+                groupNode.setPickOnBounds(true);
+                for (ShapeInterface s : composite.getChildren()) {
+                    s.getNode().setMouseTransparent(true);
+                }
+                attachEventHandlersToShape(groupNode);
+                makeDraggable(composite);
+                clearSelection();
             });
-            contextMenu.getItems().add(ungroupItem);
+            contextMenu = new ContextMenu(groupItem);
+            contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+            return;
         }
-        //contextMenu.getItems().removeAll()
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
     }
 
@@ -955,6 +960,7 @@ public class MainViewController implements Initializable {
      * @param mouseEvent the mouse event containing click coordinates
      */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
+        clearSelection();
         Label warningLabel = new Label();
         warningLabel.setTextFill(Color.RED);
         // Ignore the click if we just finished dragging
@@ -1044,18 +1050,21 @@ public class MainViewController implements Initializable {
     @FXML
     private void loadFile(ActionEvent event) {
         canvasImporter = new CanvasImporter(drawingPane);
-        // Rimuovo SOLO i nodi “shape” già presenti, lasciando selectionRect al suo posto
-        drawingPane.getChildren().removeIf(node -> node.getUserData() instanceof ShapeInterface);
-
-        // Eseguo il caricamento
-        LoadCommand load = new LoadCommand(canvasImporter);
-        invoker.executeLoadCommand(load);
-
-        // Riattacco gli handler e rendo i nodi trascinabili
-        attachEventHandlersToAllShapes();
-
-        // Assicuro che selectionRect rimanga in primo piano
-        selectionRect.toFront();
+        // Check if canvas is empty
+        if ( ! drawingPane.getChildren().isEmpty() ) {
+            loadManager(canvasImporter);
+            // Assign event handlers to all loaded shapes
+            attachEventHandlersToAllShapes();
+        }
+        else {
+            // Clear workspace from older shapes
+            drawingPane.getChildren().clear();
+            // Execute load
+            LoadCommand load = new LoadCommand(canvasImporter);
+            invoker.executeLoadCommand(load);
+            // Assign event handlers to all loaded shapes and make nodes draggable
+            attachEventHandlersToAllShapes();
+        }
     }
 
     /**
