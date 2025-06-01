@@ -24,16 +24,12 @@ public class Invoker {
         printStack("After EXECUTE");
     }
 
-    public void executeCopyCommand(CommandInterface cmd){
-        cmd.executeCommand();
-    }
-
     public void executeLoadCommand(CommandInterface cmd) {
         cmd.executeCommand();
         history.clear();
     }
 
-    public void executeSaveCommand(CommandInterface cmd) {
+    public void executeCommandNotUndoable(CommandInterface cmd) {
         cmd.executeCommand();
     }
 

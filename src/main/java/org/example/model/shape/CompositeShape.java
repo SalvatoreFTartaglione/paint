@@ -389,9 +389,9 @@ public class CompositeShape implements CompositeShapeInterface {
     ///fino a qui
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Group:\n");
+        StringBuilder sb = new StringBuilder("\nGroup:\n");
         for (ShapeInterface s : children) {
-            sb.append("  ").append(s).append("\n");
+            sb.append(" ").append(s).append("\n");
         }
         return sb.toString();
     }

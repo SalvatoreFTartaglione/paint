@@ -115,8 +115,8 @@
                                 </Label>
                                 <Button fx:id="resetGridButton" layoutX="920.0" layoutY="81.0" mnemonicParsing="false" onAction="#resetGrid" prefWidth="60.0" text="Reset" />
                                 <CheckBox fx:id="checkBoxGrid" layoutX="952.0" layoutY="8.0" mnemonicParsing="false" onAction="#toggleGrid" />
-                        <Button layoutX="459.0" layoutY="15.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="97.0" text="Save Library" />
-                        <Button layoutX="459.0" layoutY="49.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="97.0" text="Import Library" />
+                        <Button fx:id="saveLibraryButton" layoutX="459.0" layoutY="15.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="97.0" text="Save Library" onAction="#saveLibrary"/>
+                        <Button layoutX="459.0" layoutY="49.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="97.0" text="Import Library" onAction="#importLibrary"/>
 
                             </children>
                         </AnchorPane>

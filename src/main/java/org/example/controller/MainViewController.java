@@ -2,6 +2,7 @@ package org.example.controller;
 
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -50,6 +51,8 @@ import static java.lang.Math.round;
 public class MainViewController implements Initializable {
 
 
+    @FXML
+    private Button saveLibraryButton;
     @FXML
     private ComboBox<String> favoritesShapeComboBox;
     @FXML
@@ -127,6 +130,9 @@ public class MainViewController implements Initializable {
     private PositionManagerReceiver positionManagerReceiver;
     private CanvasImporter canvasImporter;
     private CanvasExporter canvasExporter;
+    private LibraryExporterReceiver libraryExporterReceiver;
+    private LibraryImporterReceiver libraryImporterReceiver;
+    private FavoriteManagerReceiver favoriteManagerReceiver;
     // State flag to understand if user is dragging and avoid accidentally adding new shapes to the canvas
     private boolean isDragging0 = false;
     private boolean hasDragged = false;
@@ -161,7 +167,10 @@ public class MainViewController implements Initializable {
         initializeZoomControls();
         initializeGridControls();
         initializeAlerts();
-
+        favoriteManagerReceiver = new FavoriteManagerReceiver();
+        saveLibraryButton.disableProperty().bind(
+                Bindings.isEmpty(favoritesShapeComboBox.getItems())
+        );
 
         initMultiSelectCommand();
         grpReceiver = new GroupReceiver(drawingPane);
@@ -426,25 +435,6 @@ public class MainViewController implements Initializable {
         selectionRect.setVisible(false);
     }
 
-
-    private void applyZoom(double zoomLevel) {
-        currentZoom = zoomLevel;
-
-        double hValue = scrollPane.getHvalue();
-        double vValue = scrollPane.getVvalue();
-
-        drawingPane.setScaleX(zoomLevel);
-        drawingPane.setScaleY(zoomLevel);
-
-        double originalWidth = 1500.0;
-        double originalHeight = 1500.0;
-
-        Platform.runLater(() -> {
-            scrollPane.setHvalue(hValue);
-            scrollPane.setVvalue(vValue);
-        });
-    }
-
     private void updateZoomLabel(double zoomLevel) {
         int percentage = (int) round(zoomLevel * 100);
         zoomValueLabel.setText(percentage + "%");
@@ -601,10 +591,7 @@ public class MainViewController implements Initializable {
             @Override
             public void onAddToFavoritesWithName(String name) {
                 if (shape != null) {
-                    CommandInterface cmd = new SaveFavoriteCommand(
-                            new FavoriteManagerReceiver(), shape, name
-
-                    );
+                    CommandInterface cmd = new SaveFavoriteCommand(favoriteManagerReceiver, shape, name);
                     invoker.executeCommand(cmd);
                 }
             }
@@ -613,7 +600,7 @@ public class MainViewController implements Initializable {
             @Override
             public void onCopy() {
                 CommandInterface cmd = new CopyCommand(shape, shapeReceiver);
-                invoker.executeCopyCommand(cmd);
+                invoker.executeCommandNotUndoable(cmd);
             }
 
             @Override
@@ -1039,7 +1026,7 @@ public class MainViewController implements Initializable {
     private void saveFile(ActionEvent event) {
         canvasExporter = new CanvasExporter(drawingPane);
         SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
-        invoker.executeSaveCommand(saveCommandFile);
+        invoker.executeCommandNotUndoable(saveCommandFile);
     }
 
 
@@ -1119,7 +1106,7 @@ public class MainViewController implements Initializable {
             if (result.get().getText().equals("Yes")) {
                 // Saving file
                 SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
-                invoker.executeSaveCommand(saveCommandFile);
+                invoker.executeCommandNotUndoable(saveCommandFile);
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // After saving execute load
@@ -1153,5 +1140,40 @@ public class MainViewController implements Initializable {
         gridPane.setVisible(checkBoxGrid.isSelected());
     }
 
+    public void saveLibrary(ActionEvent actionEvent) {
+        libraryExporterReceiver = new LibraryExporterReceiver(favoriteManagerReceiver);
+        SavaLibraryCommand savaLibraryCommand = new SavaLibraryCommand(libraryExporterReceiver);
+        invoker.executeCommandNotUndoable(savaLibraryCommand);
+    }
+
+    public void importLibrary(ActionEvent actionEvent) {
+        libraryImporterReceiver = new LibraryImporterReceiver(favoriteManagerReceiver);
+        if (favoritesShapeComboBox.getItems().isEmpty()) {
+            LoadLibraryCommand loadLibraryCommand = new LoadLibraryCommand(libraryImporterReceiver);
+            invoker.executeCommandNotUndoable(loadLibraryCommand);
+        }else {
+            showAlertLoadLibrary();
+        }
+    }
+
+    private void showAlertLoadLibrary() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Load Favorite Library");
+        alert.setHeaderText("La libreria contiene già degli elementi.");
+        alert.setContentText("Vuoi sovrascrivere la libreria attuale con una nuova?");
+
+        ButtonType overwriteButton = new ButtonType("Sì", ButtonBar.ButtonData.YES);
+        ButtonType cancelButton = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(overwriteButton, cancelButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES) {
+            // L'utente ha confermato di voler sovrascrivere
+            favoritesShapeComboBox.getItems().clear(); // Pulisce la libreria attuale
+            LoadLibraryCommand loadLibraryCommand = new LoadLibraryCommand(libraryImporterReceiver);
+            invoker.executeCommandNotUndoable(loadLibraryCommand);
+        }
+    }
 }
 

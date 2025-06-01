@@ -50,4 +50,14 @@ public class FavoriteShapeRegistry {
             o.onFavoriteListChanged(names);
         }
     }
+
+    public Map<String, ShapeInterface> getFavorites() {
+        return favorites;
+    }
+
+    public void setFavorites(Map<String, ShapeInterface> map) {
+        this.favorites.clear();
+        this.favorites.putAll(map);
+        notifyObservers();
+    }
 }

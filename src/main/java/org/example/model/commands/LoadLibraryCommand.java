@@ -1,0 +1,35 @@
+package org.example.model.commands;
+
+import javafx.stage.FileChooser;
+import org.example.model.receivers.LibraryImporterReceiver;
+
+import java.io.File;
+import java.io.IOException;
+
+public class LoadLibraryCommand implements CommandInterface{
+
+    private LibraryImporterReceiver libraryImporterReceiver;
+
+    public LoadLibraryCommand(LibraryImporterReceiver libraryImporterReceiver) {
+        this.libraryImporterReceiver = libraryImporterReceiver;
+    }
+
+    @Override
+    public void executeCommand() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"));
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            try {
+                libraryImporterReceiver.importLibrary(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void undoCommand() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+}
