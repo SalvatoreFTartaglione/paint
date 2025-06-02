@@ -1,6 +1,11 @@
 package org.example.model.commands;
 
+import javafx.geometry.Point2D;
+import javafx.scene.layout.Pane;
+import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.PositionManagerReceiver;
+
+import java.util.Optional;
 
 public class RotateCommand implements CommandInterface {
 

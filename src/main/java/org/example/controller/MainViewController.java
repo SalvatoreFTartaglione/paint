@@ -238,10 +238,12 @@ public class MainViewController implements Initializable {
             }
         });
 
-        drawingPane.addEventHandler(MouseEvent.MOUSE_PRESSED, evt -> {
+        scrollPane.addEventHandler(MouseEvent.MOUSE_PRESSED, evt -> {
             // Se c’è un contextMenu aperto, lo chiudo
-            if (contextMenu != null && contextMenu.isShowing()) {
-                contextMenu.hide();
+            if (evt.getButton() == MouseButton.PRIMARY) {
+                if (contextMenu != null && contextMenu.isShowing()) {
+                    contextMenu.hide();
+                }
             }
         });
 
@@ -887,7 +889,8 @@ public class MainViewController implements Initializable {
         }
 
         node.setOnMousePressed(event -> {
-            dragStart[0] = new Point2D(event.getX(), event.getY());
+            // Usa coordinate assolute nella scena
+            dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
             shapeStartPosition[0] = new Point2D(shape.getX(), shape.getY());
             event.consume();
         });
@@ -898,23 +901,28 @@ public class MainViewController implements Initializable {
             }
             hasDragged = true;
 
-            double deltaX = event.getX() - dragStart[0].getX();
-            double deltaY = event.getY() - dragStart[0].getY();
+            double deltaX = event.getSceneX() - dragStart[0].getX();
+            double deltaY = event.getSceneY() - dragStart[0].getY();
 
-            // Controllo limiti come nella versione funzionante
+            Point2D deltaInParent = node.getParent().sceneToLocal(new Point2D(event.getSceneX(), event.getSceneY()))
+                    .subtract(node.getParent().sceneToLocal(dragStart[0]));
+
+            double adjustedDeltaX = deltaInParent.getX();
+            double adjustedDeltaY = deltaInParent.getY();
+
             double zoom = drawingPane.getScaleX();
             double paneWidth = drawingPane.getPrefWidth() * zoom;
             double paneHeight = drawingPane.getPrefHeight() * zoom;
             double extraMargin = 20;
 
-            // Verifica se il movimento è consentito
-            if (shape.canMoveBy(deltaX, deltaY, paneWidth, paneHeight, zoom, extraMargin)) {
-                shape.moveBy(deltaX, deltaY);
-                dragStart[0] = new Point2D(event.getX(), event.getY()); // Aggiorna il punto di partenza
+            if (shape.canMoveBy(adjustedDeltaX, adjustedDeltaY, paneWidth, paneHeight, zoom, extraMargin)) {
+                shape.moveBy(adjustedDeltaX, adjustedDeltaY);
+                dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
             }
 
             event.consume();
         });
+
 
         node.setOnMouseReleased(event -> {
             if (hasDragged) {

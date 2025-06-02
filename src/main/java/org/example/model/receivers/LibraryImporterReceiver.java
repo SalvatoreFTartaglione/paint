@@ -8,10 +8,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LibraryImporterReceiver {
 
@@ -31,18 +28,39 @@ public class LibraryImporterReceiver {
             }
 
             String line;
+            String currentKey = null;
+            StringBuilder shapeBuffer = null;
+
             while ((line = reader.readLine()) != null) {
                 if (line.isEmpty()) continue;
 
-                String[] parts = line.split(":", 2);
-                if (parts.length != 2) continue;
+                if (line.startsWith(" ") || line.trim().startsWith("|")) {
+                    // Riga figlia (|) → aggiungila al buffer corrente
+                    if (shapeBuffer != null) {
+                        shapeBuffer.append(" ").append(line.trim());
+                    }
+                } else {
+                    // Riga nuova (nuova shape o inizio nuovo gruppo)
+                    if (shapeBuffer != null && currentKey != null) {
+                        ShapeInterface shape = parseShape(shapeBuffer.toString().trim());
+                        if (shape != null) {
+                            importedMap.put(currentKey, shape);
+                        }
+                    }
 
-                String key = parts[0].trim();
-                String value = parts[1].trim();
+                    String[] parts = line.split(":", 2);
+                    if (parts.length != 2) continue;
 
-                ShapeInterface shape = parseShape(value);
+                    currentKey = parts[0].trim();
+                    shapeBuffer = new StringBuilder(parts[1].trim());
+                }
+            }
+
+            // Gestione ultimo elemento
+            if (shapeBuffer != null && currentKey != null) {
+                ShapeInterface shape = parseShape(shapeBuffer.toString().trim());
                 if (shape != null) {
-                    importedMap.put(key, shape);
+                    importedMap.put(currentKey, shape);
                 }
             }
         }
@@ -51,92 +69,149 @@ public class LibraryImporterReceiver {
     }
 
     private ShapeInterface parseShape(String value) {
+        if (value.startsWith("Group:")) {
+            return parseGroupShape(value);
+        }
+
         String[] tokens = value.split(";");
 
         String type = tokens[0];
-        double scaleX = 0.0;
-        double scaleY = 0.0;
 
         switch (type) {
             case "Rectangle":
-                Color rectStroke = Color.web(tokens[1]);
-                Color rectFill = Color.web(tokens[2]);
-                double strokeWidth = Double.parseDouble(tokens[3]);
-                double width = Double.parseDouble(tokens[4]);
-                double height = Double.parseDouble(tokens[5]);
-                double x = Double.parseDouble(tokens[6]);
-                double y = Double.parseDouble(tokens[7]);
-                double angleR = Double.parseDouble(tokens[8]);
-                AbstractShape rectangle = new RectangleCreator();
-                rectangle.creationOfShape(rectStroke, rectFill, (int) strokeWidth, width, height, null, 0.0, 0.0, angleR);
-                return rectangle.getShape();
-
+                return parseRectangle(tokens);
             case "Ellipse":
-                Color ellStroke = Color.web(tokens[1]);
-                Color ellFill = Color.web(tokens[2]);
-                double ellStrokeWidth = Double.parseDouble(tokens[3]);
-                double radiusX = Double.parseDouble(tokens[4]);
-                double radiusY = Double.parseDouble(tokens[5]);
-                double centerX = Double.parseDouble(tokens[6]);
-                double centerY = Double.parseDouble(tokens[7]);
-                double angleE = Double.parseDouble(tokens[8]);
-                AbstractShape ellipse = new EllipseCreator();
-                ellipse.creationOfShape(ellStroke, ellFill, (int) ellStrokeWidth, radiusX, radiusY, null, 0.0, 0.0, angleE);
-                return ellipse.getShape();
-
+                return parseEllipse(tokens);
             case "Line":
-                Color lineStroke = Color.web(tokens[1]);
-                double endX = Double.parseDouble(tokens[2]);
-                double endY = Double.parseDouble(tokens[3]);
-                double startX = Double.parseDouble(tokens[4]);
-                double startY = Double.parseDouble(tokens[5]);
-                double lineStrokeWidth = Double.parseDouble(tokens[6]);
-                double angleL = Double.parseDouble(tokens[7]);
-                AbstractShape line = new LineCreator();
-                line.creationOfShape(lineStroke, null, (int) lineStrokeWidth, 0, 0, null, 0.0, 0.0, angleL);
-                line.getShape().setPoints(new Double[]{startX, startY, endX, endY});
-                return line.getShape();
-
+                return parseLine(tokens);
             case "Text":
-                String content = tokens[1];
-                Color textStroke = Color.web(tokens[2]);
-                Color textFill = Color.web(tokens[3]);
-                double textX = Double.parseDouble(tokens[4]);
-                double textY = Double.parseDouble(tokens[5]);
-                double textStrokeWidth = Double.parseDouble(tokens[6]);
-                scaleX = Double.parseDouble(tokens[7]);
-                scaleY = Double.parseDouble(tokens[8]);
-                double angleT = Double.parseDouble(tokens[9]);
-                AbstractShape text = new TextCreator();
-                text.creationOfShape(textStroke, textFill, (int) textStrokeWidth, textX, textY, content, scaleX, scaleY, angleT);
-                return text.getShape();
-
+                return parseText(tokens);
             case "Polygon":
-                Color polyStroke = Color.web(tokens[1]);
-                Color polyFill = Color.web(tokens[2]);
-                double polyStrokeWidth = Double.parseDouble(tokens[3]);
-                scaleX = Double.parseDouble(tokens[4]);
-                scaleY = Double.parseDouble(tokens[5]);
-
-                String pointsStr = tokens[6].trim();
-                if (!pointsStr.startsWith("[") || !pointsStr.endsWith("]")) return null;
-                pointsStr = pointsStr.substring(1, pointsStr.length() - 1);
-                String[] pointTokens = pointsStr.split(",");
-                Double[] pointsP = new Double[pointTokens.length];
-                for (int i = 0; i < pointTokens.length; i++) {
-                    pointsP[i] = Double.parseDouble(pointTokens[i].trim());
-                }
-
-                double angleP = Double.parseDouble(tokens[7]);
-                AbstractShape polygon = new PolygonCreator();
-                polygon.creationOfShape(polyStroke, polyFill, (int) polyStrokeWidth, 0, 0, null, scaleX, scaleY, angleP);
-                polygon.getShape().setPoints(pointsP);
-                return polygon.getShape();
-
-
+                return parsePolygon(tokens);
             default:
                 return null;
         }
     }
 
+    private ShapeInterface parseRectangle(String[] tokens) {
+        Color stroke = Color.web(tokens[1]);
+        Color fill = Color.web(tokens[2]);
+        int strokeWidth = (int) Double.parseDouble(tokens[3]);
+        double width = Double.parseDouble(tokens[4]);
+        double height = Double.parseDouble(tokens[5]);
+        double x = Double.parseDouble(tokens[6]);
+        double y = Double.parseDouble(tokens[7]);
+        double angle = Double.parseDouble(tokens[8]);
+
+        AbstractShape rect = new RectangleCreator();
+        rect.creationOfShape(stroke, fill, strokeWidth, width, height, null, 0.0, 0.0, angle);
+        rect.getShape().draw(x, y);
+        return rect.getShape();
+    }
+
+    private ShapeInterface parseEllipse(String[] tokens) {
+        Color stroke = Color.web(tokens[1]);
+        Color fill = Color.web(tokens[2]);
+        int strokeWidth = (int) Double.parseDouble(tokens[3]);
+        double radiusX = Double.parseDouble(tokens[4]);
+        double radiusY = Double.parseDouble(tokens[5]);
+        double centerX = Double.parseDouble(tokens[6]);
+        double centerY = Double.parseDouble(tokens[7]);
+        double angle = Double.parseDouble(tokens[8]);
+
+        AbstractShape ellipse = new EllipseCreator();
+        ellipse.creationOfShape(stroke, fill, strokeWidth, radiusX, radiusY, null, 0.0, 0.0, angle);
+        ellipse.getShape().draw(centerX, centerY);
+        return ellipse.getShape();
+    }
+
+    private ShapeInterface parseLine(String[] tokens) {
+        Color stroke = Color.web(tokens[1]);
+        double endX = Double.parseDouble(tokens[2]);
+        double endY = Double.parseDouble(tokens[3]);
+        double startX = Double.parseDouble(tokens[4]);
+        double startY = Double.parseDouble(tokens[5]);
+        int strokeWidth = (int) Double.parseDouble(tokens[6]);
+        double angle = Double.parseDouble(tokens[7]);
+
+        AbstractShape line = new LineCreator();
+        line.creationOfShape(stroke, null, strokeWidth, 0, 0, null, 0.0, 0.0, angle);
+        ShapeInterface shape = line.getShape();
+        shape.setPoints(new Double[]{startX, startY, endX, endY});
+        return shape;
+    }
+
+    private ShapeInterface parseText(String[] tokens) {
+        String content = tokens[1];
+        Color stroke = Color.web(tokens[2]);
+        Color fill = Color.web(tokens[3]);
+        double x = Double.parseDouble(tokens[4]);
+        double y = Double.parseDouble(tokens[5]);
+        int strokeWidth = (int) Double.parseDouble(tokens[6]);
+        double scaleX = Double.parseDouble(tokens[7]);
+        double scaleY = Double.parseDouble(tokens[8]);
+        double angle = Double.parseDouble(tokens[9]);
+
+        AbstractShape text = new TextCreator();
+        text.creationOfShape(stroke, fill, strokeWidth, x, y, content, scaleX, scaleY, angle);
+        return text.getShape();
+    }
+
+    private ShapeInterface parsePolygon(String[] tokens) {
+        Color stroke = Color.web(tokens[1]);
+        Color fill = Color.web(tokens[2]);
+        int strokeWidth = (int) Double.parseDouble(tokens[3]);
+        double scaleX = Double.parseDouble(tokens[4]);
+        double scaleY = Double.parseDouble(tokens[5]);
+
+        String pointsStr = tokens[6].trim();
+        if (!pointsStr.startsWith("[") || !pointsStr.endsWith("]")) return null;
+
+        pointsStr = pointsStr.substring(1, pointsStr.length() - 1);
+        String[] pointTokens = pointsStr.split(",");
+        Double[] points = new Double[pointTokens.length];
+        for (int i = 0; i < pointTokens.length; i++) {
+            points[i] = Double.parseDouble(pointTokens[i].trim());
+        }
+
+        double angle = Double.parseDouble(tokens[7]);
+
+        AbstractShape polygon = new PolygonCreator();
+        polygon.creationOfShape(stroke, fill, strokeWidth, 0, 0, null, scaleX, scaleY, angle);
+        polygon.getShape().setPoints(points);
+        return polygon.getShape();
+    }
+
+    private ShapeInterface parseGroupShape(String groupLine) {
+        try {
+            // Group:0.0;0.0 : Ellipse;... | Rectangle;...
+            String[] parts = groupLine.split(":", 2);
+            if (parts.length != 2) return null;
+
+            String[] positionAndChildren = parts[1].split(" : ", 2);
+            if (positionAndChildren.length != 2) return null;
+
+            String[] positionTokens = positionAndChildren[0].split(";");
+            double groupX = Double.parseDouble(positionTokens[0].trim());
+            double groupY = Double.parseDouble(positionTokens[1].trim());
+
+            String childrenStr = positionAndChildren[1];
+            String[] childStrings = childrenStr.split(" \\| ");
+            List<ShapeInterface> children = new ArrayList<>();
+
+            for (String childStr : childStrings) {
+                ShapeInterface child = parseShape(childStr.trim());
+                if (child != null) {
+                    children.add(child);
+                }
+            }
+
+            CompositeShape group = new CompositeShape(children);
+            group.draw(groupX, groupY);
+            return group;
+        } catch (Exception e) {
+            System.err.println("Failed to parse group: " + e.getMessage());
+            return null;
+        }
+    }
 }

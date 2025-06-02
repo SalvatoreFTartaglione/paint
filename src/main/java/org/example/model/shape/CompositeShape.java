@@ -5,6 +5,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
+import javafx.scene.transform.Rotate;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -95,6 +96,7 @@ public class CompositeShape implements CompositeShapeInterface {
         for (ShapeInterface child : this.getChildren()) {
             //    a) clono il figlio
             ShapeInterface childClone = child.cloneShape();
+            childClone.getNode().setUserData(childClone);
 
             //    b) recupero la sua posizione assoluta corrente
             double childX = child.getX();

@@ -38,14 +38,18 @@ public class UngroupCommand implements CommandInterface {
 
         double offsetX = group.getX();
         double offsetY = group.getY();
+        double groupRotate = group.getNode().getRotate();
 
         for (ShapeInterface s : children) {
             Node node = s.getNode();
             node.setTranslateX(0);
             node.setTranslateY(0);
+            node.setRotate(groupRotate);
 
             node.setMouseTransparent(false);
             node.setPickOnBounds(false);
+
+            node.setUserData(s);
 
             s.moveBy(offsetX, offsetY);
         }
