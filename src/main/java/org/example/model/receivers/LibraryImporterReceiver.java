@@ -35,12 +35,10 @@ public class LibraryImporterReceiver {
                 if (line.isEmpty()) continue;
 
                 if (line.startsWith(" ") || line.trim().startsWith("|")) {
-                    // Riga figlia (|) → aggiungila al buffer corrente
                     if (shapeBuffer != null) {
                         shapeBuffer.append(" ").append(line.trim());
                     }
                 } else {
-                    // Riga nuova (nuova shape o inizio nuovo gruppo)
                     if (shapeBuffer != null && currentKey != null) {
                         ShapeInterface shape = parseShape(shapeBuffer.toString().trim());
                         if (shape != null) {
@@ -184,7 +182,6 @@ public class LibraryImporterReceiver {
 
     private ShapeInterface parseGroupShape(String groupLine) {
         try {
-            // Group:0.0;0.0 : Ellipse;... | Rectangle;...
             String[] parts = groupLine.split(":", 2);
             if (parts.length != 2) return null;
 

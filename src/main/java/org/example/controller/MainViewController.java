@@ -258,19 +258,19 @@ public class MainViewController implements Initializable {
 
         favoritesShapeComboBox.setOnAction(e -> {
             String selected = favoritesShapeComboBox.getSelectionModel().getSelectedItem();
-            System.out.println("[DEBUG] Selezionato dal comboBox: " + selected);
+            //System.out.println("[DEBUG] Selezionato dal comboBox: " + selected);
 
             if (selected != null) {
                 ShapeInterface shape = FavoriteShapeRegistry.getInstance().get(selected);
-                System.out.println("[DEBUG] Recuperata shape dal registry: " + shape.toString());
+                //System.out.println("[DEBUG] Recuperata shape dal registry: " + shape.toString());
 
                 if (shape != null) {
                     ShapeInterface copy = shape.cloneShape();
-                    System.out.println("[DEBUG] Clonata shape: " + copy);
+                    //System.out.println("[DEBUG] Clonata shape: " + copy);
                     contextDTO.setShape(copy.cloneShape());
                     contextDTO.setShapeOption(new ShapeOption("Favorite", ""));
                 } else {
-                    System.out.println("[DEBUG] Nessuna shape trovata nel registry per: " + selected);
+                    //System.out.println("[DEBUG] Nessuna shape trovata nel registry per: " + selected);
                 }
             }
         });
@@ -889,7 +889,6 @@ public class MainViewController implements Initializable {
         }
 
         node.setOnMousePressed(event -> {
-            // Usa coordinate assolute nella scena
             dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
             shapeStartPosition[0] = new Point2D(shape.getX(), shape.getY());
             event.consume();
@@ -933,7 +932,6 @@ public class MainViewController implements Initializable {
                 if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
                     MoveShapeCommand cmd = new MoveShapeCommand(shape, -totalDeltaX, -totalDeltaY, draggingReceiver);
                     invoker.execute(cmd);
-                    //shape.moveBy(-totalDeltaX, -totalDeltaY); // rollback
                     MoveShapeCommand moveShapeCommand = new MoveShapeCommand(shape, totalDeltaX, totalDeltaY, draggingReceiver);
                     invoker.execute(moveShapeCommand);
                 }

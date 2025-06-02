@@ -58,14 +58,14 @@ public class UngroupCommand implements CommandInterface {
 
     @Override
     public void undoCommand() {
-        // ---------------------------------------------------------
-        // Se faccio undo, ricostruisco il gruppo esattamente come prima:
-        // a) Chiedo a receiver di raggruppare di nuovo le shape (children).
-        // b) Per ciascuna figlia, imposto mouseTransparent = true e pickOnBounds = false
-        //    (perché ora è dentro il gruppo e vogliamo che clicchi il Composite).
-        // c) Ripristino eventuali punti geometrici interni.
-        // ---------------------------------------------------------
+        // Raggruppa nuovamente le children
         CompositeShapeInterface newGroup = receiver.group(children);
+
+        // Ripristina posizione e rotazione originali
+        newGroup.draw(group.getX(), group.getY());
+        newGroup.getNode().setRotate(group.getNode().getRotate());
+
+        // Aggiorna riferimento
         this.group = newGroup;
 
         for (ShapeInterface s : children) {
@@ -73,18 +73,18 @@ public class UngroupCommand implements CommandInterface {
             node.setTranslateX(0);
             node.setTranslateY(0);
 
-            // Dentro il gruppo, i figli devono essere mouseTransparent
-            // e non intercettare pick sui bounds, perché lo facciamo gestire al Composite.
-            node.setMouseTransparent(false);
-            node.setPickOnBounds(true);
+            // Devono essere trasparenti e non cliccabili direttamente
+            node.setMouseTransparent(true);
+            node.setPickOnBounds(false);
 
-            // Ripristino punti interni, se esistono
+            // Ripristina eventuali punti geometrici
             Double[] pts = originalPoints.get(s);
             if (pts != null) {
                 s.draw(pts);
             }
         }
     }
+
 
 
     @Override
