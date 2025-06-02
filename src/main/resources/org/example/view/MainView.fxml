@@ -10,7 +10,7 @@
 <?import javafx.scene.text.*?>
 <?import org.example.model.*?>
 
-<SplitPane fx:id="splitPane" dividerPositions="0.16132264529058116" orientation="VERTICAL" prefHeight="1000" prefWidth="1920.0" stylesheets="/org/example/styles/viewStyle.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.MainViewController">
+<SplitPane fx:id="splitPane" dividerPositions="0.16132264529058116" orientation="VERTICAL" prefHeight="700" prefWidth="1120.0" stylesheets="/org/example/styles/viewStyle.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.MainViewController">
     <items>
         <TabPane fx:id="tabPane" prefHeight="151.0" prefWidth="799.0" tabClosingPolicy="UNAVAILABLE">
             <tabs>

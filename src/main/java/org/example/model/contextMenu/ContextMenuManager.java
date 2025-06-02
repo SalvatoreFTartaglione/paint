@@ -58,13 +58,14 @@ public class ContextMenuManager {
         });
         contextMenu.getItems().add(resizePanel);
 
-        addTransformationButton(contextMenu, "Stretch", () -> {
-            stretchPanel.setVisible(true);
-            resizePanel.setVisible(false);
-            rotatePanel.setVisible(false);
-        });
-        contextMenu.getItems().add(stretchPanel);
-
+        if(!shape.isGroup()) {
+            addTransformationButton(contextMenu, "Stretch", () -> {
+                stretchPanel.setVisible(true);
+                resizePanel.setVisible(false);
+                rotatePanel.setVisible(false);
+            });
+            contextMenu.getItems().add(stretchPanel);
+        }
         addTransformationButton(contextMenu, "Rotate", () -> {
             rotatePanel.setVisible(true);
             resizePanel.setVisible(false);
