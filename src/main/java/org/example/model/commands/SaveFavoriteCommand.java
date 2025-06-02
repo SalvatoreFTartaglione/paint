@@ -22,7 +22,6 @@ public class SaveFavoriteCommand implements CommandInterface {
 
     @Override
     public void undoCommand() {
-        //receiver.removeFavorite(name);
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

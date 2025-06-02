@@ -20,9 +20,16 @@ public class FavoriteShapeRegistry {
     }
 
     public void save(String name, ShapeInterface shape) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Il nome della shape non può essere vuoto o nullo.");
+        }
+
+        if (shape == null) {
+            throw new IllegalArgumentException("La shape non può essere nulla.");
+        }
         favorites.put(name, shape);
-        System.out.println("[DEBUG] Shape salvata con nome: " + name);
-        System.out.println("[DEBUG] Shape: " + shape.toString());
+//        System.out.println("[DEBUG] Shape salvata con nome: " + name);
+//        System.out.println("[DEBUG] Shape: " + shape.toString());
         notifyObservers();
     }
 
@@ -40,10 +47,20 @@ public class FavoriteShapeRegistry {
         return favorites.keySet();
     }
 
+    //Attach(observer)
     public void addObserver(FavoriteObserver observer) {
-        observers.add(observer);
+        if (observer != null) {
+            observers.add(observer);
+        }
+    }
+    //Detach(observer)
+    public void removeObserver(FavoriteObserver observer) {
+        if (observer != null) {
+            observers.remove(observer);
+        }
     }
 
+    //Notify()
     private void notifyObservers() {
         Set<String> names = new HashSet<>(favorites.keySet());
         for (FavoriteObserver o : observers) {

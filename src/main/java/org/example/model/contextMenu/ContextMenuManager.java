@@ -46,15 +46,18 @@ public class ContextMenuManager {
         CustomMenuItem resizePanel = createResizeItem(shape, actions::onResize);
         CustomMenuItem stretchPanel = createStretchItem(shape, actions::onStretch);
         CustomMenuItem rotatePanel = createRotateItem(shape, actions::onRotate);
+        CustomMenuItem flipPanel = createFlipPanel(actions);
         resizePanel.setVisible(false);
         stretchPanel.setVisible(false);
         rotatePanel.setVisible(false);
+        flipPanel.setVisible(false);
 
         // Buttons to show panels
         addTransformationButton(contextMenu, "Resize", () -> {
             resizePanel.setVisible(true);
             stretchPanel.setVisible(false);
             rotatePanel.setVisible(false);
+            flipPanel.setVisible(false);
         });
         contextMenu.getItems().add(resizePanel);
 
@@ -63,6 +66,7 @@ public class ContextMenuManager {
                 stretchPanel.setVisible(true);
                 resizePanel.setVisible(false);
                 rotatePanel.setVisible(false);
+                flipPanel.setVisible(false);
             });
             contextMenu.getItems().add(stretchPanel);
         }
@@ -70,12 +74,18 @@ public class ContextMenuManager {
             rotatePanel.setVisible(true);
             resizePanel.setVisible(false);
             stretchPanel.setVisible(false);
+            flipPanel.setVisible(false);
         });
         contextMenu.getItems().add(rotatePanel);
 
-        // Menu Flip
-        Menu mirroringMenu = createMirroringMenu(actions);
-        contextMenu.getItems().add(mirroringMenu);
+
+        addTransformationButton(contextMenu, "Flip", () -> {
+            flipPanel.setVisible(true);
+            resizePanel.setVisible(false);
+            stretchPanel.setVisible(false);
+            rotatePanel.setVisible(false);
+        });
+        contextMenu.getItems().add(flipPanel);
 
         // === LAYER SELECTION ===
         addSectionHeader(contextMenu, "LAYERS");
@@ -160,6 +170,40 @@ public class ContextMenuManager {
 
         return colorPicker;
     }
+
+    private static CustomMenuItem createFlipPanel(ContextMenuActions actions) {
+        VBox buttons = new VBox(5);
+        buttons.getStyleClass().add("control-panel");
+
+        Button up = new Button("↑ Vertical Up");
+        Button down = new Button("↓ Vertical Down");
+        Button vCenter = new Button("↕ Vertical Center");
+        Button left = new Button("← Horizontal Left");
+        Button right = new Button("→ Horizontal Right");
+        Button hCenter = new Button("↔ Horizontal Center");
+
+        up.setPrefWidth(180);
+        down.setPrefWidth(180);
+        vCenter.setPrefWidth(180);
+        left.setPrefWidth(180);
+        right.setPrefWidth(180);
+        hCenter.setPrefWidth(180);
+
+        up.setOnAction(e -> actions.onMirrorUp());
+        down.setOnAction(e -> actions.onMirrorDown());
+        vCenter.setOnAction(e -> actions.onMirrorVerticalAroundCenter());
+        left.setOnAction(e -> actions.onMirrorLeft());
+        right.setOnAction(e -> actions.onMirrorRight());
+        hCenter.setOnAction(e -> actions.onMirrorHorizontalAroundCenter());
+
+        buttons.getChildren().addAll(up, down, vCenter, left, right, hCenter);
+
+        CustomMenuItem flipPanel = new CustomMenuItem(buttons);
+        flipPanel.setHideOnClick(false);
+
+        return flipPanel;
+    }
+
 
     private static CustomMenuItem createStretchItem(ShapeInterface shape, StretchHandler stretchHandler) {
         boolean isTextShape = shape.getText() != null;
@@ -325,28 +369,7 @@ public class ContextMenuManager {
         return item;
     }
 
-    private static Menu createMirroringMenu(ContextMenuActions actions) {
-        Menu mirroringMenu = new Menu("Flip");
 
-        MenuItem[] items = {
-                new MenuItem("↑ Vertical Up"),
-                new MenuItem("↓ Vertical Down"),
-                new MenuItem("↕ Vertical Center"),
-                new MenuItem("← Horizontal Left"),
-                new MenuItem("→ Horizontal Right"),
-                new MenuItem("↔ Horizontal Center")
-        };
-
-        items[0].setOnAction(e -> actions.onMirrorUp());
-        items[1].setOnAction(e -> actions.onMirrorDown());
-        items[2].setOnAction(e -> actions.onMirrorVerticalAroundCenter());
-        items[3].setOnAction(e -> actions.onMirrorLeft());
-        items[4].setOnAction(e -> actions.onMirrorRight());
-        items[5].setOnAction(e -> actions.onMirrorHorizontalAroundCenter());
-
-        mirroringMenu.getItems().addAll(items);
-        return mirroringMenu;
-    }
 
     private static void addFavoritesItem(ContextMenu contextMenu, ContextMenuActions actions) {
         Label label = new Label("★ Add to Favorites");

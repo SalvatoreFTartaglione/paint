@@ -16,6 +16,7 @@ public class AddShapeCommand implements CommandInterface {
         this.addToCanvasReceiver = addToCanvasReceiver;
     }
 
+    @Override
     public void executeCommand() {
         shape = addToCanvasReceiver.addShape();
         executed = (shape != null);

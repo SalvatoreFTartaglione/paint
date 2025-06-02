@@ -139,7 +139,6 @@ public class MainViewController implements Initializable {
     private ShapeReceiver shapeReceiver = new ShapeReceiver(null);
     private double currentZoom = 1.0;
     private Pane gridPane = new Pane();
-    private ObservableList<ShapeInterface> favoritesShapeList = FXCollections.observableArrayList();
     //Usati per il rettangolo della selezione multipla
     private Rectangle selectionRect;
     private Point2D selectionStart;
@@ -151,9 +150,7 @@ public class MainViewController implements Initializable {
     private final Point2D[] shapeStartPosition = new Point2D[1];
 
     private FavoriteManagerReceiver favoriteManagerReceiver = new FavoriteManagerReceiver();
-    //private ObservableList<ShapeInterface> favoritesShapeList = FXCollections.observableArrayList();
-    //@FXML     DA CAPIRE SE USARE STRING O SHAPE INTERFACE COME TIPO !!!
-    //private ComboBox<ShapeInterface> favoritesShapeComboBox;
+
 
     /**
      * Initializes the controller after the root element has been completely processed.
@@ -254,6 +251,7 @@ public class MainViewController implements Initializable {
         //drawingPane.getChildren().clear();
 
         // favoriteShapesComboBox section
+        // Observer attached
         FavoriteShapeRegistry.getInstance().addObserver(this::onFavoriteListChanged);
 
         favoritesShapeComboBox.setOnAction(e -> {
@@ -279,6 +277,7 @@ public class MainViewController implements Initializable {
 
     // favoriteShapesComboBox section
     private void onFavoriteListChanged(Set<String> updatedNames) {
+        //System.out.println("[DEBUG] Observer triggered - new favorites: " + updatedNames);
         Platform.runLater(() -> {
             favoritesShapeComboBox.getItems().setAll(updatedNames);
             ShapeOption currentOption = shapeComboBox.getValue();
@@ -592,6 +591,14 @@ public class MainViewController implements Initializable {
             @Override
             public void onAddToFavoritesWithName(String name) {
                 if (shape != null) {
+                    if (name == null || name.trim().isEmpty()) {
+                        Alert alert = new Alert(Alert.AlertType.WARNING);
+                        alert.setTitle("Invalid Name");
+                        alert.setHeaderText("Name cannot be empty");
+                        alert.setContentText("Please enter a valid name for the favorite shape.");
+                        alert.showAndWait();
+                        return;
+                    }
                     // Controlla se il nome è già nel ComboBox
                     if (favoritesShapeComboBox.getItems().contains(name)) {
                         Alert alert = new Alert(Alert.AlertType.WARNING);

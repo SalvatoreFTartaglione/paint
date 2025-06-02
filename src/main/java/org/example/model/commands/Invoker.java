@@ -23,7 +23,7 @@ public class Invoker {
             }
         }
         // Debug print
-        printStack("After EXECUTE");
+        //printStack("After EXECUTE");
     }
 
     public void executeLoadCommand(CommandInterface cmd) {
@@ -45,16 +45,16 @@ public class Invoker {
         if (!history.isEmpty()) {
             history.pop().undoCommand();
             //debug print
-            printStack("After UNDO");
+            //printStack("After UNDO");
         }
     }
 
     // debug method
-    private void printStack(String title) {
-        System.out.println("==== " + title + " ====");
-        for (int i = history.size() - 1; i >= 0; i--) {
-            System.out.println("[" + i + "] " + history.get(i).getClass().getSimpleName());
-        }
-        System.out.println("=====================");
-    }
+//    private void printStack(String title) {
+//        System.out.println("==== " + title + " ====");
+//        for (int i = history.size() - 1; i >= 0; i--) {
+//            System.out.println("[" + i + "] " + history.get(i).getClass().getSimpleName());
+//        }
+//        System.out.println("=====================");
+//    }
 }
