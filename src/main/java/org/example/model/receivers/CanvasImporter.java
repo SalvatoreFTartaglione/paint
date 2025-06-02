@@ -129,6 +129,7 @@ public class CanvasImporter {
                     Node n = shape.getNode();
                     n.setUserData(shape);
                     canvas.getChildren().add(n);
+                    System.out.println(canvas.getChildren().size());
                 }else {
                     throw new NullPointerException("Shape is null: " + shape);
                 }

@@ -486,40 +486,40 @@ public class MainViewController implements Initializable {
             //Per evitare che se nel gruppo è presente una linea e si fa il fillColor, alla linea non succeda niente
             public void onFillColorChanged(Color newColor) {
                 CommandInterface cmd = new ChangeFillColorCommand(shape, newColor, changesOnShapeReceiver);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
             }
 
             @Override
             public void onStrokeColorChanged(Color newColor) {
                 CommandInterface cmd = new ChangeStrokeColorCommand(shape, newColor, changesOnShapeReceiver);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
             }
 
             @Override
             public void onSendToBack() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new SendBackwardCommand(positionManagerReceiver);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
             }
 
             @Override
             public void onBringToFront() {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new BringForwardCommand(positionManagerReceiver);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
             }
 
             @Override
             public void onResize(double oldWidth, double oldHeight, double newSize) {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new ResizeCommand(positionManagerReceiver, newSize, oldWidth, oldHeight);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
             }
 
             public void onStretch(double oldWidth, double oldHeight, double newWidth, double newHeight) {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new StretchCommand(positionManagerReceiver, newWidth, newHeight, oldWidth, oldHeight);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
             }
 
             @Override
@@ -527,7 +527,7 @@ public class MainViewController implements Initializable {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.UP, contextDTO);
                 if (cmd.isExecutable()) {
-                    invoker.executeCommand(cmd);
+                    invoker.execute(cmd);
                 }else {
                     mirrorOutsideCanvasAlert.showAndWait();
                 }
@@ -538,7 +538,7 @@ public class MainViewController implements Initializable {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.DOWN, contextDTO);
                 if (cmd.isExecutable()) {
-                    invoker.executeCommand(cmd);
+                    invoker.execute(cmd);
                 }else {
                     mirrorOutsideCanvasAlert.showAndWait();
                 }
@@ -549,7 +549,7 @@ public class MainViewController implements Initializable {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.LEFT, contextDTO);
                 if (cmd.isExecutable()) {
-                    invoker.executeCommand(cmd);
+                    invoker.execute(cmd);
                 }else {
                     mirrorOutsideCanvasAlert.showAndWait();
                 }
@@ -560,7 +560,7 @@ public class MainViewController implements Initializable {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.RIGHT, contextDTO);
                 if (cmd.isExecutable()) {
-                    invoker.executeCommand(cmd);
+                    invoker.execute(cmd);
                 }else {
                     mirrorOutsideCanvasAlert.showAndWait();
                 }
@@ -571,7 +571,7 @@ public class MainViewController implements Initializable {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.HORIZONTAL, contextDTO);
                 if (cmd.isExecutable()) {
-                    invoker.executeCommand(cmd);
+                    invoker.execute(cmd);
                 }else {
                     mirrorOutsideCanvasAlert.showAndWait();
                 }
@@ -582,7 +582,7 @@ public class MainViewController implements Initializable {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new MirroringCommand(positionManagerReceiver, MirrorDirectionEnum.VERTICAL, contextDTO);
                 if (cmd.isExecutable()) {
-                    invoker.executeCommand(cmd);
+                    invoker.execute(cmd);
                 }else {
                     mirrorOutsideCanvasAlert.showAndWait();
                 }
@@ -593,7 +593,7 @@ public class MainViewController implements Initializable {
                 positionManagerReceiver = new PositionManagerReceiver(shape);
                 CommandInterface cmd = new RotateCommand(positionManagerReceiver, oldAngle, newAngle);
                 if (cmd.isExecutable()) {
-                    invoker.executeCommand(cmd);
+                    invoker.execute(cmd);
                 }else {
                     mirrorOutsideCanvasAlert.showAndWait();
                 }
@@ -615,7 +615,7 @@ public class MainViewController implements Initializable {
                     CommandInterface cmd = new SaveFavoriteCommand(
                             favoriteManagerReceiver, shape, name
                     );
-                    invoker.executeCommand(cmd);
+                    invoker.execute(cmd);
                 }
             }
 
@@ -623,13 +623,13 @@ public class MainViewController implements Initializable {
             @Override
             public void onCopy() {
                 CommandInterface cmd = new CopyCommand(shape, shapeReceiver);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
             }
 
             @Override
             public void onCut() {
                 CommandInterface cmd = new CutCommand(shape, shapeReceiver, contextDTO);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
             }
 
             @Override
@@ -638,7 +638,7 @@ public class MainViewController implements Initializable {
                 contextDTO.setSceneY(event.getSceneY());
                 if(shapeReceiver.hasShape()) {
                     CommandInterface cmd = new PasteCommand(shapeReceiver, contextDTO);
-                    invoker.executeCommand(cmd);
+                    invoker.execute(cmd);
 
                     ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
                     Node node = pastedShape.getNode();
@@ -655,14 +655,14 @@ public class MainViewController implements Initializable {
             @Override
             public void onDelete() {
                 CommandInterface cmd = new DeleteCommand(contextDTO, shape, shapeReceiver);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
             }
 
             @Override
             public void onUngroup() {
                 CompositeShapeInterface groupShape = (CompositeShapeInterface) shape;
                 UngroupCommand cmd = new UngroupCommand(grpReceiver, groupShape);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
 
                 // 2) Ottengo le shape scomposte
                 List<ShapeInterface> ungroupedChildren = cmd.getChildren();
@@ -711,7 +711,7 @@ public class MainViewController implements Initializable {
                 // Costruisci e esegui il GroupCommand come fai di consueto
                 List<ShapeInterface> toGroup = new ArrayList<>(currentSelection);
                 GroupCommand cmd = new GroupCommand(grpReceiver, toGroup);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
                 CompositeShapeInterface composite = cmd.getCreatedGroup();
                 // pick-on-bounds + figli mouse-transparent
                 Node groupNode = composite.getNode();
@@ -747,7 +747,7 @@ public class MainViewController implements Initializable {
         pasteItem.setOnAction(e -> {
             if(shapeReceiver.hasShape()) {
                 CommandInterface cmd = new PasteCommand(shapeReceiver, contextDTO);
-                invoker.executeCommand(cmd);
+                invoker.execute(cmd);
 
                 // Recupera la shape incollata, perchè senza questo non posso aprire il contextMenu su una figura incollata
                 ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
@@ -936,10 +936,10 @@ public class MainViewController implements Initializable {
 
                 if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
                     MoveShapeCommand cmd = new MoveShapeCommand(shape, -totalDeltaX, -totalDeltaY, draggingReceiver);
-                    invoker.executeCommand(cmd);
+                    invoker.execute(cmd);
                     //shape.moveBy(-totalDeltaX, -totalDeltaY); // rollback
                     MoveShapeCommand moveShapeCommand = new MoveShapeCommand(shape, totalDeltaX, totalDeltaY, draggingReceiver);
-                    invoker.executeCommand(moveShapeCommand);
+                    invoker.execute(moveShapeCommand);
                 }
 
                 Platform.runLater(() -> {
@@ -998,7 +998,7 @@ public class MainViewController implements Initializable {
                 if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
                     compositeShape.moveBy(-totalDeltaX, -totalDeltaY); // rollback
                     MoveShapeCommand moveShapeCommand = new MoveShapeCommand(compositeShape, totalDeltaX, totalDeltaY, draggingReceiver);
-                    invoker.executeCommand(moveShapeCommand);
+                    invoker.execute(moveShapeCommand);
                 }
 
                 Platform.runLater(() -> {
@@ -1068,7 +1068,7 @@ public class MainViewController implements Initializable {
                 setParameters(mouseEvent, shapeComboBox, drawingPane, contextDTO.getStartPoint(), borderColorPicker, fillColorPicker);
                 addToCanvasReceiver = new AddToCanvasReceiver(contextDTO);
                 CommandInterface addShape = new AddShapeCommand(contextDTO, addToCanvasReceiver);
-                invoker.executeCommand(addShape);
+                invoker.execute(addShape);
 
                 // Assign event handlers to newly created shape
                 // Assuming AddShapeCommand adds the shape as the last element of the drawingPane
@@ -1108,7 +1108,7 @@ public class MainViewController implements Initializable {
     private void saveFile(ActionEvent event) throws IOException {
         canvasExporter = new CanvasExporter(drawingPane);
         SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
-        invoker.executeCommand(saveCommandFile);
+        invoker.execute(saveCommandFile);
     }
 
 
@@ -1191,7 +1191,7 @@ public class MainViewController implements Initializable {
             if (result.get().getText().equals("Yes")) {
                 // Saving file
                 SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
-                invoker.executeCommand(saveCommandFile);
+                invoker.execute(saveCommandFile);
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // After saving execute load
@@ -1228,7 +1228,7 @@ public class MainViewController implements Initializable {
     public void saveLibrary(ActionEvent actionEvent) throws IOException {
         libraryExporterReceiver = new LibraryExporterReceiver(favoriteManagerReceiver);
         SavaLibraryCommand savaLibraryCommand = new SavaLibraryCommand(libraryExporterReceiver);
-        invoker.executeCommand(savaLibraryCommand);
+        invoker.execute(savaLibraryCommand);
     }
 
     public void importLibrary(ActionEvent actionEvent) throws IOException {
@@ -1274,7 +1274,7 @@ public class MainViewController implements Initializable {
             // L'utente ha confermato di voler sovrascrivere
             favoritesShapeComboBox.getItems().clear(); // Pulisce la libreria attuale
             LoadLibraryCommand loadLibraryCommand = new LoadLibraryCommand(libraryImporterReceiver);
-            invoker.executeCommand(loadLibraryCommand);
+            invoker.execute(loadLibraryCommand);
         }
     }
 }

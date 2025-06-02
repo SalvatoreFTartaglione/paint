@@ -48,13 +48,13 @@ public class InvokerTest {
     public void executeAndUndoMultipleCommandsStackBehavior() {
         // 1. Add shape
         CommandInterface addCmd = new AddShapeCommand(dto, addReceiver);
-        invoker.executeCommand(addCmd);
+        invoker.execute(addCmd);
         assertEquals(1, pane.getChildren().size());
         originalShape = (ShapeInterface) pane.getChildren().get(0).getUserData();
 
         // 2. Change Fill Color
         CommandInterface colorCmd = new ChangeFillColorCommand(originalShape, Color.BLUE, new ChangesOnShapeReceiver());
-        invoker.executeCommand(colorCmd);
+        invoker.execute(colorCmd);
         assertEquals(Color.BLUE, originalShape.getFillColor());
 
         // 3. Resize shape
@@ -62,19 +62,19 @@ public class InvokerTest {
         double oldWidth = originalShape.getWidth();
         double oldHeight = originalShape.getHeight();
         CommandInterface resizeCmd = new ResizeCommand(pmr, 200, 150, oldWidth, oldHeight);
-        invoker.executeCommand(resizeCmd);
+        invoker.execute(resizeCmd);
         assertEquals(200, originalShape.getWidth(), 0.01);
         assertEquals(150, originalShape.getHeight(), 0.01);
 
         // 4. Copy + Paste
         shapeReceiver.copy(originalShape);
         CommandInterface pasteCmd = new PasteCommand(shapeReceiver, dto);
-        invoker.executeCommand(pasteCmd);
+        invoker.execute(pasteCmd);
         assertEquals(2, pane.getChildren().size());
 
         // 5. Delete original shape
         CommandInterface deleteCmd = new DeleteCommand(dto, originalShape, shapeReceiver);
-        invoker.executeCommand(deleteCmd);
+        invoker.execute(deleteCmd);
         assertEquals(1, pane.getChildren().size());
 
         // UNDO SEQUENCE

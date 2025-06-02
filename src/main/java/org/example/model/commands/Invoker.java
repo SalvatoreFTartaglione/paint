@@ -7,11 +7,11 @@ public class Invoker {
     private final Stack<CommandInterface> history = new Stack<>();
 
     /**
-     * Executes a command and stores it for potentia.
+     * Executes a command and stores it for potential.
      *
      * @param cmd the command to execute
      */
-    public void executeCommand(CommandInterface cmd) {
+    public void execute(CommandInterface cmd) {
         cmd.executeCommand();
         if (cmd.isUndoable()) {
             if (cmd instanceof AddShapeCommand) {
