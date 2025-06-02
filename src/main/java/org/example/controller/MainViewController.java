@@ -930,8 +930,7 @@ public class MainViewController implements Initializable {
                 double totalDeltaY = currentPosition.getY() - shapeStartPosition[0].getY();
 
                 if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
-                    MoveShapeCommand cmd = new MoveShapeCommand(shape, -totalDeltaX, -totalDeltaY, draggingReceiver);
-                    invoker.execute(cmd);
+                    shape.moveBy(-totalDeltaX, -totalDeltaY); // rollback
                     MoveShapeCommand moveShapeCommand = new MoveShapeCommand(shape, totalDeltaX, totalDeltaY, draggingReceiver);
                     invoker.execute(moveShapeCommand);
                 }
