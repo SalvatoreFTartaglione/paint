@@ -401,7 +401,16 @@ public class CompositeShape implements CompositeShapeInterface {
     ///fino a qui
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Group: ");
+        // 1) Prendo X e Y del gruppo
+        double x = getX();
+        double y = getY();
+
+        // 2) Inizio con “Group:x;y”, poi aggiungo “ : ” e infine la lista dei figli separati da “ | ”
+        StringBuilder sb = new StringBuilder();
+        sb.append("Group:")
+                .append(x).append(";").append(y)
+                .append(" : ");
+
         Iterator<ShapeInterface> it = children.iterator();
         while (it.hasNext()) {
             sb.append(it.next());
@@ -409,8 +418,10 @@ public class CompositeShape implements CompositeShapeInterface {
                 sb.append(" | ");
             }
         }
+
         return sb.toString();
     }
+
 
 
 
