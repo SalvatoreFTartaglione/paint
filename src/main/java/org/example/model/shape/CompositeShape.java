@@ -279,28 +279,24 @@ public class CompositeShape implements CompositeShapeInterface {
 
     @Override
     public boolean canMoveBy(double deltaX, double deltaY, double paneWidth, double paneHeight, double zoom, double margin) {
-        // Calcola la nuova posizione
-        double newX = getX() + deltaX;
-        double newY = getY() + deltaY;
+        Node node = getNode();
 
-        // Dimensioni del pane effettive (senza zoom complicato)
-        double effectivePaneWidth = paneWidth;
-        double effectivePaneHeight = paneHeight;
+        if (node == null) return false;
 
-        // Limiti molto permissivi - permetti che gran parte del gruppo esca dai bordi
-        double groupWidth = getWidth();
-        double groupHeight = getHeight();
+        Bounds bounds = node.getBoundsInParent();
 
-        // Permetti che il 20% del gruppo possa uscire dai bordi
-        double tolerance = 0.2;
+        double newMinX = bounds.getMinX() + deltaX;
+        double newMaxX = bounds.getMaxX() + deltaX;
+        double newMinY = bounds.getMinY() + deltaY;
+        double newMaxY = bounds.getMaxY() + deltaY;
 
-        double minX = -(groupWidth * tolerance);
-        double maxX = effectivePaneWidth + (groupWidth * tolerance);
-        double minY = -(groupHeight * tolerance);
-        double maxY = effectivePaneHeight + (groupHeight * tolerance);
-
-        return newX >= minX && newX <= maxX && newY >= minY && newY <= maxY;
+        return newMinX >= -margin &&
+                newMinY >= -margin &&
+                newMaxX <= paneWidth + margin &&
+                newMaxY <= paneHeight + margin;
     }
+
+
 
     @Override
     public void mirrorUp() {

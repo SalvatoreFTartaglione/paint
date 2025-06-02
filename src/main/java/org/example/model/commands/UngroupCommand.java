@@ -33,43 +33,23 @@ public class UngroupCommand implements CommandInterface {
 
     @Override
     public void executeCommand() {
-        // ---------------------------------------------------------
-        // 1) Per ciascuna figlia, calcolo la posizione assoluta in coordinate del drawingPane:
-        //    a) Prendo il nodo JavaFX (Node) della shape.
-        //    b) Converto un suo punto di riferimento in coordinate di scena (sceneX, sceneY).
-        //    c) Converto quel (sceneX, sceneY) in coordinate locali del drawingPane.
-        //    d) Memorizzo il risultato in originalPositions.
-        // ---------------------------------------------------------
+        if (group == null) return;
+        receiver.ungroup(group);
+
+        double offsetX = group.getX();
+        double offsetY = group.getY();
+
         for (ShapeInterface s : children) {
-            Node childNode = s.getNode();
+            Node node = s.getNode();
+            node.setTranslateX(0);
+            node.setTranslateY(0);
 
-            // (a) Scelgo come punto di riferimento l'origine (0,0) locale del nodo
-            Point2D localZero = new Point2D(0, 0);
+            node.setMouseTransparent(false);
+            node.setPickOnBounds(false);
 
-            // (b) Converto in coordinate di scena:
-            Point2D scenePoint = childNode.localToScene(localZero);
-
-            // (c) Converto quelle sceneCoord in coordinate del drawingPane.
-            //     Per farlo, devo sapere a quale nodo appartiene:
-            //     ecco l’idea: prendo il parent finale, cioè il drawingPane.
-            //     Se GroupReceiver reinserisce le figlie direttamente in drawingPane,
-            //     basta fare: drawingPane.sceneToLocal(scenePoint).
-            //     Ma qui non abbiamo direttamente riferimento a drawingPane dentro il comando,
-            //     quindi salveremo "scenePoint" e le ricaveremo in controller.
-            originalPositions.put(s, scenePoint);
-
-            // (Opzionale) salvo anche punti interni (per undo)
-            Double[] pts = s.getPoints();
-            if (pts != null) {
-                originalPoints.put(s, pts.clone());
-            }
+            s.moveBy(offsetX, offsetY);
         }
 
-        // ---------------------------------------------------------
-        // 2) Eseguo lo sgrouping reale: il GroupReceiver toglie il Composite
-        //    e reinserisce le shape figlie come figli diretti del drawingPane.
-        // ---------------------------------------------------------
-        receiver.ungroup(group);
     }
 
     @Override
@@ -91,8 +71,8 @@ public class UngroupCommand implements CommandInterface {
 
             // Dentro il gruppo, i figli devono essere mouseTransparent
             // e non intercettare pick sui bounds, perché lo facciamo gestire al Composite.
-            node.setMouseTransparent(true);
-            node.setPickOnBounds(false);
+            node.setMouseTransparent(false);
+            node.setPickOnBounds(true);
 
             // Ripristino punti interni, se esistono
             Double[] pts = originalPoints.get(s);
