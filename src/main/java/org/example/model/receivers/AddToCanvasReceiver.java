@@ -144,6 +144,7 @@ public class AddToCanvasReceiver {
                     canAdd = true;
                     break;
                 }
+                break;
             }
             case "Favorite": {
                 ShapeInterface favoriteShape = drawingDTO.getShape();

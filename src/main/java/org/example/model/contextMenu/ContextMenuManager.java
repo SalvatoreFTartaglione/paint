@@ -1,5 +1,6 @@
 package org.example.model.contextMenu;
 
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -27,120 +28,67 @@ public class ContextMenuManager {
     public static MenuComponents createContextMenu(ShapeInterface shape, ContextMenuActions actions) {
 
         ContextMenu contextMenu = new ContextMenu();
+        contextMenu.getStyleClass().add("custom-context-menu");
 
-        // Color Management
         ColorPicker fillPicker = null;
         ColorPicker strokePicker = new ColorPicker(shape.getStrokeColor());
 
-        // Resize panels (initially hidden)
-        CustomMenuItem stretchPanel = createStretchItem(shape, actions::onStretch);
-        CustomMenuItem resizePanel  = createResizeItem(shape, actions::onResize);
-        stretchPanel.setVisible(false);
-        resizePanel.setVisible(false);
+        // === COLORS ===
+        addSectionHeader(contextMenu, "COLORS");
+        if (shape.getFillColor() != null) {
+            fillPicker = createColorPickerItem(contextMenu, "Fill Color", shape.getFillColor(), actions::onFillColorChanged);
+        }
+        createColorPickerItem(contextMenu, "Border Color", shape.getStrokeColor(), actions::onStrokeColorChanged);
 
-        // Rotate panel (initially hidden)
-        CustomMenuItem rotatePanel  = createRotateItem(shape, actions::onRotate);
+        // === TRANSFORMATIONS ===
+        addSectionHeader(contextMenu, "TRANSFORMATIONS");
+        // Control Panels
+        CustomMenuItem resizePanel = createResizeItem(shape, actions::onResize);
+        CustomMenuItem stretchPanel = createStretchItem(shape, actions::onStretch);
+        CustomMenuItem rotatePanel = createRotateItem(shape, actions::onRotate);
+        resizePanel.setVisible(false);
+        stretchPanel.setVisible(false);
         rotatePanel.setVisible(false);
 
-        MenuItem ungroupItem = null;
-
-        //UngroupMenu
-        if(shape.isGroup()){
-            ungroupItem = new MenuItem("Ungroup");
-            ungroupItem.setOnAction(e->actions.onUngroup());
-        }
-
-        // Fill Color (for line must be null)
-        if (shape.getFillColor() != null) {
-            fillPicker = createColorPickerItem(
-                    contextMenu,
-                    "Change Fill Color:",
-                    shape.getFillColor() != null ? shape.getFillColor() : shape.getStrokeColor(),
-                    newColor -> actions.onFillColorChanged(newColor)
-            );
-        }
-        // Stroke Color
-        createColorPickerItem(contextMenu, "Change Border Color:", shape.getStrokeColor(), actions::onStrokeColorChanged);
-
-        // Send to Back
-        CustomMenuItem sendToBackItem = new CustomMenuItem(new Label("Send to Back"));
-        sendToBackItem.setOnAction(e -> actions.onSendToBack());
-
-        // Bring to Front
-        CustomMenuItem bringToFrontItem = new CustomMenuItem(new Label("Bring to Front"));
-        bringToFrontItem.setOnAction(e -> actions.onBringToFront());
-
-        //Copy shape
-        MenuItem copyItem = new MenuItem("Copy");
-        copyItem.setOnAction(e -> actions.onCopy());
-
-        //Cut shape
-        MenuItem cutItem = new MenuItem("Cut");
-        cutItem.setOnAction(e -> actions.onCut());
-
-        //Paste shape
-        MenuItem pasteItem = new MenuItem("Paste");
-        pasteItem.setOnAction(e -> actions.onPaste());
-
-        //Delete shape
-        MenuItem deleteItem = new MenuItem("Delete");
-        deleteItem.setOnAction(e -> actions.onDelete());
-
-        // Resize shape
-        Label visualLabel = new Label("Resize");
-        CustomMenuItem visualBtn = new CustomMenuItem(visualLabel);
-        visualBtn.setHideOnClick(false);
-        visualBtn.setOnAction(e -> {
+        // Buttons to show panels
+        addTransformationButton(contextMenu, "Resize", () -> {
             resizePanel.setVisible(true);
+            stretchPanel.setVisible(false);
+            rotatePanel.setVisible(false);
         });
+        contextMenu.getItems().add(resizePanel);
 
-        // stretch shape
-        Label numericLabel = new Label("Stretch");
-        CustomMenuItem numericBtn = new CustomMenuItem(numericLabel);
-        numericBtn.setHideOnClick(false);
-        numericBtn.setOnAction(e -> {
+        addTransformationButton(contextMenu, "Stretch", () -> {
             stretchPanel.setVisible(true);
+            resizePanel.setVisible(false);
+            rotatePanel.setVisible(false);
         });
+        contextMenu.getItems().add(stretchPanel);
 
-        // Rotate shape
-        Label rotateLabel = new Label("Rotate");
-        CustomMenuItem rotateBtn = new CustomMenuItem(rotateLabel);
-        rotateBtn.setHideOnClick(false);
-        rotateBtn.setOnAction(e -> {
-            System.out.println("Rotating shape");
+        addTransformationButton(contextMenu, "Rotate", () -> {
             rotatePanel.setVisible(true);
+            resizePanel.setVisible(false);
+            stretchPanel.setVisible(false);
         });
+        contextMenu.getItems().add(rotatePanel);
 
-        // Mirroring
-        Menu mirroringMenu = new Menu("Flip");
+        // Menu Flip
+        Menu mirroringMenu = createMirroringMenu(actions);
+        contextMenu.getItems().add(mirroringMenu);
 
-        // Submenu items
-        MenuItem verticalUp = new MenuItem("Vertical Up");
-        verticalUp.setOnAction(e -> actions.onMirrorUp());
+        // === LAYER SELECTION ===
+        addSectionHeader(contextMenu, "LAYERS");
+        addMenuItem(contextMenu, "Send to Back", actions::onSendToBack);
+        addMenuItem(contextMenu, "Bring to Front", actions::onBringToFront);
 
-        MenuItem verticalDown = new MenuItem("Vertical Down");
-        verticalDown.setOnAction(e -> actions.onMirrorDown());
+        // === CLIPBOARD SELECTION ===
+        addSectionHeader(contextMenu, "CLIPBOARD");
+        addMenuItem(contextMenu, "Copy", actions::onCopy);
+        addMenuItem(contextMenu, "Cut", actions::onCut);
+        addMenuItem(contextMenu, "Paste", actions::onPaste);
 
-        MenuItem verticalCenter = new MenuItem("Vertical Around Center");
-        verticalCenter.setOnAction(e -> actions.onMirrorVerticalAroundCenter());
-
-        MenuItem horizontalLeft = new MenuItem("Horizontal Left");
-        horizontalLeft.setOnAction(e -> actions.onMirrorLeft());
-
-        MenuItem horizontalRight = new MenuItem("Horizontal Right");
-        horizontalRight.setOnAction(e -> actions.onMirrorRight());
-
-        MenuItem horizontalCenter = new MenuItem("Horizontal Around Center");
-        horizontalCenter.setOnAction(e -> actions.onMirrorHorizontalAroundCenter());
-
-        // Add elements to submenu
-        mirroringMenu.getItems().addAll(
-                verticalUp, verticalDown,
-                verticalCenter, horizontalLeft,
-                horizontalRight,
-                horizontalCenter
-        );
-
+        // === ACTIONS SELECTION ===
+        addSectionHeader(contextMenu, "ACTIONS");
         // Save shape as favorite
         Label addToFavoritesLabel = new Label("Add to Favorites");
         CustomMenuItem addToFavorites = new CustomMenuItem(addToFavoritesLabel);
@@ -153,108 +101,142 @@ public class ContextMenuManager {
             });
         });
 
-        // Add items
-        contextMenu.getItems().addAll(numericBtn, visualBtn, resizePanel, stretchPanel, rotatePanel);
-        if(ungroupItem != null) {
-            contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, ungroupItem, rotateBtn, addToFavorites, mirroringMenu);
+        if (shape.isGroup()) {
+            addMenuItem(contextMenu, "Ungroup", actions::onUngroup);
         }
-        else{
-            contextMenu.getItems().addAll(sendToBackItem, bringToFrontItem, cutItem, copyItem, pasteItem, deleteItem, rotateBtn, addToFavorites, mirroringMenu);
-        }
+
+        addFavoritesItem(contextMenu, actions);
+        addMenuItem(contextMenu, "Delete", actions::onDelete);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }
 
+    private static void addSectionHeader(ContextMenu contextMenu, String text) {
+        if (!contextMenu.getItems().isEmpty()) {
+            contextMenu.getItems().add(new SeparatorMenuItem());
+        }
+        Label header = new Label(text);
+        header.getStyleClass().add("menu-section-header");
+        CustomMenuItem headerItem = new CustomMenuItem(header);
+        headerItem.setHideOnClick(false);
+        contextMenu.getItems().add(headerItem);
+    }
+
+    private static void addMenuItem(ContextMenu contextMenu, String text, Runnable action) {
+        Label label = new Label(text);
+        label.getStyleClass().add("menu-item-label");
+        CustomMenuItem item = new CustomMenuItem(label);
+        item.setOnAction(e -> action.run());
+        contextMenu.getItems().add(item);
+    }
+
+    private static void addTransformationButton(ContextMenu contextMenu, String text, Runnable action) {
+        Label label = new Label("▶ " + text);
+        label.getStyleClass().add("menu-item-label");
+        CustomMenuItem item = new CustomMenuItem(label);
+        item.setHideOnClick(false);
+        item.setOnAction(e -> action.run());
+        contextMenu.getItems().add(item);
+    }
+
     private static ColorPicker createColorPickerItem(ContextMenu contextMenu, String labelText, Color initialColor, ColorChangeHandler handler) {
         ColorPicker colorPicker = new ColorPicker(initialColor);
+        colorPicker.setPrefWidth(100);
+
         Label label = new Label(labelText);
-        HBox box = new HBox(10, label, colorPicker);
-        CustomMenuItem item = new CustomMenuItem(box);
+        label.setPrefWidth(80);
+
+        HBox container = new HBox(label, colorPicker);
+        container.getStyleClass().add("color-picker-container");
+        container.setAlignment(Pos.CENTER_LEFT);
+        container.setSpacing(10);
+
+        CustomMenuItem item = new CustomMenuItem(container);
         item.setHideOnClick(false);
 
         colorPicker.setOnAction(e -> handler.onColorChanged(colorPicker.getValue()));
-
         contextMenu.getItems().add(item);
+
         return colorPicker;
     }
 
     private static CustomMenuItem createStretchItem(ShapeInterface shape, StretchHandler stretchHandler) {
-
-        // Check if it's a text or a line
         boolean isTextShape = shape.getText() != null;
         boolean isLineShape = shape.getFillColor() == null;
 
-        // get old shape dimensions (WxH) do display in the textfield
-        TextField w = (isTextShape || isLineShape) ? new TextField("") : new TextField(String.format("%.1f",shape.getWidth()));
-        TextField h = (isTextShape || isLineShape) ? new TextField("") : new TextField(String.format("%.1f", shape.getHeight()));
-        w.setPrefWidth(60); h.setPrefWidth(60);
+        TextField widthField = new TextField(isTextShape || isLineShape ? "" : String.format("%.1f", shape.getWidth()));
+        TextField heightField = new TextField(isTextShape || isLineShape ? "" : String.format("%.1f", shape.getHeight()));
+
+        widthField.getStyleClass().add("control-input");
+        heightField.getStyleClass().add("control-input");
+        widthField.setPrefWidth(70);
+        heightField.setPrefWidth(70);
+        widthField.setPromptText("Width");
+        heightField.setPromptText("Height");
 
         Button applyBtn = new Button("Apply");
-        applyBtn.setPrefWidth(60);
+        applyBtn.getStyleClass().add("control-button");
+        applyBtn.setPrefWidth(70);
 
-        // invalid input warning
         Label warningLabel = new Label();
-        warningLabel.setStyle("-fx-text-fill: red;");
+        warningLabel.getStyleClass().add("warning-label");
 
-        HBox inputsBox = new HBox(10, new Label("W:"), w, new Label("H:"), h, applyBtn);
-        VBox wrapper = new VBox(5, inputsBox, warningLabel);
-        CustomMenuItem item = new CustomMenuItem(wrapper);
+        HBox inputsBox = new HBox(8);
+        inputsBox.getChildren().addAll(
+                new Label("W:"), widthField,
+                new Label("H:"), heightField,
+                applyBtn
+        );
+        inputsBox.setAlignment(Pos.CENTER_LEFT);
+
+        VBox container = new VBox(8, inputsBox, warningLabel);
+        container.getStyleClass().add("control-panel");
+
+        CustomMenuItem item = new CustomMenuItem(container);
         item.setHideOnClick(false);
 
         Runnable apply = () -> {
             try {
-                // get newWidth and newHeight value from the textfield
-                double newWidth = Double.parseDouble(w.getText());
-                double newHeight = Double.parseDouble(h.getText());
-
-
-
+                double newWidth = Double.parseDouble(widthField.getText());
+                double newHeight = Double.parseDouble(heightField.getText());
                 double maxLimit = isTextShape ? 10.0 : 300.0;
 
-                // Validation: checks for element
                 boolean widthValid = newWidth > 0 && newWidth <= maxLimit;
                 boolean heightValid = newHeight > 0 && newHeight <= maxLimit;
 
-                // if newWidth and newHeight are too big
                 if (widthValid && heightValid) {
+                    widthField.getStyleClass().remove("input-error");
+                    heightField.getStyleClass().remove("input-error");
+                    warningLabel.setText("");
+
                     Double oldWidth = shape.getStretchWidth();
                     Double oldHeight = shape.getStretchHeight();
-                    // Reset border for bad input
-                    w.setStyle("");
-                    h.setStyle("");
-                    // Clear warning
-                    warningLabel.setText("");
                     stretchHandler.onStretch(oldWidth, oldHeight, newWidth, newHeight);
                 } else {
-                    // Highlights only invalid fields
                     if (!widthValid) {
-                        w.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
+                        widthField.getStyleClass().add("input-error");
                     } else {
-                        w.setStyle("");
+                        widthField.getStyleClass().remove("input-error");
                     }
                     if (!heightValid) {
-                        h.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
+                        heightField.getStyleClass().add("input-error");
                     } else {
-                        h.setStyle("");
+                        heightField.getStyleClass().remove("input-error");
                     }
-                    // Shows warning
-                    if (isTextShape) {
-                        warningLabel.setText("Max stretch value must be positive and can't be over 10x10");
-                    } else {
-                        warningLabel.setText("Max stretch value must be positive and can't be over 300x300");
-                    }
+
+                    String limit = isTextShape ? "10x10" : "300x300";
+                    warningLabel.setText("Values must be positive and ≤ " + limit);
                 }
             } catch (NumberFormatException e) {
-                w.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
-                h.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
-                warningLabel.setText("Invalid number format.");
+                widthField.getStyleClass().add("input-error");
+                heightField.getStyleClass().add("input-error");
+                warningLabel.setText("Please enter valid numbers");
             }
         };
-        // Apply changes when button gets pressed
+
         applyBtn.setOnAction(e -> apply.run());
-        // Handle enter event on textfields
-        w.setOnAction(e -> apply.run());
-        h.setOnAction(e -> apply.run());
+        widthField.setOnAction(e -> apply.run());
+        heightField.setOnAction(e -> apply.run());
 
         return item;
     }
@@ -265,83 +247,119 @@ public class ContextMenuManager {
         double maxSize = shape.getMaxSliderSize();
 
         Slider slider = new Slider(minSize, maxSize, currentSize);
-        Label valLabel = new Label(shape.getSliderLabel(slider.getValue()));
+        slider.setPrefWidth(180);
+        slider.setShowTickLabels(true);
+        slider.setShowTickMarks(true);
+
+        Label valueLabel = new Label(shape.getSliderLabel(slider.getValue()));
+        valueLabel.setPrefWidth(80);
+        valueLabel.setAlignment(Pos.CENTER_RIGHT);
 
         Button applyBtn = new Button("Apply");
-        applyBtn.setPrefWidth(60);
+        applyBtn.getStyleClass().add("control-button");
+        applyBtn.setPrefWidth(70);
 
-        slider.setPrefWidth(150);
-        slider.setShowTickLabels(true);
-
-        // Only update label, no visual changes to shape
         slider.valueProperty().addListener((obs, oldV, newV) -> {
-            double newSize = newV.doubleValue();
-            valLabel.setText(shape.getSliderLabel(newSize));
+            valueLabel.setText(shape.getSliderLabel(newV.doubleValue()));
         });
 
-        // Apply changes only when Apply button is clicked
         applyBtn.setOnAction(e -> {
-            //get previous shape dimensions (WxH)
             double oldWidth = shape.getWidth();
             double oldHeight = shape.getHeight();
             double newSize = slider.getValue();
             resizeHandler.onResize(oldWidth, oldHeight, newSize);
         });
 
-        HBox box = new HBox(10, slider, valLabel, applyBtn);
-        CustomMenuItem item = new CustomMenuItem(box);
+        HBox container = new HBox(10, slider, valueLabel, applyBtn);
+        container.getStyleClass().addAll("control-panel", "slider-container");
+        container.setAlignment(Pos.CENTER_LEFT);
+
+        CustomMenuItem item = new CustomMenuItem(container);
         item.setHideOnClick(false);
         return item;
     }
 
     private static CustomMenuItem createRotateItem(ShapeInterface shape, RotateHandler rotateHandler) {
-
-        double currentAngle = shape.getAngle();
-        TextField angleField = new TextField(String.format("%.1f", currentAngle));
+        TextField angleField = new TextField(String.format("%.1f", shape.getAngle()));
+        angleField.getStyleClass().add("control-input");
         angleField.setPrefWidth(80);
+        angleField.setPromptText("0-360°");
 
         Button applyBtn = new Button("Apply");
-        applyBtn.setPrefWidth(60);
+        applyBtn.getStyleClass().add("control-button");
+        applyBtn.setPrefWidth(70);
 
-        // Warning label per input non validi
         Label warningLabel = new Label();
-        warningLabel.setStyle("-fx-text-fill: red;");
+        warningLabel.getStyleClass().add("warning-label");
 
-        HBox inputsBox = new HBox(10, new Label("Angle (°):"), angleField, applyBtn);
-        VBox wrapper = new VBox(5, inputsBox, warningLabel);
-        CustomMenuItem item = new CustomMenuItem(wrapper);
+        HBox inputsBox = new HBox(8, new Label("Angle:"), angleField, applyBtn);
+        inputsBox.setAlignment(Pos.CENTER_LEFT);
+
+        VBox container = new VBox(8, inputsBox, warningLabel);
+        container.getStyleClass().add("control-panel");
+
+        CustomMenuItem item = new CustomMenuItem(container);
         item.setHideOnClick(false);
 
         Runnable apply = () -> {
             try {
                 double newAngle = Double.parseDouble(angleField.getText());
-
-                // Validazione: deve essere tra 0 e 360
                 if (newAngle >= 0 && newAngle <= 360) {
-                    double oldAngle = shape.getAngle();
-
-                    // Reset stile per input valido
-                    angleField.setStyle("");
+                    angleField.getStyleClass().remove("input-error");
                     warningLabel.setText("");
-
-                    rotateHandler.onRotate(oldAngle, newAngle);
+                    rotateHandler.onRotate(shape.getAngle(), newAngle);
                 } else {
-                    // Highlight invalid field
-                    angleField.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
-                    warningLabel.setText("Angle must be between 0 and 360 degrees");
+                    angleField.getStyleClass().add("input-error");
+                    warningLabel.setText("Angle must be between 0° and 360°");
                 }
             } catch (NumberFormatException e) {
-                angleField.setStyle("-fx-border-color: red; -fx-border-width: 3px;");
-                warningLabel.setText("Invalid number format.");
+                angleField.getStyleClass().add("input-error");
+                warningLabel.setText("Please enter a valid number");
             }
         };
 
-        // Apply changes when button is pressed
         applyBtn.setOnAction(e -> apply.run());
-        // Gestisce l'evento Enter sul campo di testo
         angleField.setOnAction(e -> apply.run());
 
         return item;
+    }
+
+    private static Menu createMirroringMenu(ContextMenuActions actions) {
+        Menu mirroringMenu = new Menu("Flip");
+
+        MenuItem[] items = {
+                new MenuItem("↑ Vertical Up"),
+                new MenuItem("↓ Vertical Down"),
+                new MenuItem("↕ Vertical Center"),
+                new MenuItem("← Horizontal Left"),
+                new MenuItem("→ Horizontal Right"),
+                new MenuItem("↔ Horizontal Center")
+        };
+
+        items[0].setOnAction(e -> actions.onMirrorUp());
+        items[1].setOnAction(e -> actions.onMirrorDown());
+        items[2].setOnAction(e -> actions.onMirrorVerticalAroundCenter());
+        items[3].setOnAction(e -> actions.onMirrorLeft());
+        items[4].setOnAction(e -> actions.onMirrorRight());
+        items[5].setOnAction(e -> actions.onMirrorHorizontalAroundCenter());
+
+        mirroringMenu.getItems().addAll(items);
+        return mirroringMenu;
+    }
+
+    private static void addFavoritesItem(ContextMenu contextMenu, ContextMenuActions actions) {
+        Label label = new Label("★ Add to Favorites");
+        label.getStyleClass().add("menu-item-label");
+        CustomMenuItem item = new CustomMenuItem(label);
+        item.setHideOnClick(false);
+        item.setOnAction(e -> {
+            TextInputDialog dialog = new TextInputDialog("MyFavorite");
+            dialog.setTitle("Add to Favorites");
+            dialog.setHeaderText("Enter a name for this favorite shape:");
+            dialog.setContentText("Name:");
+            dialog.showAndWait().ifPresent(actions::onAddToFavoritesWithName);
+        });
+        contextMenu.getItems().add(item);
     }
 
     @FunctionalInterface

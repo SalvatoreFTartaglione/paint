@@ -162,6 +162,13 @@ public class MainViewController implements Initializable {
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Load CSS stylesheet
+        /*Platform.runLater(() -> {
+            String css = getClass().getResource("/org/example/styles/viewStyle.css").toExternalForm();
+            splitPane.getScene().getStylesheets().add(css);
+        });*/
+
+        // Init Components
         initializeSplitPane();
         initializeShapeChoiceBox();
         initializeZoomControls();
@@ -433,7 +440,7 @@ public class MainViewController implements Initializable {
             }
         }
 
-        warningLabel.setText(currentSelection.size() + " forme selezionate");
+        //warningLabel.setText(currentSelection.size() + " forme selezionate");
         selectionRect.setVisible(false);
     }
 
@@ -978,9 +985,6 @@ public class MainViewController implements Initializable {
             event.consume();
         });
     }
-
-
-
 
 
     /**
