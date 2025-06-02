@@ -113,59 +113,103 @@ public class PolygonShape implements ShapeInterface {
 
     @Override
     public void mirrorUp() {
-        double centerY = getY();
-        double height = getHeight();
-        double mirroredY = centerY - height;
-
-        for (int i = 1; i < polygonShape.getPoints().size(); i += 2) {
-            double currentY = polygonShape.getPoints().get(i);
-            double distance = centerY - currentY;
-            polygonShape.getPoints().set(i, mirroredY - distance);
+        if (points == null || points.length < 4) return;
+        double minY = Double.MAX_VALUE;
+        for (int i = 1; i < points.length; i += 2) {
+            if (points[i] < minY) {
+                minY = points[i];
+            }
         }
-        this.updatePointsArray();
+        Double[] mirroredPoints = new Double[points.length];
+        for (int i = 0; i < points.length; i++) {
+            if (i % 2 == 0) {
+                mirroredPoints[i] = points[i];
+            } else {
+                mirroredPoints[i] = 2 * minY - points[i];
+            }
+        }
+
+        this.points = mirroredPoints;
+        polygonShape.getPoints().clear();
+        polygonShape.getPoints().addAll(Arrays.asList(mirroredPoints));
     }
+
 
     @Override
     public void mirrorDown() {
-        double centerY = getY();
-        double height = getHeight();
-        double mirroredY = centerY + height;
+        if (points == null || points.length < 4) return;
 
-        for (int i = 1; i < polygonShape.getPoints().size(); i += 2) {
-            double currentY = polygonShape.getPoints().get(i);
-            double distance = currentY - centerY;
-            polygonShape.getPoints().set(i, mirroredY + distance);
+        double maxY = Double.MIN_VALUE;
+        for (int i = 1; i < points.length; i += 2) {
+            if (points[i] > maxY) {
+                maxY = points[i];
+            }
         }
-        this.updatePointsArray();
+
+        Double[] mirroredPoints = new Double[points.length];
+        for (int i = 0; i < points.length; i++) {
+            if (i % 2 == 0) {
+                mirroredPoints[i] = points[i];
+            } else {
+                mirroredPoints[i] = 2 * maxY - points[i];
+            }
+        }
+
+        this.points = mirroredPoints;
+        polygonShape.getPoints().clear();
+        polygonShape.getPoints().addAll(Arrays.asList(mirroredPoints));
     }
 
     @Override
     public void mirrorLeft() {
-        double centerX = getX();
-        double width = getWidth();
-        double mirroredX = centerX - width;
+        if (points == null || points.length < 4) return;
 
-        for (int i = 0; i < polygonShape.getPoints().size(); i += 2) {
-            double currentX = polygonShape.getPoints().get(i);
-            double distance = centerX - currentX;
-            polygonShape.getPoints().set(i, mirroredX - distance);
+        double minX = Double.MAX_VALUE;
+        for (int i = 0; i < points.length; i += 2) {
+            if (points[i] < minX) {
+                minX = points[i];
+            }
         }
-        this.updatePointsArray();
+
+        Double[] mirroredPoints = new Double[points.length];
+        for (int i = 0; i < points.length; i++) {
+            if (i % 2 == 0) {
+                mirroredPoints[i] = 2 * minX - points[i];
+            } else {
+                mirroredPoints[i] = points[i];
+            }
+        }
+
+        this.points = mirroredPoints;
+        polygonShape.getPoints().clear();
+        polygonShape.getPoints().addAll(Arrays.asList(mirroredPoints));
     }
 
     @Override
     public void mirrorRight() {
-        double centerX = getX();
-        double width = getWidth();
-        double mirroredX = centerX + width;
+        if (points == null || points.length < 4) return;
 
-        for (int i = 0; i < polygonShape.getPoints().size(); i += 2) {
-            double currentX = polygonShape.getPoints().get(i);
-            double distance = currentX - centerX;
-            polygonShape.getPoints().set(i, mirroredX + distance);
+        double maxX = Double.MIN_VALUE;
+        for (int i = 0; i < points.length; i += 2) {
+            if (points[i] > maxX) {
+                maxX = points[i];
+            }
         }
-        this.updatePointsArray();
+
+        Double[] mirroredPoints = new Double[points.length];
+        for (int i = 0; i < points.length; i++) {
+            if (i % 2 == 0) {
+                mirroredPoints[i] = 2 * maxX - points[i];
+            } else {
+                mirroredPoints[i] = points[i];
+            }
+        }
+
+        this.points = mirroredPoints;
+        polygonShape.getPoints().clear();
+        polygonShape.getPoints().addAll(Arrays.asList(mirroredPoints));
     }
+
 
     @Override
     public void setScaleX(double scale) {
@@ -189,15 +233,56 @@ public class PolygonShape implements ShapeInterface {
 
     @Override
     public void mirrorHorizontallyAroundCenter() {
-        polygonShape.setScaleX(polygonShape.getScaleX() * -1);
-        this.updatePointsArray();
+        if (points == null || points.length < 4) return;
+
+        double minX = Double.MAX_VALUE;
+        double maxX = Double.MIN_VALUE;
+        for (int i = 0; i < points.length; i += 2) {
+            minX = Math.min(minX, points[i]);
+            maxX = Math.max(maxX, points[i]);
+        }
+        double centerX = (minX + maxX) / 2.0;
+
+        Double[] mirroredPoints = new Double[points.length];
+        for (int i = 0; i < points.length; i++) {
+            if (i % 2 == 0) {
+                mirroredPoints[i] = 2 * centerX - points[i];
+            } else {
+                mirroredPoints[i] = points[i];
+            }
+        }
+
+        this.points = mirroredPoints;
+        polygonShape.getPoints().clear();
+        polygonShape.getPoints().addAll(Arrays.asList(mirroredPoints));
     }
 
     @Override
     public void mirrorVerticallyAroundCenter() {
-        polygonShape.setScaleY(polygonShape.getScaleY() * -1);
-        this.updatePointsArray();
+        if (points == null || points.length < 4) return;
+
+        double minY = Double.MAX_VALUE;
+        double maxY = Double.MIN_VALUE;
+        for (int i = 1; i < points.length; i += 2) {
+            minY = Math.min(minY, points[i]);
+            maxY = Math.max(maxY, points[i]);
+        }
+        double centerY = (minY + maxY) / 2.0;
+
+        Double[] mirroredPoints = new Double[points.length];
+        for (int i = 0; i < points.length; i++) {
+            if (i % 2 == 0) {
+                mirroredPoints[i] = points[i];
+            } else {
+                mirroredPoints[i] = 2 * centerY - points[i];
+            }
+        }
+
+        this.points = mirroredPoints;
+        polygonShape.getPoints().clear();
+        polygonShape.getPoints().addAll(Arrays.asList(mirroredPoints));
     }
+
 
     @Override
     public Color getStrokeColor() {
@@ -359,6 +444,13 @@ public class PolygonShape implements ShapeInterface {
         return result;
     }
 
+    public void setPoints(Double[] points) {
+        polygonShape.getPoints().clear();
+        for (Double point : points) {
+            polygonShape.getPoints().add(point);
+        }
+    }
+
     @Override
     public Node getNode() {
         return polygonShape;
@@ -393,8 +485,130 @@ public class PolygonShape implements ShapeInterface {
 
     @Override
     public Optional<Point2D> simulateMirror(MirrorDirectionEnum direction) {
-        return Optional.empty();
+        if (points == null || points.length < 2) return Optional.empty();
+
+        Double[] simulated = Arrays.copyOf(points, points.length);
+
+        switch (direction) {
+            case UP: {
+                double minY = Double.MAX_VALUE;
+                for (int i = 1; i < simulated.length; i += 2) {
+                    minY = Math.min(minY, simulated[i]);
+                }
+                for (int i = 1; i < simulated.length; i += 2) {
+                    simulated[i] = 2 * minY - simulated[i];
+                }
+                break;
+            }
+            case DOWN: {
+                double maxY = Double.MIN_VALUE;
+                for (int i = 1; i < simulated.length; i += 2) {
+                    maxY = Math.max(maxY, simulated[i]);
+                }
+                for (int i = 1; i < simulated.length; i += 2) {
+                    simulated[i] = 2 * maxY - simulated[i];
+                }
+                break;
+            }
+            case LEFT: {
+                double minX = Double.MAX_VALUE;
+                for (int i = 0; i < simulated.length; i += 2) {
+                    minX = Math.min(minX, simulated[i]);
+                }
+                for (int i = 0; i < simulated.length; i += 2) {
+                    simulated[i] = 2 * minX - simulated[i];
+                }
+                break;
+            }
+            case RIGHT: {
+                double maxX = Double.MIN_VALUE;
+                for (int i = 0; i < simulated.length; i += 2) {
+                    maxX = Math.max(maxX, simulated[i]);
+                }
+                for (int i = 0; i < simulated.length; i += 2) {
+                    simulated[i] = 2 * maxX - simulated[i];
+                }
+                break;
+            }
+            case HORIZONTAL: {
+                double minX = Double.MAX_VALUE, maxX = Double.MIN_VALUE;
+                for (int i = 0; i < simulated.length; i += 2) {
+                    minX = Math.min(minX, simulated[i]);
+                    maxX = Math.max(maxX, simulated[i]);
+                }
+                double centerX = (minX + maxX) / 2.0;
+                for (int i = 0; i < simulated.length; i += 2) {
+                    simulated[i] = 2 * centerX - simulated[i];
+                }
+                break;
+            }
+            case VERTICAL: {
+                double minY = Double.MAX_VALUE, maxY = Double.MIN_VALUE;
+                for (int i = 1; i < simulated.length; i += 2) {
+                    minY = Math.min(minY, simulated[i]);
+                    maxY = Math.max(maxY, simulated[i]);
+                }
+                double centerY = (minY + maxY) / 2.0;
+                for (int i = 1; i < simulated.length; i += 2) {
+                    simulated[i] = 2 * centerY - simulated[i];
+                }
+                break;
+            }
+        }
+
+        // Trova il punto estremo in base alla direzione
+        Point2D result = null;
+
+        switch (direction) {
+            case LEFT:
+            case HORIZONTAL: {
+                double minX = Double.MAX_VALUE;
+                for (int i = 0; i < simulated.length; i += 2) {
+                    if (simulated[i] < minX) {
+                        minX = simulated[i];
+                        result = new Point2D(simulated[i], simulated[i + 1]);
+                    }
+                }
+                break;
+            }
+            case RIGHT: {
+                double maxX = Double.MIN_VALUE;
+                for (int i = 0; i < simulated.length; i += 2) {
+                    if (simulated[i] > maxX) {
+                        maxX = simulated[i];
+                        result = new Point2D(simulated[i], simulated[i + 1]);
+                    }
+                }
+                break;
+            }
+            case UP:
+            case VERTICAL: {
+                double minY = Double.MAX_VALUE;
+                for (int i = 1; i < simulated.length; i += 2) {
+                    if (simulated[i] < minY) {
+                        minY = simulated[i];
+                        result = new Point2D(simulated[i - 1], simulated[i]);
+                    }
+                }
+                break;
+            }
+            case DOWN: {
+                double maxY = Double.MIN_VALUE;
+                for (int i = 1; i < simulated.length; i += 2) {
+                    if (simulated[i] > maxY) {
+                        maxY = simulated[i];
+                        result = new Point2D(simulated[i - 1], simulated[i]);
+                    }
+                }
+                break;
+            }
+        }
+
+        return Optional.ofNullable(result);
     }
+
+
+
 
     @Override
     public void setAngle(double angle) {

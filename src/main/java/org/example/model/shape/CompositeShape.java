@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -398,12 +399,18 @@ public class CompositeShape implements CompositeShapeInterface {
     ///fino a qui
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("\nGroup:\n");
-        for (ShapeInterface s : children) {
-            sb.append(" ").append(s).append("\n");
+        StringBuilder sb = new StringBuilder("Group: ");
+        Iterator<ShapeInterface> it = children.iterator();
+        while (it.hasNext()) {
+            sb.append(it.next());
+            if (it.hasNext()) {
+                sb.append(" | ");
+            }
         }
         return sb.toString();
     }
+
+
 
     @Override
     public double getStretchWidth() {

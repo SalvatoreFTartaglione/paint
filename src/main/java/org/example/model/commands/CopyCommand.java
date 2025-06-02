@@ -21,4 +21,9 @@ public class CopyCommand implements CommandInterface {
     public void undoCommand() {
         receiver.undoCopy();
     }
+
+    @Override
+    public boolean isUndoable() {
+        return false;
+    }
 }

@@ -105,4 +105,8 @@ public interface ShapeInterface {
     void setAngle(double angle);
     double getAngle();
 
+    default void setPoints(Double[] points){
+        return;
+    }
+
 }

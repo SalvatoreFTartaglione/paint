@@ -3,6 +3,7 @@ package org.example.model.commands;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.AddToCanvasReceiver;
 import org.example.model.shape.ShapeInterface;
+
 public class AddShapeCommand implements CommandInterface {
 
     private ShapeInterface shape;
@@ -25,6 +26,11 @@ public class AddShapeCommand implements CommandInterface {
         if (executed && shape != null && shape.getNode() != null) {
             drawingDTO.getDrawingPane().getChildren().remove(shape.getNode());
         }
+    }
+
+    @Override
+    public boolean isUndoable() {
+        return wasExecuted();
     }
 
     public ShapeInterface getShape() {

@@ -15,21 +15,25 @@ public class LoadLibraryCommand implements CommandInterface{
     }
 
     @Override
-    public void executeCommand() {
+    public void executePossibleExceptionCommand() throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"));
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
-            try {
-                libraryImporterReceiver.importLibrary(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            libraryImporterReceiver.importLibrary(file);
         }
     }
 
     @Override
-    public void undoCommand() {
+    public void executeCommand() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void undoCommand() { throw new UnsupportedOperationException("Not supported yet."); }
+
+    @Override
+    public boolean isUndoable() {
+        return false;
     }
 }

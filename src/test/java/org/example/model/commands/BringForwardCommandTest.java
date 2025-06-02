@@ -73,7 +73,7 @@ public class BringForwardCommandTest {
         PositionManagerReceiver receiver = new PositionManagerReceiver(unboundShape);
         BringForwardCommand cmd = new BringForwardCommand(receiver);
 
-        Exception exception = assertThrows(IllegalStateException.class, cmd::executeCommand);
+        Exception exception = assertThrows(IllegalStateException.class, () -> cmd.executeCommand());
         assertTrue(exception.getMessage().contains("Node does not have a Pane parent"));
     }
 }

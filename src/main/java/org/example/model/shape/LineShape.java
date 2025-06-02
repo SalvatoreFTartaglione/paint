@@ -301,7 +301,8 @@ public class LineShape implements ShapeInterface{
      * @param points
      * Sets the coordinate of the line and inserts them in an array of double
      */
-    private void setPoints(Double[] points){
+    @Override
+    public void setPoints(Double[] points){
         this.points = points;
     }
 

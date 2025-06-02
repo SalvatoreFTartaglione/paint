@@ -51,10 +51,10 @@ public class MirroringCommand implements CommandInterface{
 
         double x = simulated.get().getX();
         double y = simulated.get().getY();
-        double canvasWidth = contextDTO.getDrawingPane().getWidth();
-        double canvasHeight = contextDTO.getDrawingPane().getHeight();
 
-        return x >= 0 && x <= canvasWidth && y >= 0 && y <= canvasHeight;
+        final double tolerance = -0.5;
 
+        return x >= tolerance && y >= tolerance;
     }
+
 }

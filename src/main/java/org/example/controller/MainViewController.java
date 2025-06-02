@@ -39,6 +39,7 @@ import org.example.model.shape.MirrorDirectionEnum;
 import org.example.model.shape.ShapeInterface;
 import org.example.model.ZoomableScrollPane;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -473,7 +474,11 @@ public class MainViewController implements Initializable {
 
                 // Se è click destro, mostra il menu contestuale
                 if (event.getButton() == MouseButton.SECONDARY) {
-                    showContextMenu(shape, event);
+                    try {
+                        showContextMenu(shape, event);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
 
@@ -485,7 +490,7 @@ public class MainViewController implements Initializable {
     /**
      * Show context menu for selected shape
      */
-    private void showContextMenu(ShapeInterface shape, MouseEvent event) {
+    private void showContextMenu(ShapeInterface shape, MouseEvent event) throws IOException {
         // Create context menu actions
         ContextMenuActions actions = new ContextMenuActions() {
 
@@ -622,7 +627,7 @@ public class MainViewController implements Initializable {
                     CommandInterface cmd = new SaveFavoriteCommand(
                             favoriteManagerReceiver, shape, name
                     );
-                    invoker.executeSaveFavoriteCommand(cmd);
+                    invoker.executeCommand(cmd);
                 }
             }
 
@@ -630,7 +635,7 @@ public class MainViewController implements Initializable {
             @Override
             public void onCopy() {
                 CommandInterface cmd = new CopyCommand(shape, shapeReceiver);
-                invoker.executeCommandNotUndoable(cmd);
+                invoker.executeCommand(cmd);
             }
 
             @Override
@@ -1079,10 +1084,10 @@ public class MainViewController implements Initializable {
      * Calls the function to save the file
      */
     @FXML
-    private void saveFile(ActionEvent event) {
+    private void saveFile(ActionEvent event) throws IOException {
         canvasExporter = new CanvasExporter(drawingPane);
         SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
-        invoker.executeCommandNotUndoable(saveCommandFile);
+        invoker.executeCommand(saveCommandFile);
     }
 
 
@@ -1091,7 +1096,7 @@ public class MainViewController implements Initializable {
      * Calls the function to load a file
      */
     @FXML
-    private void loadFile(ActionEvent event) {
+    private void loadFile(ActionEvent event) throws IOException {
         canvasImporter = new CanvasImporter(drawingPane);
         // Check if canvas is empty
         if (drawingPane.getChildren().stream()
@@ -1151,7 +1156,7 @@ public class MainViewController implements Initializable {
     }
 
 
-    private void loadManager(CanvasImporter canvasImporter) {
+    private void loadManager(CanvasImporter canvasImporter) throws IOException {
         // Confirmation alert
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("SaveCommand Workspace");
@@ -1166,7 +1171,7 @@ public class MainViewController implements Initializable {
             if (result.get().getText().equals("Yes")) {
                 // Saving file
                 SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
-                invoker.executeCommandNotUndoable(saveCommandFile);
+                invoker.executeCommand(saveCommandFile);
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // After saving execute load
@@ -1200,27 +1205,44 @@ public class MainViewController implements Initializable {
         gridPane.setVisible(checkBoxGrid.isSelected());
     }
 
-    public void saveLibrary(ActionEvent actionEvent) {
+    public void saveLibrary(ActionEvent actionEvent) throws IOException {
         libraryExporterReceiver = new LibraryExporterReceiver(favoriteManagerReceiver);
         SavaLibraryCommand savaLibraryCommand = new SavaLibraryCommand(libraryExporterReceiver);
-        invoker.executeCommandNotUndoable(savaLibraryCommand);
+        invoker.executeCommand(savaLibraryCommand);
     }
 
-    public void importLibrary(ActionEvent actionEvent) {
+    public void importLibrary(ActionEvent actionEvent) throws IOException {
         libraryImporterReceiver = new LibraryImporterReceiver(favoriteManagerReceiver);
         if (favoritesShapeComboBox.getItems().isEmpty()) {
             LoadLibraryCommand loadLibraryCommand = new LoadLibraryCommand(libraryImporterReceiver);
-            invoker.executeCommandNotUndoable(loadLibraryCommand);
+            try {
+                invoker.executePossibleExceptionCommand(loadLibraryCommand);
+            } catch (IOException e) {
+                showErrorAlertLoadLibrary(e);
+            }
         }else {
             showAlertLoadLibrary();
         }
     }
 
-    private void showAlertLoadLibrary() {
+    private void showErrorAlertLoadLibrary(IOException e) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Load Favorite Library");
+        alert.setHeaderText(e.getMessage());
+        alert.setContentText("Could not load library. Maybe you tried to load a canvas file.");
+
+        ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
+        alert.getButtonTypes().setAll(okButton);
+
+        alert.showAndWait();
+
+    }
+
+    private void showAlertLoadLibrary() throws IOException {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Load Favorite Library");
-        alert.setHeaderText("La libreria contiene già degli elementi.");
-        alert.setContentText("Vuoi sovrascrivere la libreria attuale con una nuova?");
+        alert.setHeaderText("Library is not empty.");
+        alert.setContentText("Do you want override the current library?");
 
         ButtonType overwriteButton = new ButtonType("Sì", ButtonBar.ButtonData.YES);
         ButtonType cancelButton = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -1232,7 +1254,7 @@ public class MainViewController implements Initializable {
             // L'utente ha confermato di voler sovrascrivere
             favoritesShapeComboBox.getItems().clear(); // Pulisce la libreria attuale
             LoadLibraryCommand loadLibraryCommand = new LoadLibraryCommand(libraryImporterReceiver);
-            invoker.executeCommandNotUndoable(loadLibraryCommand);
+            invoker.executeCommand(loadLibraryCommand);
         }
     }
 }

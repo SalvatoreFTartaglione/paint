@@ -1,6 +1,5 @@
 package org.example.model.commands;
 
-import org.example.model.commands.CommandInterface;
 import org.example.model.shape.ShapeInterface;
 import org.example.model.receivers.FavoriteManagerReceiver;
 
@@ -25,5 +24,10 @@ public class SaveFavoriteCommand implements CommandInterface {
     public void undoCommand() {
         //receiver.removeFavorite(name);
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isUndoable() {
+        return false;
     }
 }

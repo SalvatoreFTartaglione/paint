@@ -26,8 +26,7 @@ public class AddToCanvasReceiver {
     }
 
 
-    public ShapeInterface
-    addShape() {
+    public ShapeInterface addShape() {
         ShapeInterface shape = null;
         ShapeOption selectedShape = drawingDTO.getShapeOption();
         canAdd = false;
@@ -152,7 +151,8 @@ public class AddToCanvasReceiver {
                 if (favoriteShape != null) {
                     ShapeInterface clonedShape = favoriteShape.cloneShape();
                     Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-                    clonedShape.draw(localCoords.getX(), localCoords.getY());
+                    Point2D clampedCoords = clampPosition(localCoords.getX(), localCoords.getY(), clonedShape.getWidth(), clonedShape.getHeight());
+                    clonedShape.draw(clampedCoords.getX(), clampedCoords.getY());
                     shape = clonedShape;
                     canAdd = true;
                     break;

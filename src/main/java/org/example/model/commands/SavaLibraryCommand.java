@@ -37,4 +37,9 @@ public class SavaLibraryCommand implements CommandInterface{
     public void undoCommand() {
         throw new UnsupportedOperationException("Feature not supported.");
     }
+
+    @Override
+    public boolean isUndoable() {
+        return false;
+    }
 }

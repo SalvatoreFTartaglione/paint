@@ -1,10 +1,6 @@
 package org.example.model.commands;
 
-import javafx.scene.Node;
-import javafx.scene.layout.Pane;
 import org.example.model.receivers.PositionManagerReceiver;
-import org.example.model.receivers.ShapeReceiver;
-import org.example.model.shape.ShapeInterface;
 
 public class ResizeCommand implements CommandInterface {
 

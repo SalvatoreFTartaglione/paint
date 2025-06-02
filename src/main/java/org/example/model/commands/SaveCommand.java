@@ -1,6 +1,5 @@
 package org.example.model.commands;
 
-import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import org.example.model.receivers.CanvasExporter;
 
@@ -41,6 +40,11 @@ public class SaveCommand implements CommandInterface {
     @Override
     public void undoCommand() {
         throw new UnsupportedOperationException("Feature not supported.");
+    }
+
+    @Override
+    public boolean isUndoable() {
+        return false;
     }
 
 

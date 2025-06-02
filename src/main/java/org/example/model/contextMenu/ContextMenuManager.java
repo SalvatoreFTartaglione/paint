@@ -25,7 +25,7 @@ public class ContextMenuManager {
     /*
      * Creates a complitely configured context menu with event handlers
      */
-    public static MenuComponents createContextMenu(ShapeInterface shape, ContextMenuActions actions) {
+    public static MenuComponents createContextMenu(ShapeInterface shape, ContextMenuActions actions){
 
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.getStyleClass().add("custom-context-menu");

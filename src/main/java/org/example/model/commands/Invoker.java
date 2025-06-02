@@ -1,5 +1,6 @@
 package org.example.model.commands;
 
+import java.io.IOException;
 import java.util.Stack;
 
 public class Invoker {
@@ -12,21 +13,17 @@ public class Invoker {
      */
     public void executeCommand(CommandInterface cmd) {
         cmd.executeCommand();
-        // only push if meaningful
-        if (cmd instanceof AddShapeCommand) {
-            if (((AddShapeCommand) cmd).wasExecuted()) {
+        if (cmd.isUndoable()) {
+            if (cmd instanceof AddShapeCommand) {
+                if (((AddShapeCommand) cmd).wasExecuted()) {
+                    history.push(cmd);
+                }
+            } else {
                 history.push(cmd);
             }
-        } else {
-            history.push(cmd);
         }
         // Debug print
         printStack("After EXECUTE");
-    }
-
-    public void executeSaveFavoriteCommand(CommandInterface cmd) {cmd.executeCommand();}
-    public void executeCopyCommand(CommandInterface cmd){
-        cmd.executeCommand();
     }
 
     public void executeLoadCommand(CommandInterface cmd) {
@@ -34,8 +31,11 @@ public class Invoker {
         history.clear();
     }
 
-    public void executeCommandNotUndoable(CommandInterface cmd) {
-        cmd.executeCommand();
+    public void executePossibleExceptionCommand(CommandInterface cmd) throws IOException {
+        cmd.executePossibleExceptionCommand();
+        if (cmd.isUndoable()) {
+            history.push(cmd);
+        }
     }
 
     /**

@@ -74,7 +74,7 @@ public class SendBackwardCommandTest {
         PositionManagerReceiver receiver = new PositionManagerReceiver(orphan);
         SendBackwardCommand command = new SendBackwardCommand(receiver);
 
-        Exception exception = assertThrows(IllegalStateException.class, command::executeCommand);
+        Exception exception = assertThrows(IllegalStateException.class, () -> command.executeCommand());
         assertTrue(exception.getMessage().contains("Node does not have a Pane parent"));
     }
 }
