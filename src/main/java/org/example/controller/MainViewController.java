@@ -163,11 +163,6 @@ public class MainViewController implements Initializable {
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Load CSS stylesheet
-        /*Platform.runLater(() -> {
-            String css = getClass().getResource("/org/example/styles/viewStyle.css").toExternalForm();
-            splitPane.getScene().getStylesheets().add(css);
-        });*/
 
         // Init Components
         initializeSplitPane();
@@ -175,12 +170,11 @@ public class MainViewController implements Initializable {
         initializeZoomControls();
         initializeGridControls();
         initializeAlerts();
-        //favoriteManagerReceiver = new FavoriteManagerReceiver();
+
         saveLibraryButton.disableProperty().bind(
                 Bindings.isEmpty(favoritesShapeComboBox.getItems())
         );
 
-        // disabilita il menu delle figure preferite all inizio
         favoritesShapeComboBox.setDisable(true);
 
         initMultiSelectCommand();
@@ -191,18 +185,17 @@ public class MainViewController implements Initializable {
             // 1) se sto disegnando il rettangolo di selezione, non toccare nulla
             if (selectionRect.isVisible()) return;
 
-
             // 2) solo sul click sinistro
             if (evt.getButton() != MouseButton.PRIMARY) return;
 
             // 2) se ho già selezionato delle shape e il click non è sopra una di esse, allora clear
             if (!currentSelection.isEmpty()) {
-                boolean clickSuSelezionate = currentSelection.stream()
+                boolean clickOnSelected = currentSelection.stream()
                         .map(ShapeInterface::getNode)
                         .anyMatch(node ->
                                 node.contains(node.sceneToLocal(evt.getSceneX(), evt.getSceneY()))
                         );
-                if (!clickSuSelezionate) {
+                if (!clickOnSelected) {
                     clearSelection();
                 }
             }
@@ -280,19 +273,15 @@ public class MainViewController implements Initializable {
             }
         });
 
-
-
-
     }
+
     // favoriteShapesComboBox section
     private void onFavoriteListChanged(Set<String> updatedNames) {
         Platform.runLater(() -> {
             favoritesShapeComboBox.getItems().setAll(updatedNames);
-
             ShapeOption currentOption = shapeComboBox.getValue();
             boolean isFavoriteSelected = currentOption != null && "Favorite".equals(currentOption.getName());
             boolean hasFavorites = !updatedNames.isEmpty();
-
             favoritesShapeComboBox.setDisable(!(isFavoriteSelected && hasFavorites));
         });
     }
@@ -301,7 +290,7 @@ public class MainViewController implements Initializable {
     private void initializeAlerts() {
         mirrorOutsideCanvasAlert.setTitle("Shape outside of canvas");
         mirrorOutsideCanvasAlert.setHeaderText("Can not mirror here.");
-        mirrorOutsideCanvasAlert.setContentText("The following action will translate the figure outside the canvas...Try again.");
+        mirrorOutsideCanvasAlert.setContentText("The following action will translate the figure outside the canvas. Try again.");
         ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
         mirrorOutsideCanvasAlert.getButtonTypes().setAll(okButton);
     }
@@ -324,7 +313,6 @@ public class MainViewController implements Initializable {
     private void createGrid(double cellSize, Pane gridPane) {
 
         gridPane.getChildren().clear();
-
         double width = gridPane.getPrefWidth();
         double height = gridPane.getPrefHeight();
 
@@ -691,7 +679,7 @@ public class MainViewController implements Initializable {
 
                     // e) Ripristino interattività
                     childNode.setMouseTransparent(false);
-                    // childNode.setPickOnBounds(true); // opzionale
+                    childNode.setPickOnBounds(true); // opzionale
 
                     attachEventHandlersToShape(childNode);
                     makeDraggable(child);
@@ -1120,8 +1108,7 @@ public class MainViewController implements Initializable {
     private void loadFile(ActionEvent event) throws IOException {
         canvasImporter = new CanvasImporter(drawingPane);
         // Check if canvas is empty
-        if (drawingPane.getChildren().stream()
-                .anyMatch(node -> node.getUserData() instanceof ShapeInterface)) {
+        if (drawingPane.getChildren().stream().anyMatch(node -> node.getUserData() instanceof ShapeInterface)) {
             loadManager(canvasImporter);
             // Assign event handlers to all loaded shapes
             attachEventHandlersToAllShapes();
@@ -1145,24 +1132,8 @@ public class MainViewController implements Initializable {
      */
     private void attachEventHandlersToAllShapes() {
         for (Node node : drawingPane.getChildren()) {
-            Object ud = node.getUserData();
-            if (!(ud instanceof ShapeInterface)) continue;
-            ShapeInterface s = (ShapeInterface) ud;
-
-            boolean isComposite = !s.getChildren().isEmpty();
-
-            // Se è un gruppo (ha figli), il Group cattura i click
-            node.setMouseTransparent(false);
-            node.setPickOnBounds(isComposite);
-
-            if (isComposite) {
-                // i figli NON devono intercettare il click
-                for (ShapeInterface child : s.getChildren()) {
-                    child.getNode().setMouseTransparent(true);
-                }
-            }
             attachEventHandlersToShape(node);
-            makeDraggable(s);
+            makeDraggable((ShapeInterface) node.getUserData());
         }
     }
 
