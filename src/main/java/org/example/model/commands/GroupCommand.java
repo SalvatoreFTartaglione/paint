@@ -10,17 +10,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Command per eseguire e annullare il raggruppamento di più shape
- */
+
 public class GroupCommand implements CommandInterface {
     private final GroupReceiver receiver;
     private final List<ShapeInterface> shapes;
     private CompositeShapeInterface group;
 
-    // memorizzo x,y per tutte le shape
+
     private final Map<ShapeInterface, Point2D> originalPositions = new HashMap<>();
-    // memorizzo i punti (per linee, poligoni, ecc.)
     private final Map<ShapeInterface, Double[]> originalPoints    = new HashMap<>();
 
     public GroupCommand(GroupReceiver receiver, List<ShapeInterface> shapes) {
@@ -75,6 +72,7 @@ public class GroupCommand implements CommandInterface {
         }
     }
 
+    @Override
     public CompositeShapeInterface getCreatedGroup() {
         return group;
     }

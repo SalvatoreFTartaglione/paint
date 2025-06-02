@@ -4,7 +4,7 @@ import javafx.geometry.Point2D;
 import org.example.model.receivers.DraggingReceiver;
 import org.example.model.shape.ShapeInterface;
 
-public class DragCommand implements CommandInterface {
+public class MoveShapeCommand implements CommandInterface {
 
     private final ShapeInterface shape;
     private final double deltaX;
@@ -13,7 +13,7 @@ public class DragCommand implements CommandInterface {
     private final DraggingReceiver draggingReceiver;
 
 
-    public DragCommand(ShapeInterface shape, double deltaX, double deltaY, DraggingReceiver draggingReceiver) {
+    public MoveShapeCommand(ShapeInterface shape, double deltaX, double deltaY, DraggingReceiver draggingReceiver) {
         this.shape = shape;
         this.deltaX = deltaX;
         this.deltaY = deltaY;

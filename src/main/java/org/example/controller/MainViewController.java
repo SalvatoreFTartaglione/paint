@@ -274,18 +274,6 @@ public class MainViewController implements Initializable {
                     System.out.println("[DEBUG] Clonata shape: " + copy);
                     contextDTO.setShape(copy.cloneShape());
                     contextDTO.setShapeOption(new ShapeOption("Favorite", ""));
-//                    ShapeReceiver receiver = new ShapeReceiver(contextDTO);
-//                    //System.out.println("[DEBUG] Creato receiver con contextDTO: " + contextDTO);
-//
-//                    CommandInterface cmd = new PasteCommand(receiver, contextDTO);
-//                    System.out.println("[DEBUG] Creato comando AddShapeCommand");
-
-//                    invoker.executeCommand(cmd);
-//                    System.out.println("[DEBUG] Eseguito comando: inserita copia nel canvas");
-//
-//                    attachEventHandlersToShape(copy.getNode());     //Aggiunge al nodo i gestori di eventi
-//                    makeDraggable(copy);
-//                    System.out.println("[DEBUG] Handlers assegnati alla shape, drag abilitato");
                 } else {
                     System.out.println("[DEBUG] Nessuna shape trovata nel registry per: " + selected);
                 }
@@ -655,7 +643,12 @@ public class MainViewController implements Initializable {
                     ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
                     Node node = pastedShape.getNode();
                     attachEventHandlersToShape(node);
-                    makeDraggable(pastedShape);
+                    if (pastedShape instanceof CompositeShapeInterface) {
+                        makeDraggableGroup((CompositeShapeInterface) pastedShape);
+                    }
+                    else {
+                        makeDraggable(pastedShape);
+                    }
                 }
             }
 
@@ -666,41 +659,40 @@ public class MainViewController implements Initializable {
             }
 
             @Override
-            public void onUngroup(){
+            public void onUngroup() {
                 CompositeShapeInterface groupShape = (CompositeShapeInterface) shape;
                 UngroupCommand cmd = new UngroupCommand(grpReceiver, groupShape);
                 invoker.executeCommand(cmd);
 
                 // 2) Ottengo le shape scomposte
                 List<ShapeInterface> ungroupedChildren = cmd.getChildren();
-                // 3) Ottengo le posizioni salvate, che sono in coordinate di scena
+
+                // 3) Ottengo le posizioni salvate in coordinate di scena
                 Map<ShapeInterface, Point2D> savedScene = cmd.getOriginalScenePositions();
 
-                // 4) PER OGNI CHILD:
-                //    a) Converto savedScene.get(child) (sceneX, sceneY) in localX, localY del drawingPane
-                //    b) Imposto childNode.setLayoutX(localX) e setLayoutY(localY)
-                //    c) Ripristino interattività (mouseTransparent, pickOnBounds, handlers, drag)
-
+                // 4) Per ogni child: ripristino posizione e interattività
                 for (ShapeInterface child : ungroupedChildren) {
                     Node childNode = child.getNode();
 
-                    // a) prendo la Point2D in sceneCoordinate salvata
+                    // a) Prendo il punto salvato in coordinate di scena
                     Point2D scenePt = savedScene.get(child);
                     if (scenePt != null) {
-                        // converto in coordinate local del drawingPane
-                        // ATTENZIONE: uso drawingPane.sceneToLocal(...) per ottenere localX/localY
+                        // b) Converto in coordinate locali del drawingPane
                         Point2D localOnPane = drawingPane.sceneToLocal(scenePt);
 
-                        // b) imposto esplicitamente layoutX, layoutY
+                        // c) Reset di eventuali traslazioni accumulate
+                        childNode.setTranslateX(0);
+                        childNode.setTranslateY(0);
+
+                        // d) Imposto layoutX/Y basato sulla conversione
                         childNode.setLayoutX(localOnPane.getX());
                         childNode.setLayoutY(localOnPane.getY());
                     }
 
-                    // c1) ripristino mouseTransparent / pickOnBounds
+                    // e) Ripristino interattività
                     childNode.setMouseTransparent(false);
-                    childNode.setPickOnBounds(true);
+                    // childNode.setPickOnBounds(true); // opzionale
 
-                    // c2) riattacco listener e drag
                     attachEventHandlersToShape(childNode);
                     makeDraggable(child);
                 }
@@ -728,7 +720,7 @@ public class MainViewController implements Initializable {
                     s.getNode().setMouseTransparent(true);
                 }
                 attachEventHandlersToShape(groupNode);
-                makeDraggable(composite);
+                makeDraggableGroup(composite);
                 clearSelection();
             });
             contextMenu = new ContextMenu(groupItem);
@@ -761,7 +753,12 @@ public class MainViewController implements Initializable {
                 ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
                 if (pastedShape != null && pastedShape.getNode() != null) {
                     attachEventHandlersToShape(pastedShape.getNode());
-                    makeDraggable(pastedShape);
+                    if(pastedShape instanceof CompositeShapeInterface) {
+                        makeDraggableGroup((CompositeShapeInterface) pastedShape);
+                    }
+                    else {
+                        makeDraggable(pastedShape);
+                    }
                 }
             }
         });
@@ -890,106 +887,130 @@ public class MainViewController implements Initializable {
         });
     }
 
-    //Ho dovuto modificarlo perchè facendo il Draggable sulla figura Component non andava bene
     private void makeDraggable(ShapeInterface shape) {
+        final Point2D[] dragStart = new Point2D[1];
         final Point2D[] shapeStartPosition = new Point2D[1];
-        final Point2D[] nodeStartTranslate = new Point2D[1];
-        final Point2D[] dragStartScene = new Point2D[1];
-        final Bounds[] initialBounds = new Bounds[1];
+
         Node node;
         if (shape != null && shape.getNode() != null) {
             node = shape.getNode();
         } else {
             return;
         }
-        node.setOnMousePressed(event -> {
-            // 1) Posizione iniziale del mouse
-            dragStartScene[0] = new Point2D(event.getSceneX(), event.getSceneY());
-            // 2) Posizione logica iniziale della shape (usata poi nel DragCommand)
-            shapeStartPosition[0] = new Point2D(shape.getX(), shape.getY());
-            // 3) Bounds iniziali (per i calcoli di clamp del drag)
-            initialBounds[0] = node.getBoundsInParent();
-            // 4) Translate corrente del nodo (di solito 0)
-            nodeStartTranslate[0] = new Point2D(node.getTranslateX(), node.getTranslateY());
 
+        node.setOnMousePressed(event -> {
+            dragStart[0] = new Point2D(event.getX(), event.getY());
+            shapeStartPosition[0] = new Point2D(shape.getX(), shape.getY());
             event.consume();
         });
 
         node.setOnMouseDragged(event -> {
-            isDragging0 = true;
+            if (!isDragging0) {
+                isDragging0 = true;
+            }
             hasDragged = true;
 
-            // Delta in pixel sullo schermo
-            double deltaSceneX = event.getSceneX() - dragStartScene[0].getX();
-            double deltaSceneY = event.getSceneY() - dragStartScene[0].getY();
+            double deltaX = event.getX() - dragStart[0].getX();
+            double deltaY = event.getY() - dragStart[0].getY();
 
-            // Delta logico (divido per zoom)
+            // Controllo limiti come nella versione funzionante
             double zoom = drawingPane.getScaleX();
-            double rawVisDX = deltaSceneX / zoom;
-            double rawVisDY = deltaSceneY / zoom;
+            double paneWidth = drawingPane.getPrefWidth() * zoom;
+            double paneHeight = drawingPane.getPrefHeight() * zoom;
+            double extraMargin = 20;
 
-            // Limiti visivi consentiti per non uscire dai bordi neri (5px)
-            Bounds b0 = initialBounds[0];
-            double initMinX = b0.getMinX();
-            double initMaxX = b0.getMaxX();
-            double initMinY = b0.getMinY();
-            double initMaxY = b0.getMaxY();
-
-            double BORDER = 5.0;
-            double innerMinX = BORDER;
-            double innerMinY = BORDER;
-            double innerMaxX = drawingPane.getWidth()  - BORDER;
-            double innerMaxY = drawingPane.getHeight() - BORDER;
-
-            double minVisDX = innerMinX - initMinX;
-            double maxVisDX = innerMaxX - initMaxX;
-            double minVisDY = innerMinY - initMinY;
-            double maxVisDY = innerMaxY - initMaxY;
-
-            double clampedVisDX = Math.max(minVisDX, Math.min(rawVisDX, maxVisDX));
-            double clampedVisDY = Math.max(minVisDY, Math.min(rawVisDY, maxVisDY));
-
-            // Applico il solo feedback visivo (translate), senza toccare shape.moveBy
-            node.setTranslateX(nodeStartTranslate[0].getX() + clampedVisDX);
-            node.setTranslateY(nodeStartTranslate[0].getY() + clampedVisDY);
+            // Verifica se il movimento è consentito
+            if (shape.canMoveBy(deltaX, deltaY, paneWidth, paneHeight, zoom, extraMargin)) {
+                shape.moveBy(deltaX, deltaY);
+                dragStart[0] = new Point2D(event.getX(), event.getY()); // Aggiorna il punto di partenza
+            }
 
             event.consume();
         });
 
         node.setOnMouseReleased(event -> {
-            // Calcolo quanto abbiamo spostato “visivamente”
-            double totalDX = node.getTranslateX() - nodeStartTranslate[0].getX();
-            double totalDY = node.getTranslateY() - nodeStartTranslate[0].getY();
+            if (hasDragged) {
+                Point2D currentPosition = new Point2D(shape.getX(), shape.getY());
+                double totalDeltaX = currentPosition.getX() - shapeStartPosition[0].getX();
+                double totalDeltaY = currentPosition.getY() - shapeStartPosition[0].getY();
 
-            // Se non ci siamo mossi abbastanza, usciamo senza creare comandi
-            if (Math.abs(totalDX) < 0.5 && Math.abs(totalDY) < 0.5) {
-                node.setTranslateX(0);
-                node.setTranslateY(0);
+                if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
+                    MoveShapeCommand cmd = new MoveShapeCommand(shape, -totalDeltaX, -totalDeltaY, draggingReceiver);
+                    invoker.executeCommand(cmd);
+                    //shape.moveBy(-totalDeltaX, -totalDeltaY); // rollback
+                    MoveShapeCommand moveShapeCommand = new MoveShapeCommand(shape, totalDeltaX, totalDeltaY, draggingReceiver);
+                    invoker.executeCommand(moveShapeCommand);
+                }
+
                 Platform.runLater(() -> {
                     isDragging0 = false;
                     hasDragged = false;
                 });
-                event.consume();
-                return;
             }
-
-            // 1) Ripulisco il feedback visivo: riporto translateX/Y a zero
-            node.setTranslateX(nodeStartTranslate[0].getX());
-            node.setTranslateY(nodeStartTranslate[0].getY());
-
-            // 2) Eseguo un unico DragCommand (che sposta “veramente” la shape)
-            DragCommand dragCmd = new DragCommand(shape, totalDX, totalDY, draggingReceiver);
-            invoker.executeCommand(dragCmd);
-
-            // 3) Reset dei flag di dragging
-            Platform.runLater(() -> {
-                isDragging0 = false;
-                hasDragged = false;
-            });
-
             event.consume();
         });
     }
+
+    private void makeDraggableGroup(CompositeShapeInterface compositeShape) {
+        final Point2D[] dragStart = new Point2D[1];
+        final Point2D[] shapeStartPosition = new Point2D[1];
+
+        Node node = compositeShape.getNode();
+        if (node == null) return;
+
+        node.setOnMousePressed(event -> {
+            dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
+            shapeStartPosition[0] = new Point2D(compositeShape.getX(), compositeShape.getY());
+            event.consume();
+        });
+
+        node.setOnMouseDragged(event -> {
+            if (!isDragging0) {
+                isDragging0 = true;
+            }
+            hasDragged = true;
+
+            // Usa coordinate scene invece di coordinate locali del nodo
+            double deltaX = event.getSceneX() - dragStart[0].getX();
+            double deltaY = event.getSceneY() - dragStart[0].getY();
+
+            // Parametri semplificati per il controllo limiti
+            double zoom = drawingPane.getScaleX();
+            double paneWidth = drawingPane.getPrefWidth();
+            double paneHeight = drawingPane.getPrefHeight();
+            double extraMargin = 20;
+
+            // Verifica se il movimento è consentito
+            if (compositeShape.canMoveBy(deltaX, deltaY, paneWidth, paneHeight, zoom, extraMargin)) {
+                compositeShape.moveBy(deltaX, deltaY);
+                dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
+            }
+
+            event.consume();
+        });
+
+        node.setOnMouseReleased(event -> {
+            if (hasDragged) {
+                Point2D currentPosition = new Point2D(compositeShape.getX(), compositeShape.getY());
+                double totalDeltaX = currentPosition.getX() - shapeStartPosition[0].getX();
+                double totalDeltaY = currentPosition.getY() - shapeStartPosition[0].getY();
+
+                if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
+                    compositeShape.moveBy(-totalDeltaX, -totalDeltaY); // rollback
+                    MoveShapeCommand moveShapeCommand = new MoveShapeCommand(compositeShape, totalDeltaX, totalDeltaY, draggingReceiver);
+                    invoker.executeCommand(moveShapeCommand);
+                }
+
+                Platform.runLater(() -> {
+                    isDragging0 = false;
+                    hasDragged = false;
+                });
+            }
+            event.consume();
+        });
+    }
+
+
 
 
     /**
@@ -1140,7 +1161,6 @@ public class MainViewController implements Initializable {
                     child.getNode().setMouseTransparent(true);
                 }
             }
-
             attachEventHandlersToShape(node);
             makeDraggable(s);
         }

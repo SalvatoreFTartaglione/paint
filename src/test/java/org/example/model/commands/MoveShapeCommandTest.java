@@ -15,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * 1. executeCommand() moves the shape by the specified deltas.
  * 2. undoCommand() resets the shape's position to the original coordinates.
  */
-public class DragCommandTest {
+public class MoveShapeCommandTest {
 
     private ShapeInterface shape;
     private DraggingReceiver receiver;
-    private DragCommand command;
+    private MoveShapeCommand command;
     private Point2D initialPosition;
 
     @BeforeEach
@@ -41,7 +41,7 @@ public class DragCommandTest {
         };
 
         initialPosition = new Point2D(shape.getX(), shape.getY());
-        command = new DragCommand(shape, 20, 30, receiver);
+        command = new MoveShapeCommand(shape, 20, 30, receiver);
     }
 
     @Test

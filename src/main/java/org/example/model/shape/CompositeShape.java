@@ -278,20 +278,26 @@ public class CompositeShape implements CompositeShapeInterface {
     }
 
     @Override
-    public boolean canMoveBy(double deltaX, double deltaY,
-                             double paneWidth, double paneHeight,
-                             double zoom, double margin) {
-        // Simile a una singola shape: verifica che il bounding del gruppo stia dentro i limiti
+    public boolean canMoveBy(double deltaX, double deltaY, double paneWidth, double paneHeight, double zoom, double margin) {
+        // Calcola la nuova posizione
         double newX = getX() + deltaX;
         double newY = getY() + deltaY;
 
-        double halfW = (getWidth() / 2 + margin) / zoom;
-        double halfH = (getHeight() / 2 + margin) / zoom;
+        // Dimensioni del pane effettive (senza zoom complicato)
+        double effectivePaneWidth = paneWidth;
+        double effectivePaneHeight = paneHeight;
 
-        double minX = halfW;
-        double maxX = (paneWidth / zoom) - halfW;
-        double minY = halfH;
-        double maxY = (paneHeight / zoom) - halfH;
+        // Limiti molto permissivi - permetti che gran parte del gruppo esca dai bordi
+        double groupWidth = getWidth();
+        double groupHeight = getHeight();
+
+        // Permetti che il 20% del gruppo possa uscire dai bordi
+        double tolerance = 0.2;
+
+        double minX = -(groupWidth * tolerance);
+        double maxX = effectivePaneWidth + (groupWidth * tolerance);
+        double minY = -(groupHeight * tolerance);
+        double maxY = effectivePaneHeight + (groupHeight * tolerance);
 
         return newX >= minX && newX <= maxX && newY >= minY && newY <= maxY;
     }

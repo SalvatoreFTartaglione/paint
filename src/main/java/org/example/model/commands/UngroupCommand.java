@@ -102,17 +102,14 @@ public class UngroupCommand implements CommandInterface {
         }
     }
 
-    /**
-     * Restituisce l'elenco di shape "liberate" dal gruppo.
-     */
+
+    @Override
     public List<ShapeInterface> getChildren() {
         return children;
     }
 
-    /**
-     * Restituisce la mappa [shape → Point2D(sceneX, sceneY)] salvata prima dell'ungroup.
-     * NOTA: qui il Point2D è ancora in coordinate di scena, non in coordinate del drawingPane!
-     */
+
+    @Override
     public Map<ShapeInterface, Point2D> getOriginalScenePositions() {
         return originalPositions;
     }
