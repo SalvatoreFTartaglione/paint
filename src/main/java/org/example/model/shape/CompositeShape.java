@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class CompositeShape implements CompositeShapeInterface {
     private final Group groupNode = new Group();
@@ -70,6 +71,50 @@ public class CompositeShape implements CompositeShapeInterface {
     @Override
     public boolean canHaveFill() {
         return true;
+    }
+
+    @Override
+    public List<Color> getFillColors(){
+        List<Color> colors = new ArrayList<>();
+        for (ShapeInterface s : children) {
+            if (s.canHaveFill()) {
+                colors.add(s.getFillColor());
+            }
+        }
+        return colors;
+    }
+
+    @Override
+    public void setFillColors(List<Color> colors){
+        List<ShapeInterface> fillableChildren = children.stream()
+                .filter(ShapeInterface::canHaveFill)
+                .collect(Collectors.toList());
+
+        if (colors.size() != fillableChildren.size()) {
+            throw new IllegalArgumentException("Colors list size does not match the number of fillable children");
+        }
+
+        for (int i = 0; i < fillableChildren.size(); i++) {
+            fillableChildren.get(i).setFillColor(colors.get(i));
+        }
+    }
+
+    @Override
+    public List<Color> getStrokeColors(){
+        return children.stream()
+                .map(ShapeInterface::getStrokeColor)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void setStrokeColors(List<Color> colors){
+        if (colors.size() != children.size()) {
+            throw new IllegalArgumentException("Colors list size does not match the number of children");
+        }
+
+        for (int i = 0; i < children.size(); i++) {
+            children.get(i).setStrokeColor(colors.get(i));
+        }
     }
 
     @Override

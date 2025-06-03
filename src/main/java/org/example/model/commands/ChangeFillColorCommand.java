@@ -4,10 +4,13 @@ import javafx.scene.paint.Color;
 import org.example.model.receivers.ChangesOnShapeReceiver;
 import org.example.model.shape.ShapeInterface;
 
+import java.util.List;
+
 public class ChangeFillColorCommand implements CommandInterface {
     private final ShapeInterface shape;
     private final Color newColor;
     private Color oldColor;
+    private List<Color> oldColors;
     private ChangesOnShapeReceiver changesOnShapeReceiver;
 
     /**
@@ -27,7 +30,12 @@ public class ChangeFillColorCommand implements CommandInterface {
      */
     @Override
     public void executeCommand() {
-        oldColor = shape.getFillColor();
+        if(shape.isGroup()){
+            oldColors = shape.getFillColors();
+        }
+        else {
+            oldColor = shape.getFillColor();
+        }
         changesOnShapeReceiver.changeFillColor(shape,newColor);
     }
 
@@ -36,6 +44,11 @@ public class ChangeFillColorCommand implements CommandInterface {
      */
     @Override
     public void undoCommand() {
-        shape.setFillColor(oldColor);
+        if(shape.isGroup()){
+            shape.setFillColors(oldColors);
+        }
+        else {
+            shape.setFillColor(oldColor);
+        }
     }
 }

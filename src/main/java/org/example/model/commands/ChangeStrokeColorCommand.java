@@ -4,10 +4,13 @@ import javafx.scene.paint.Color;
 import org.example.model.receivers.ChangesOnShapeReceiver;
 import org.example.model.shape.ShapeInterface;
 
+import java.util.List;
+
 public class ChangeStrokeColorCommand implements CommandInterface {
     private final ShapeInterface shape;
     private final Color newColor;
     private Color oldColor;
+    private List<Color> oldColors;
     private ChangesOnShapeReceiver changesOnShapeReceiver;
 
     /**
@@ -28,7 +31,12 @@ public class ChangeStrokeColorCommand implements CommandInterface {
      */
     @Override
     public void executeCommand() {
-        oldColor = shape.getStrokeColor();
+        if(shape.isGroup()){
+            oldColors = shape.getStrokeColors();
+        }
+        else {
+            oldColor = shape.getStrokeColor();
+        }
         changesOnShapeReceiver.changeStrokeColor(shape, newColor);
     }
 
@@ -37,7 +45,12 @@ public class ChangeStrokeColorCommand implements CommandInterface {
      */
     @Override
     public void undoCommand() {
-        shape.setStrokeColor(oldColor);
+        if(shape.isGroup()){
+            shape.setStrokeColors(oldColors);
+        }
+        else {
+            shape.setStrokeColor(oldColor);
+        }
     }
 
 }
