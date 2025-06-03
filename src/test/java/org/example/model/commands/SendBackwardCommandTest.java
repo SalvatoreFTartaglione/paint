@@ -6,11 +6,12 @@ import org.example.model.receivers.PositionManagerReceiver;
 import org.example.model.shape.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SendBackwardCommandTest {
 
@@ -21,7 +22,7 @@ public class SendBackwardCommandTest {
         drawingPane = new Pane();
     }
 
-    static Stream<ShapeInterface> shapeProvider() {
+    static Stream<Arguments> shapeProvider() {
         RectangleShape rect = new RectangleShape(Color.BLACK, Color.ORANGE, 100, 60, 2, 0.0);
         rect.draw(100, 100);
 
@@ -34,7 +35,16 @@ public class SendBackwardCommandTest {
         LineShape line = new LineShape(Color.BLACK, 2, 0.0);
         line.draw(new Double[]{100.0, 100.0, 200.0, 150.0});
 
-        return Stream.of(rect, ellipse, text, line);
+        PolygonShape polygon = new PolygonShape(Color.BLACK, Color.GREEN, 2, 1.0, 1.0, 0.0);
+        polygon.draw(new Double[]{100.0, 100.0, 150.0, 120.0, 120.0, 160.0});
+
+        return Stream.of(
+                Arguments.of(rect),
+                Arguments.of(ellipse),
+                Arguments.of(text),
+                Arguments.of(line),
+                Arguments.of(polygon)
+        );
     }
 
     @ParameterizedTest
@@ -52,7 +62,6 @@ public class SendBackwardCommandTest {
         SendBackwardCommand command = new SendBackwardCommand(receiver);
         command.executeCommand();
 
-        // After execute: topShape goes to back
         assertEquals(topShape.getNode(), drawingPane.getChildren().get(0));
         assertEquals(shapeToSendBack.getNode(), drawingPane.getChildren().get(1));
     }
@@ -70,7 +79,6 @@ public class SendBackwardCommandTest {
         command.executeCommand();
         command.undoCommand();
 
-        // Original order restored
         assertEquals(shapeToSendBack.getNode(), drawingPane.getChildren().get(0));
         assertEquals(topShape.getNode(), drawingPane.getChildren().get(1));
     }
@@ -78,7 +86,6 @@ public class SendBackwardCommandTest {
     @ParameterizedTest
     @MethodSource("shapeProvider")
     public void testExecuteThrowsIfNodeHasNoPaneParent(ShapeInterface shape) {
-        // Do not add shape to drawingPane
         PositionManagerReceiver receiver = new PositionManagerReceiver(shape);
         SendBackwardCommand command = new SendBackwardCommand(receiver);
 

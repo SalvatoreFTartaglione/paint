@@ -33,7 +33,9 @@ public class AddShapeCommandTest {
     }
 
     static Stream<String> shapeOptions() {
-        return Stream.of("Rectangle", "Ellipse", "Text");   // La Line è esclusa perché richiede accorgimenti specifici
+        return Stream.of("Rectangle", "Ellipse", "Text");
+        // Line is excluded because it requires two separate clicks (start and end point) to be drawn, making it incompatible with single-step command execution in unit tests
+        // Polygon is excluded as they require either animation support (Timeline) or pre-built shapes, which complicate unit testing without full JavaFX initialization
     }
 
     @ParameterizedTest

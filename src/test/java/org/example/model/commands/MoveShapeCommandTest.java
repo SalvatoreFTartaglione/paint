@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,7 +46,20 @@ public class MoveShapeCommandTest {
         LineShape line = new LineShape(Color.BLACK, 2, 0.0);
         line.draw(new Double[]{50.0, 80.0, 150.0, 120.0});
 
-        return Stream.of(rect, ellipse, text, line);
+        PolygonShape polygon = new PolygonShape(Color.BLACK, Color.YELLOW, 2, 1.0, 1.0, 0.0);
+        polygon.draw(new Double[]{50.0, 80.0, 100.0, 120.0, 150.0, 80.0});
+
+        // not implemented
+//        CompositeShape composite = new CompositeShape(List.of(
+//                new RectangleShape(Color.BLACK, Color.BEIGE, 60, 30, 2, 0.0) {{
+//                    draw(50, 80);
+//                }},
+//                new EllipseShape(Color.BLACK, Color.BEIGE, 2.0, 30, 30, 0.0) {{
+//                    draw(110, 100);
+//                }}
+//        ));
+
+        return Stream.of(rect, ellipse, text, line, polygon);
     }
 
     @ParameterizedTest
