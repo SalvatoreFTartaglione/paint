@@ -6,34 +6,29 @@ import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.commandInterface.CommandInterface;
 import org.example.model.commands.concreteCommands.*;
 import org.example.model.commands.invoker.Invoker;
 import org.example.model.commands.receivers.*;
-import org.example.model.observer.FavoriteObserver;
-import org.example.model.registry.FavoriteShapeRegistry;
 import org.example.model.contextMenu.ContextMenuActions;
 import org.example.model.contextMenu.ContextMenuManager;
 import org.example.model.enums.MirrorDirectionEnum;
 import org.example.model.factory.product.ShapeInterface;
+import org.example.model.observer.FavoriteObserver;
+import org.example.model.registry.FavoriteShapeRegistry;
 import org.example.model.utils.ZoomableScrollPane;
 
 import java.io.IOException;
@@ -42,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.*;
 
 import static java.lang.Math.round;
 
@@ -229,10 +223,11 @@ public class MainViewController implements Initializable, FavoriteObserver {
     }
 
     /**
-     * Aggiorna la lista dei preferiti nella combo box dei preferiti e abilita/disabilita
-     * la combo box in base allo stato corrente.
+     * Updates the list of favorite shapes displayed in the UI and enables or disables
+     * the corresponding ComboBox depending on the current selected shape option and
+     * whether there are any favorites available.
      *
-     * @param updatedNames insieme di nomi aggiornati degli elementi preferiti.
+     * @param updatedNames a set containing the updated names of the favorite shapes
      */
     public void onFavoriteListChanged(Set<String> updatedNames) {
         Platform.runLater(() -> {
@@ -244,6 +239,10 @@ public class MainViewController implements Initializable, FavoriteObserver {
         });
     }
 
+    /**
+     * Initializes the alert shown when a mirror operation would place a shape outside the canvas.
+     * Sets the alert's title, header, and message, and configures it with a single "Ok" button.
+     */
     private void initializeAlerts() {
         mirrorOutsideCanvasAlert.setTitle("Shape outside of canvas");
         mirrorOutsideCanvasAlert.setHeaderText("Can not mirror here.");
@@ -252,6 +251,11 @@ public class MainViewController implements Initializable, FavoriteObserver {
         mirrorOutsideCanvasAlert.getButtonTypes().setAll(okButton);
     }
 
+    /**
+     * Initializes the grid controls for the canvas, including the grid slider and its listener.
+     * Sets the initial grid size, adds the grid pane to the canvas container,
+     * and ensures the grid is initially invisible and non-interactive.
+     */
     private void initializeGridControls() {
         gridSlider.setValue(50);
         gridValueLabel.setText(round(gridSlider.getValue()) +" px");
@@ -267,6 +271,13 @@ public class MainViewController implements Initializable, FavoriteObserver {
         gridPane.setVisible(false);
     }
 
+    /**
+     * Creates a grid overlay on the specified pane using the given cell size.
+     * Clears any existing grid lines before adding new vertical and horizontal lines.
+     *
+     * @param cellSize the spacing (in pixels) between grid lines
+     * @param gridPane the pane on which the grid will be drawn
+     */
     private void createGrid(double cellSize, Pane gridPane) {
 
         gridPane.getChildren().clear();
@@ -288,11 +299,21 @@ public class MainViewController implements Initializable, FavoriteObserver {
         }
     }
 
+    /**
+     * Resets the grid size to the default value and recreates the grid with that size.
+     *
+     * @param actionEvent the action event triggered by the UI (e.g., a button click)
+     */
     public void resetGrid(ActionEvent actionEvent) {
         gridSlider.setValue(50);
         createGrid(50.0, gridPane);
     }
 
+    /**
+     * Initializes the zoom controls, setting the minimum, maximum, and default zoom levels.
+     * Adds a listener to the zoom slider to update the zoom level dynamically and
+     * reflect it on the zoom label.
+     */
     private void initializeZoomControls() {
         zoomSlider.setMin(0.20);
         zoomSlider.setMax(2.0);
@@ -308,19 +329,31 @@ public class MainViewController implements Initializable, FavoriteObserver {
     }
 
 
+    /**
+     * Updates the zoom level label to show the current zoom as a percentage.
+     *
+     * @param zoomLevel the current zoom level, where 1.0 represents 100%
+     */
     private void updateZoomLabel(double zoomLevel) {
         int percentage = (int) round(zoomLevel * 100);
         zoomValueLabel.setText(percentage + "%");
     }
 
+    /**
+     * Resets the zoom slider to the default value (1.0), which corresponds to 100% zoom.
+     *
+     * @param event the action event triggered by the UI (e.g., a button click)
+     */
     @FXML
     private void resetZoom(ActionEvent event) {
         zoomSlider.setValue(1.0);
     }
 
-
     /**
-     * NUOVO METODO: Assegna event handler diretti alla forma appena creata
+     * Attaches mouse click event handlers to a shape node to enable context menu interaction.
+     * On right-click, displays a context menu with various shape manipulation options.
+     *
+     * @param shapeNode the node representing the shape to which event handlers are attached
      */
     private void attachEventHandlersToShape(Node shapeNode) {
 
@@ -347,9 +380,27 @@ public class MainViewController implements Initializable, FavoriteObserver {
     }
 
     /**
-     * Show context menu for selected shape
+     * Displays a context menu for the specified shape at the mouse event's location.
+     * The menu includes various shape manipulation actions such as coloring, resizing,
+     * mirroring, rotating, and clipboard operations (copy, cut, paste, delete).
+     *
+     * This method also handles validation for favorite naming and mirrors that go out of bounds.
+     *
+     * @param shape the shape to which the context menu actions apply
+     * @param event the mouse event triggering the context menu display
+     * @throws IOException if an I/O error occurs while initializing the context menu
      */
     private void showContextMenu(ShapeInterface shape, MouseEvent event) throws IOException {
+        /**
+         * Defines the actions available in the context menu for a shape.
+         * Each method corresponds to a specific command operation such as color changes,
+         * transformations (resize, rotate, mirror), z-order adjustments, clipboard actions,
+         * and favorite shape handling.
+         *
+         * The commands follow the Command Pattern and are executed via the {@code invoker}.
+         * Some actions, like mirroring or rotating, include checks to ensure the operation is executable.
+         * Alerts are shown if the operation would move the shape outside the canvas or if invalid data is provided.
+         */
         ContextMenuActions actions = new ContextMenuActions() {
 
             @Override
@@ -359,6 +410,7 @@ public class MainViewController implements Initializable, FavoriteObserver {
             }
 
             @Override
+
             public void onStrokeColorChanged(Color newColor) {
                 CommandInterface cmd = new ChangeStrokeColorCommand(shape, newColor, changesOnShapeReceiver);
                 invoker.execute(cmd);
@@ -567,14 +619,25 @@ public class MainViewController implements Initializable, FavoriteObserver {
     }
 
     /**
-     * Sets the undo manager for this controller.
+     * Sets the {@link Invoker} responsible for managing undo/redo command execution.
      *
-     * @param invoker the {@code Invoker} to associate with the canvas
+     * @param invoker the {@code Invoker} instance used to execute and track commands
      */
     public void setUndoManager(Invoker invoker) {
         this.invoker = invoker;
     }
 
+    /**
+     * Initializes the shape selection ComboBox with available shape options, each represented with an icon.
+     *
+     * Adds listeners to handle logic when "Favorite" is selected:
+     * <ul>
+     *   <li>Disables the favorites ComboBox if there are no saved favorites.</li>
+     *   <li>Displays an alert if "Favorite" is selected but no favorites exist.</li>
+     * </ul>
+     *
+     * Also sets up custom cell rendering to display both shape names and images.
+     */
     private void initializeShapeChoiceBox() {
         List<ShapeOption> shapes = List.of(
                 new ShapeOption("Ellipse", "/org/example/images/ellipse.png"),
@@ -652,6 +715,13 @@ public class MainViewController implements Initializable, FavoriteObserver {
 
     }
 
+    /**
+     * Initializes the UI layout behavior of the {@code SplitPane}, locking the divider
+     * and ensuring it retains a fixed position (30%) on height changes.
+     *
+     * This method also disables user interaction with the divider.
+     * Executed on the JavaFX application thread using {@link Platform#runLater}.
+     */
     private void initializeSplitPane() {
         Platform.runLater(() -> {
             Node divider = splitPane.lookupAll(".split-pane-divider")
@@ -671,6 +741,14 @@ public class MainViewController implements Initializable, FavoriteObserver {
         });
     }
 
+    /**
+     * Makes a shape draggable within the {@code drawingPane} by attaching mouse event handlers.
+     *
+     * Tracks the drag start point, computes movement deltas, checks boundary constraints,
+     * and uses a {@code MoveShapeCommand} to allow undo/redo of the move.
+     *
+     * @param shape the shape to make draggable; must not be {@code null} and must have a node
+     */
     private void makeDraggable(ShapeInterface shape) {
         final Point2D[] dragStart = new Point2D[1];
         final Point2D[] shapeStartPosition = new Point2D[1];
@@ -734,12 +812,18 @@ public class MainViewController implements Initializable, FavoriteObserver {
         });
     }
 
-
     /**
-     * Handles the primary mouse click to draw the selected shape on the canvas.
-     * Supports Ellipse, Line, Rectangle, and Text.
+     * Handles mouse clicks on the drawing canvas to create and add a new shape
+     * based on the current selection in the shapeComboBox.
      *
-     * @param mouseEvent the mouse event containing click coordinates
+     * <p>Handles special cases such as:</p>
+     * <ul>
+     *   <li>Showing alerts when drawing text with empty or too long content.</li>
+     *   <li>Registering polygon points.</li>
+     *   <li>Executing an {@code AddShapeCommand} via the {@code Invoker} for undo/redo support.</li>
+     * </ul>
+     *
+     * @param mouseEvent the {@code MouseEvent} triggered by clicking the canvas
      */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
         if (isContextMenuShowing) {
@@ -814,6 +898,17 @@ public class MainViewController implements Initializable, FavoriteObserver {
         }
     }
 
+    /**
+     * Configures and updates the {@code contextDTO} with parameters required for
+     * shape creation and drawing.
+     *
+     * @param mouseEvent         the mouse event used for coordinates
+     * @param shapeComboBox      the shape selection combo box
+     * @param drawingPane        the pane where shapes are drawn
+     * @param startPoint         the start point of the shape, if any
+     * @param borderColorPicker  color picker for border color
+     * @param fillColorPicker    color picker for fill color
+     */
     private void setParameters(MouseEvent mouseEvent, ComboBox<ShapeOption> shapeComboBox, Pane drawingPane, Point2D startPoint, ColorPicker borderColorPicker, ColorPicker fillColorPicker) {
         contextDTO.setDrawingPane(drawingPane);
         contextDTO.setStartPoint(startPoint);
@@ -827,8 +922,10 @@ public class MainViewController implements Initializable, FavoriteObserver {
     }
 
     /**
-     * @param event
-     * Calls the function to save the file
+     * Saves the current canvas to a file using {@code CanvasExporter} and executes
+     * a {@code SaveCommand} via the command {@code Invoker}.
+     *
+     * @param event the action event triggered by clicking the "Save" button
      */
     @FXML
     private void saveFile(ActionEvent event) {
@@ -837,10 +934,13 @@ public class MainViewController implements Initializable, FavoriteObserver {
         invoker.execute(saveCommandFile);
     }
 
-
     /**
-     * @param event
-     * Calls the function to load a file
+     * Loads a canvas file using {@code CanvasImporter} and executes a {@code LoadCommand}.
+     * <p>If shapes already exist on the canvas, prompts the user to optionally save
+     * before loading a new file.</p>
+     *
+     * @param event the action event triggered by clicking the "Load" button
+     * @throws IOException if the load operation fails
      */
     @FXML
     private void loadFile(ActionEvent event) throws IOException {
@@ -864,9 +964,8 @@ public class MainViewController implements Initializable, FavoriteObserver {
         }
     }
 
-
     /**
-     * Assign event handlers to all shapes in the drawingPane and make nodes draggable
+     * Attaches event handlers and enables drag functionality for all shapes currently on the canvas.
      */
     private void attachEventHandlersToAllShapes() {
         for (Node node : drawingPane.getChildren()) {
@@ -876,6 +975,14 @@ public class MainViewController implements Initializable, FavoriteObserver {
     }
 
 
+    /**
+     * Manages the canvas loading process when existing shapes are present.
+     * Prompts the user to save current work before overwriting, and then executes
+     * the {@code LoadCommand} to import a new canvas.
+     *
+     * @param canvasImporter the importer used to load the canvas
+     * @throws IOException if an error occurs during loading
+     */
     private void loadManager(CanvasImporter canvasImporter) throws IOException {
         // Confirmation alert
         Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -916,9 +1023,9 @@ public class MainViewController implements Initializable, FavoriteObserver {
         }
     }
 
-
     /**
-     * Handles the Undo button action to undo the last executed command.
+     * Handles the undo action by delegating to the {@code Invoker}.
+     * Reattaches necessary event handlers to shapes after undoing.
      *
      * @param actionEvent the action event triggered by the undo button
      */
@@ -928,16 +1035,35 @@ public class MainViewController implements Initializable, FavoriteObserver {
         attachEventHandlersToAllShapes();
     }
 
+
+    /**
+     * Toggles the visibility of the grid on the canvas based on the checkbox state.
+     *
+     * @param actionEvent the action event triggered by the grid toggle checkbox
+     */
     public void toggleGrid(ActionEvent actionEvent) {
         gridPane.setVisible(checkBoxGrid.isSelected());
     }
 
+    /**
+     * Saves the current favorite shape library using a {@code SavaLibraryCommand}.
+     *
+     * @param actionEvent the action event triggered by the save library button
+     * @throws IOException if an error occurs while saving the library
+     */
     public void saveLibrary(ActionEvent actionEvent) throws IOException {
         libraryExporterReceiver = new LibraryExporterReceiver(favoriteManagerReceiver);
         SavaLibraryCommand savaLibraryCommand = new SavaLibraryCommand(libraryExporterReceiver);
         invoker.execute(savaLibraryCommand);
     }
 
+    /**
+     * Imports a shape library into the favorites list.
+     * <p>If the current favorites list is not empty, prompts the user for confirmation.</p>
+     *
+     * @param actionEvent the action event triggered by the import library button
+     * @throws IOException if an error occurs during import
+     */
     public void importLibrary(ActionEvent actionEvent) throws IOException {
         libraryImporterReceiver = new LibraryImporterReceiver(favoriteManagerReceiver);
         if (favoritesShapeComboBox.getItems().isEmpty()) {
@@ -952,6 +1078,11 @@ public class MainViewController implements Initializable, FavoriteObserver {
         }
     }
 
+    /**
+     * Displays an error alert when a library file fails to load.
+     *
+     * @param e the exception containing error details
+     */
     private void showErrorAlertLoadLibrary(IOException e) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Load Favorite Library");
@@ -965,6 +1096,11 @@ public class MainViewController implements Initializable, FavoriteObserver {
 
     }
 
+    /**
+     * Displays an error alert when a canvas file fails to load.
+     *
+     * @param e the exception containing error details
+     */
     private void showErrorAlertLoadCanvas(IOException e) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Load Canvas Error");
@@ -978,6 +1114,12 @@ public class MainViewController implements Initializable, FavoriteObserver {
 
     }
 
+    /**
+     * Prompts the user to confirm if the current favorite library should be overwritten.
+     * If confirmed, clears existing favorites and loads the new library.
+     *
+     * @throws IOException if an error occurs while loading the library
+     */
     private void showAlertLoadLibrary() throws IOException {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Load Favorite Library");
