@@ -114,4 +114,6 @@ public interface ShapeInterface {
     default List<Color> getFillColors(){  throw new UnsupportedOperationException("Only composite shapes support getFillColors");}
     default void setStrokeColors(List<Color> colors){  throw new UnsupportedOperationException("Only composite shapes support setStrokeColors");}
     default List<Color> getStrokeColors(){  throw new UnsupportedOperationException("Only composite shapes support getStrokeColors");}
+
+    default boolean isCompositeShape(){ return false; }
 }

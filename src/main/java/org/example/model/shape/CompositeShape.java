@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class CompositeShape implements CompositeShapeInterface {
+public class CompositeShape implements ShapeInterface {
     private final Group groupNode = new Group();
     private final List<ShapeInterface> children = new ArrayList<>();
 
@@ -56,13 +56,11 @@ public class CompositeShape implements CompositeShapeInterface {
         groupNode.setUserData(this); // per riconoscere il composite
     }
 
-    @Override
     public void addChild(ShapeInterface child) {
         children.add(child);
         groupNode.getChildren().add(child.getNode());
     }
 
-    @Override
     public void removeChild(ShapeInterface child) {
         children.remove(child);
         groupNode.getChildren().remove(child.getNode());
@@ -135,7 +133,7 @@ public class CompositeShape implements CompositeShapeInterface {
         double oldMinY = oldBounds.getMinY();
 
         // 2) creo un nuovo gruppo vuoto
-        CompositeShapeInterface copyGroup = new CompositeShape();
+        CompositeShape copyGroup = new CompositeShape();
 
         // 3) per ciascun figlio del gruppo originale...
         for (ShapeInterface child : this.getChildren()) {
@@ -163,6 +161,10 @@ public class CompositeShape implements CompositeShapeInterface {
         return (ShapeInterface) copyGroup;
     }
 
+    @Override
+    public boolean isCompositeShape() {
+        return true;
+    }
 
 
     @Override
@@ -297,31 +299,31 @@ public class CompositeShape implements CompositeShapeInterface {
     @Override
     public double getMaxSliderSize() {
         // Default fornito dall’interfaccia
-        return CompositeShapeInterface.super.getMaxSliderSize();
+        return ShapeInterface.super.getMaxSliderSize();
     }
 
     @Override
     public double getMinSliderSize() {
         // Default fornito dall’interfaccia
-        return CompositeShapeInterface.super.getMinSliderSize();
+        return ShapeInterface.super.getMinSliderSize();
     }
 
     @Override
     public String getSliderLabel(double value) {
         // Default fornito dall’interfaccia
-        return CompositeShapeInterface.super.getSliderLabel(value);
+        return ShapeInterface.super.getSliderLabel(value);
     }
 
     @Override
     public Point2D getRestorePosition() {
         // Default fornito dall’interfaccia
-        return CompositeShapeInterface.super.getRestorePosition();
+        return ShapeInterface.super.getRestorePosition();
     }
 
     @Override
     public void setRestorePosition(Point2D point) {
         // Default fornito dall’interfaccia
-        CompositeShapeInterface.super.setRestorePosition(point);
+        ShapeInterface.super.setRestorePosition(point);
     }
 
     @Override

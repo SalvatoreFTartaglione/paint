@@ -640,8 +640,8 @@ public class MainViewController implements Initializable {
                     ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
                     Node node = pastedShape.getNode();
                     attachEventHandlersToShape(node);
-                    if (pastedShape instanceof CompositeShapeInterface) {
-                        makeDraggableGroup((CompositeShapeInterface) pastedShape);
+                    if (pastedShape.isCompositeShape()) {
+                        makeDraggableGroup(pastedShape);
                     }
                     else {
                         makeDraggable(pastedShape);
@@ -657,7 +657,7 @@ public class MainViewController implements Initializable {
 
             @Override
             public void onUngroup() {
-                CompositeShapeInterface groupShape = (CompositeShapeInterface) shape;
+                ShapeInterface groupShape = shape;
                 UngroupCommand cmd = new UngroupCommand(grpReceiver, groupShape);
                 invoker.execute(cmd);
 
@@ -709,7 +709,7 @@ public class MainViewController implements Initializable {
                 List<ShapeInterface> toGroup = new ArrayList<>(currentSelection);
                 GroupCommand cmd = new GroupCommand(grpReceiver, toGroup);
                 invoker.execute(cmd);
-                CompositeShapeInterface composite = cmd.getCreatedGroup();
+                ShapeInterface composite = cmd.getCreatedGroup(); /*TODO: CAMBIARE LA LOGICA, QUESTA RIGA ROMPE IL PATTERN IL CONTROLLER PARA SOLO CON L'INVOKER*/
                 // pick-on-bounds + figli mouse-transparent
                 Node groupNode = composite.getNode();
                 groupNode.setPickOnBounds(true);
@@ -750,8 +750,8 @@ public class MainViewController implements Initializable {
                 ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
                 if (pastedShape != null && pastedShape.getNode() != null) {
                     attachEventHandlersToShape(pastedShape.getNode());
-                    if(pastedShape instanceof CompositeShapeInterface) {
-                        makeDraggableGroup((CompositeShapeInterface) pastedShape);
+                    if(pastedShape.isCompositeShape()) {
+                        makeDraggableGroup(pastedShape);
                     }
                     else {
                         makeDraggable(pastedShape);
@@ -951,7 +951,7 @@ public class MainViewController implements Initializable {
         });
     }
 
-    private void makeDraggableGroup(CompositeShapeInterface compositeShape) {
+    private void makeDraggableGroup(ShapeInterface compositeShape) {
         final Point2D[] dragStart = new Point2D[1];
         final Point2D[] shapeStartPosition = new Point2D[1];
 

@@ -1,7 +1,6 @@
 package org.example.model.commands;
 
 import javafx.geometry.Point2D;
-import org.example.model.shape.CompositeShapeInterface;
 import org.example.model.shape.ShapeInterface;
 
 import java.io.IOException;
@@ -29,7 +28,7 @@ public interface CommandInterface {
         return null;
     }
 
-    default CompositeShapeInterface getCreatedGroup() {
+    default ShapeInterface getCreatedGroup() {
         return null;
     }
 

@@ -1,7 +1,6 @@
 package org.example.model.receivers;
 
 import javafx.scene.layout.Pane;
-import org.example.model.shape.CompositeShapeInterface;
 import org.example.model.shape.CompositeShape;
 import org.example.model.shape.ShapeInterface;
 
@@ -20,7 +19,7 @@ public class GroupReceiver {
     /**
      * Raggruppa le shape rimuovendole dal canvas e restituendo un CompositeShapeInterface
      */
-    public CompositeShapeInterface group(List<ShapeInterface> shapes) {
+    public ShapeInterface group(List<ShapeInterface> shapes) {
         // rimuovi le shape singole
         for (ShapeInterface s : shapes) {
             drawingPane.getChildren().remove(s.getNode());
@@ -34,7 +33,7 @@ public class GroupReceiver {
     /**
      * Scompone il CompositeShapeInterface riportando le shape originali nel canvas
      */
-    public void ungroup(CompositeShapeInterface composite) {
+    public void ungroup(ShapeInterface composite) {
         // rimuovi il nodo del gruppo
         drawingPane.getChildren().remove(composite.getNode());
         // reinserisci le shape figlie

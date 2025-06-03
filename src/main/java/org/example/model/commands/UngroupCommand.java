@@ -3,7 +3,6 @@ package org.example.model.commands;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import org.example.model.receivers.GroupReceiver;
-import org.example.model.shape.CompositeShapeInterface;
 import org.example.model.shape.ShapeInterface;
 
 import java.util.HashMap;
@@ -16,7 +15,7 @@ import java.util.Map;
  */
 public class UngroupCommand implements CommandInterface {
     private final GroupReceiver receiver;
-    private CompositeShapeInterface group;
+    private ShapeInterface group;
     private final List<ShapeInterface> children;
 
     // Per ciascuna shape, memorizzo la posizione assoluta (X,Y) sul drawingPane
@@ -25,7 +24,7 @@ public class UngroupCommand implements CommandInterface {
     // (Opzionale) se le shape hanno punti interni da ripristinare
     private final Map<ShapeInterface, Double[]> originalPoints = new HashMap<>();
 
-    public UngroupCommand(GroupReceiver receiver, CompositeShapeInterface group) {
+    public UngroupCommand(GroupReceiver receiver, ShapeInterface group) {
         this.receiver = receiver;
         this.group    = group;
         this.children = List.copyOf(group.getChildren());
@@ -59,7 +58,7 @@ public class UngroupCommand implements CommandInterface {
     @Override
     public void undoCommand() {
         // Raggruppa nuovamente le children
-        CompositeShapeInterface newGroup = receiver.group(children);
+        ShapeInterface newGroup = receiver.group(children);
 
         // Ripristina posizione e rotazione originali
         newGroup.draw(group.getX(), group.getY());

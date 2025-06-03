@@ -3,7 +3,6 @@ package org.example.model.commands;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import org.example.model.receivers.GroupReceiver;
-import org.example.model.shape.CompositeShapeInterface;
 import org.example.model.shape.ShapeInterface;
 
 import java.util.HashMap;
@@ -14,7 +13,7 @@ import java.util.Map;
 public class GroupCommand implements CommandInterface {
     private final GroupReceiver receiver;
     private final List<ShapeInterface> shapes;
-    private CompositeShapeInterface group;
+    private ShapeInterface group;
 
 
     private final Map<ShapeInterface, Point2D> originalPositions = new HashMap<>();
@@ -73,7 +72,7 @@ public class GroupCommand implements CommandInterface {
     }
 
     @Override
-    public CompositeShapeInterface getCreatedGroup() {
+    public ShapeInterface getCreatedGroup() {
         return group;
     }
 }
