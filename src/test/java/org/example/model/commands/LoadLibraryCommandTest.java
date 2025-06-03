@@ -1,6 +1,7 @@
 package org.example.model.commands;
 
-import org.example.model.receivers.LibraryImporterReceiver;
+import org.example.model.commands.concreteCommands.LoadLibraryCommand;
+import org.example.model.commands.receivers.LibraryImporterReceiver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -8,6 +8,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
+<?import org.example.model.utils.ZoomableScrollPane?>
+
 <?import org.example.model.*?>
 
 <SplitPane fx:id="splitPane" dividerPositions="0.16132264529058116" orientation="VERTICAL" prefHeight="700" prefWidth="1422" stylesheets="/org/example/styles/viewStyle.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.MainViewController">

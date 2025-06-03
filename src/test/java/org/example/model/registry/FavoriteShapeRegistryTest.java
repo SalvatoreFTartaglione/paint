@@ -2,8 +2,8 @@ package org.example.model.registry;
 
 import javafx.scene.paint.Color;
 import org.example.model.observer.FavoriteObserver;
-import org.example.model.shape.RectangleShape;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.factory.concreteProduct.RectangleShape;
+import org.example.model.factory.product.ShapeInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

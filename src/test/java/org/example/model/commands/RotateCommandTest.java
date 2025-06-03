@@ -1,12 +1,13 @@
 package org.example.model.commands;
 
 import javafx.scene.paint.Color;
-import org.example.model.receivers.PositionManagerReceiver;
-import org.example.model.shape.*;
+import org.example.model.commands.concreteCommands.RotateCommand;
+import org.example.model.commands.receivers.PositionManagerReceiver;
+import org.example.model.factory.concreteProduct.*;
+import org.example.model.factory.product.ShapeInterface;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;

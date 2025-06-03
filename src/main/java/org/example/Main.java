@@ -2,7 +2,7 @@ package org.example;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import org.example.model.commands.Invoker;
+import org.example.model.commands.invoker.Invoker;
 import org.example.view.MainView;
 import org.example.controller.MainViewController;
 

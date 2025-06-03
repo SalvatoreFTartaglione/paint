@@ -2,12 +2,13 @@ package org.example.model.receivers;
 
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
-import org.example.model.shape.*;
-import org.junit.jupiter.api.BeforeEach;
+import org.example.model.commands.receivers.PositionManagerReceiver;
+import org.example.model.enums.MirrorDirectionEnum;
+import org.example.model.factory.concreteProduct.*;
+import org.example.model.factory.product.ShapeInterface;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -63,12 +64,13 @@ public class PositionManagerReceiverTest {
 
         receiver.stretch(150.0, 90.0);
         assertEquals(150.0, shape.getStretchWidth(), 0.01);
-        assertEquals(90.0, shape.getStretchWidth(), 0.01);
+        assertEquals(90.0, shape.getStretchHeight(), 0.01);
 
         receiver.resetStretch(oldWidth, oldHeight);
         assertEquals(oldWidth, shape.getStretchWidth(), 0.01);
         assertEquals(oldHeight, shape.getStretchHeight(), 0.01);
     }
+
 
     @ParameterizedTest
     @MethodSource("shapeProvider")

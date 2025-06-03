@@ -1,8 +1,10 @@
 package org.example.model.receivers;
 
 import javafx.scene.paint.Color;
+import org.example.model.commands.receivers.FavoriteManagerReceiver;
+import org.example.model.factory.concreteProduct.*;
+import org.example.model.factory.product.ShapeInterface;
 import org.example.model.registry.FavoriteShapeRegistry;
-import org.example.model.shape.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

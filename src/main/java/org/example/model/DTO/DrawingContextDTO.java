@@ -3,12 +3,10 @@ package org.example.model.DTO;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import org.example.controller.ShapeOption;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.factory.product.ShapeInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +26,7 @@ public class DrawingContextDTO {
     private ScrollPane scrollPane;
     private Group mainCanvasContainer;
     private List<Point2D> polygonPoints = new ArrayList<>();
-    private static final double TOLERANCE = 3.0;
+    private static final double TOLERANCE = 25.0;
     private ShapeInterface shape;                                           // utils for favorite shapes
 
     public Group getMainCanvasContainer() {
@@ -149,6 +147,8 @@ public class DrawingContextDTO {
     public void setPolygonPoint(Point2D point) {
         polygonPoints.add(point);
     }
+
+    public void resetPolygonPoints() { polygonPoints.clear(); }
 
     /*
     Checks if the user has added more than two points and if the starting point is the same as the

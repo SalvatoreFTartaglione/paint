@@ -1,12 +1,11 @@
 package org.example.model.commands;
 
-import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import org.example.model.DTO.DrawingContextDTO;
-import org.example.model.receivers.PositionManagerReceiver;
-import org.example.model.shape.MirrorDirectionEnum;
-import org.example.model.shape.RectangleShape;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.commands.concreteCommands.MirroringCommand;
+import org.example.model.commands.receivers.PositionManagerReceiver;
+import org.example.model.enums.MirrorDirectionEnum;
+import org.example.model.factory.concreteProduct.RectangleShape;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

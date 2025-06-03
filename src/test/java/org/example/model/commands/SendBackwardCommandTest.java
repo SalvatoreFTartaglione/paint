@@ -2,8 +2,10 @@ package org.example.model.commands;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import org.example.model.receivers.PositionManagerReceiver;
-import org.example.model.shape.*;
+import org.example.model.commands.concreteCommands.SendBackwardCommand;
+import org.example.model.commands.receivers.PositionManagerReceiver;
+import org.example.model.factory.concreteProduct.*;
+import org.example.model.factory.product.ShapeInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

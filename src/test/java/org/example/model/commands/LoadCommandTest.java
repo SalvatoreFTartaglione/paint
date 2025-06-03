@@ -1,6 +1,7 @@
 package org.example.model.commands;
 
-import org.example.model.receivers.CanvasImporter;
+import org.example.model.commands.concreteCommands.LoadCommand;
+import org.example.model.commands.receivers.CanvasImporter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

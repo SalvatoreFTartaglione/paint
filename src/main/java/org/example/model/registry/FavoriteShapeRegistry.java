@@ -1,7 +1,7 @@
 package org.example.model.registry;
 
 import org.example.model.observer.FavoriteObserver;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.factory.product.ShapeInterface;
 
 import java.util.*;
 
@@ -28,8 +28,6 @@ public class FavoriteShapeRegistry {
             throw new IllegalArgumentException("La shape non può essere nulla.");
         }
         favorites.put(name, shape);
-//        System.out.println("[DEBUG] Shape salvata con nome: " + name);
-//        System.out.println("[DEBUG] Shape: " + shape.toString());
         notifyObservers();
     }
 

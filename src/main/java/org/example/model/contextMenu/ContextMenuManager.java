@@ -5,7 +5,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.factory.product.ShapeInterface;
 
 public class ContextMenuManager {
 

@@ -5,7 +5,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.example.controller.MainViewController;
-import org.example.model.commands.Invoker;
+import org.example.model.commands.invoker.Invoker;
 
 import java.io.IOException;
 
