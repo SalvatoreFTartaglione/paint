@@ -12,7 +12,7 @@ public class RectangleShapeTest {
 
     @BeforeEach
     public void setUp() {
-        rectangle = new RectangleShape(Color.BLACK, Color.ORANGE, 100, 60, 3);
+        rectangle = new RectangleShape(Color.BLACK, Color.ORANGE, 100, 60, 3.0, 15.0);
         rectangle.draw(150, 200);
     }
 
@@ -25,6 +25,7 @@ public class RectangleShapeTest {
         assertEquals(3.0, rectangle.getCustomStrokeWidth(), 0.01);
         assertEquals(150.0, rectangle.getX(), 0.01);
         assertEquals(200.0, rectangle.getY(), 0.01);
+        assertEquals(15.0, rectangle.getAngle(), 0.01);
     }
 
     @Test
@@ -66,6 +67,7 @@ public class RectangleShapeTest {
         assertEquals(rectangle.getHeight(), clone.getHeight(), 0.01);
         assertEquals(rectangle.getX(), clone.getX(), 0.01);
         assertEquals(rectangle.getY(), clone.getY(), 0.01);
+        assertEquals(rectangle.getAngle(), clone.getAngle(), 0.01);
     }
 
     @Test
@@ -90,4 +92,35 @@ public class RectangleShapeTest {
         assertTrue(str.contains(rectangle.getFillColor().toString()));
     }
 
+    @Test
+    public void testStretch() {
+        rectangle.stretch(130, 90);
+        assertEquals(130.0, rectangle.getWidth(), 0.01);
+        assertEquals(90.0, rectangle.getHeight(), 0.01);
+    }
+
+    @Test
+    public void testResetStretch() {
+        rectangle.resetStretch(70, 40);
+        assertEquals(70.0, rectangle.getWidth(), 0.01);
+        assertEquals(40.0, rectangle.getHeight(), 0.01);
+    }
+
+    @Test
+    public void testMirrorAroundCenter() {
+        double scaleX = rectangle.getScaleX();
+        double scaleY = rectangle.getScaleY();
+
+        rectangle.mirrorHorizontallyAroundCenter();
+        assertEquals(-scaleX, rectangle.getScaleX(), 0.01);
+
+        rectangle.mirrorVerticallyAroundCenter();
+        assertEquals(-scaleY, rectangle.getScaleY(), 0.01);
+    }
+
+    @Test
+    public void testAngleSetGet() {
+        rectangle.setAngle(72.5);
+        assertEquals(72.5, rectangle.getAngle(), 0.01);
+    }
 }

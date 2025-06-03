@@ -4,77 +4,70 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.ShapeReceiver;
-import org.example.model.shape.RectangleShape;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.shape.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Integration test for CopyCommand using real implementations of ShapeReceiver, DrawingContextDTO, and ShapeInterface.
- *
- * This test verifies that:
- * 1. The original shape is correctly copied.
- * 2. The copied shape is added to the drawingPane.
- * 3. The undo operation removes only the copied shape from the drawingPane.
- */
 
 public class CopyCommandTest {
 
     private DrawingContextDTO dto;
     private Pane drawingPane;
-    private ShapeInterface originalShape;
     private ShapeReceiver receiver;
-    private CopyCommand command;
 
     @BeforeEach
     public void setUp() {
-        // Inizializza il Pane e il DTO
         drawingPane = new Pane();
         dto = new DrawingContextDTO();
         dto.setDrawingPane(drawingPane);
+        receiver = new ShapeReceiver(dto);
+    }
 
-        // Crea la forma originale
-        originalShape = new RectangleShape(Color.BLACK, Color.BLUE, 80, 40, 2);
-        originalShape.draw(50, 50);
+    static Stream<ShapeInterface> shapeProvider() {
+        RectangleShape rectangle = new RectangleShape(Color.BLACK, Color.BLUE, 80, 40, 2, 0.0);
+        rectangle.draw(70, 70);
 
-        // Aggiungi la forma originale al Pane
+        EllipseShape ellipse = new EllipseShape(Color.BLACK, Color.BLUE, 2, 40, 20, 0.0);
+        ellipse.draw(60, 60);
+
+        TextShape text = new TextShape("copy", Color.BLACK, Color.BLUE, 80, 20, 16, 1.0, 1.0, 0.0);
+        text.draw(80, 80);
+
+        LineShape line = new LineShape(Color.BLACK, 2, 0.0);
+        line.draw(new Double[]{50.0, 50.0, 100.0, 100.0});
+
+        return Stream.of(rectangle, ellipse, text, line);
+    }
+
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testCopyCommandStoresShapeInReceiver(ShapeInterface originalShape) {
         drawingPane.getChildren().add(originalShape.getNode());
 
-        // Inizializza il receiver
-        receiver = new ShapeReceiver(dto);
-
-        // Crea il comando di copia
-        command = new CopyCommand(originalShape, receiver);
-    }
-
-    @Test
-    public void testExecuteCommandAddsCopyToPane() {
-        // Esegui il comando di copia
+        CopyCommand command = new CopyCommand(originalShape, receiver);
         command.executeCommand();
 
-        // Verifica che ci siano due nodi nel Pane
-        assertEquals(2, drawingPane.getChildren().size(), "Il Pane dovrebbe contenere due nodi dopo la copia.");
+        assertTrue(receiver.hasShape(), "Receiver should hold a copied shape");
+        ShapeInterface copiedShape = receiver.getCopy();
 
-        // Verifica che la copia sia presente nel Pane
-        boolean copyFound = drawingPane.getChildren().stream()
-                .anyMatch(node -> node != originalShape.getNode());
-        assertTrue(copyFound, "La copia dovrebbe essere presente nel Pane.");
+        assertNotNull(copiedShape, "Copied shape should not be null");
+        assertNotSame(originalShape, copiedShape, "Copied shape should be a new instance");
+        assertEquals(originalShape.getClass(), copiedShape.getClass(), "Copied shape should be of the same class");
     }
 
-    @Test
-    public void testUndoCommandRemovesCopyFromPane() {
-        // Esegui il comando di copia
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testUndoCommandClearsReceiver(ShapeInterface originalShape) {
+        CopyCommand command = new CopyCommand(originalShape, receiver);
         command.executeCommand();
 
-        // Esegui l'undo del comando
+        assertTrue(receiver.hasShape(), "Receiver should contain a shape after copy");
+
         command.undoCommand();
-
-        // Verifica che ci sia solo un nodo nel Pane (la forma originale)
-        assertEquals(1, drawingPane.getChildren().size(), "Il Pane dovrebbe contenere solo la forma originale dopo l'undo.");
-
-        // Verifica che la forma originale sia ancora presente
-        assertTrue(drawingPane.getChildren().contains(originalShape.getNode()), "La forma originale dovrebbe essere ancora presente nel Pane.");
+        assertFalse(receiver.hasShape(), "Receiver should not contain shape after undo");
     }
 }

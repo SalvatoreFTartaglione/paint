@@ -12,7 +12,8 @@ public class TextShapeTest {
 
     @BeforeEach
     public void setup() {
-        textShape = new TextShape("Hello", Color.BLACK, Color.RED, 100, 50, 16, 1.0, 1.0);
+        textShape = new TextShape("Hello", Color.BLACK, Color.RED, 100, 50, 16, 1.0, 1.0, 30.0);
+        textShape.draw(200, 300);
     }
 
     @Test
@@ -46,23 +47,19 @@ public class TextShapeTest {
 
     @Test
     public void testPositioning() {
-        textShape.draw(200, 300);
         assertEquals(200, textShape.getX(), 0.01);
         assertEquals(300, textShape.getY(), 0.01);
     }
 
     @Test
     public void testMoveBy() {
-        textShape.draw(50, 50);
         textShape.moveBy(20, 30);
-
-        assertEquals(70, textShape.getX(), 0.01);
-        assertEquals(80, textShape.getY(), 0.01);
+        assertEquals(220, textShape.getX(), 0.01);
+        assertEquals(330, textShape.getY(), 0.01);
     }
 
     @Test
     public void testClone() {
-        textShape.draw(100, 100);
         TextShape clone = (TextShape) textShape.cloneShape();
 
         assertEquals(textShape.getText(), clone.getText());
@@ -71,16 +68,47 @@ public class TextShapeTest {
         assertEquals(textShape.getCustomStrokeWidth(), clone.getCustomStrokeWidth(), 0.01);
         assertEquals(textShape.getX(), clone.getX(), 0.01);
         assertEquals(textShape.getY(), clone.getY(), 0.01);
+        assertEquals(textShape.getAngle(), clone.getAngle(), 0.01);
     }
 
-//    @Test
-//    public void testSetSizeScalesText() {
-//        double originalWidth = textShape.getWidth();
-//        double originalHeight = textShape.getHeight();
-//
-//        textShape.setSize(originalWidth * 2, originalHeight * 2);
-//
-//        assertTrue(textShape.getWidth() > originalWidth);
-//        assertTrue(textShape.getHeight() > originalHeight);
-//    }
+    @Test
+    public void testStretch() {
+        textShape.stretch(2.0, 3.0);
+        assertEquals(2.0, textShape.getScaleX(), 0.01);
+        assertEquals(3.0, textShape.getScaleY(), 0.01);
+    }
+
+    @Test
+    public void testResetStretch() {
+        textShape.resetStretch(1.5, 1.5);
+        assertEquals(1.5, textShape.getScaleX(), 0.01);
+        assertEquals(1.5, textShape.getScaleY(), 0.01);
+    }
+
+    @Test
+    public void testMirrorAroundCenter() {
+        double scaleX = textShape.getScaleX();
+        double scaleY = textShape.getScaleY();
+
+        textShape.mirrorHorizontallyAroundCenter();
+        assertEquals(-scaleX, textShape.getScaleX(), 0.01);
+
+        textShape.mirrorVerticallyAroundCenter();
+        assertEquals(-scaleY, textShape.getScaleY(), 0.01);
+    }
+
+    @Test
+    public void testAngleSetGet() {
+        textShape.setAngle(75.0);
+        assertEquals(75.0, textShape.getAngle(), 0.01);
+    }
+
+    @Test
+    public void testToStringFormat() {
+        String result = textShape.toString();
+        assertTrue(result.startsWith("Text;"));
+        assertTrue(result.contains("Hello"));
+        assertTrue(result.contains(textShape.getStrokeColor().toString()));
+        assertTrue(result.contains(textShape.getFillColor().toString()));
+    }
 }

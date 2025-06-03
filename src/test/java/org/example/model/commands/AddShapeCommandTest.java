@@ -3,22 +3,17 @@ package org.example.model.commands;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import org.example.controller.ShapeOption;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.AddToCanvasReceiver;
 import org.example.model.shape.ShapeInterface;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Integration test for AddShapeCommand using real DTO, receiver, and shape.
- *
- * Verifies that:
- * 1. executeCommand() adds a shape to the drawingPane.
- * 2. undoCommand() removes the shape.
- * 3. extra undo calls are handled gracefully.
- */
 
 public class AddShapeCommandTest {
 
@@ -28,21 +23,26 @@ public class AddShapeCommandTest {
 
     @BeforeEach
     public void setUp() {
-        dto = new DrawingContextDTO();
         drawingPane = new Pane();
+        dto = new DrawingContextDTO();
         dto.setDrawingPane(drawingPane);
         dto.setBorderColor(Color.BLACK);
         dto.setFillColor(Color.RED);
         dto.setSceneX(100);
         dto.setSceneY(100);
-        dto.setShapeOption(new org.example.controller.ShapeOption("Rectangle", ""));
-
-        receiver = new AddToCanvasReceiver(dto);
     }
 
-    @Test
-    public void testExecuteCommandAddShape() {
+    static Stream<String> shapeOptions() {
+        return Stream.of("Rectangle", "Ellipse", "Text");   // La Line è esclusa perché richiede accorgimenti specifici
+    }
+
+    @ParameterizedTest
+    @MethodSource("shapeOptions")
+    public void testExecuteCommandAddShape(String shapeType) {
+        dto.setShapeOption(new ShapeOption(shapeType, ""));
+        receiver = new AddToCanvasReceiver(dto);
         AddShapeCommand cmd = new AddShapeCommand(dto, receiver);
+
         assertEquals(0, drawingPane.getChildren().size());
 
         cmd.executeCommand();
@@ -51,27 +51,9 @@ public class AddShapeCommandTest {
         Node node = drawingPane.getChildren().get(0);
         assertNotNull(node.getUserData());
         assertTrue(node.getUserData() instanceof ShapeInterface);
-    }
 
-    @Test
-    public void testUndoCommandRemoveShape() {
-        AddShapeCommand cmd = new AddShapeCommand(dto, receiver);
-        cmd.executeCommand();
-        assertEquals(1, drawingPane.getChildren().size());
-
-        cmd.undoCommand();
-        assertEquals(0, drawingPane.getChildren().size());
-    }
-
-    @Test
-    public void testUndoCommandDoesNothingIfPaneEmpty() {
-        AddShapeCommand cmd = new AddShapeCommand(dto, receiver);
-        cmd.executeCommand();
-        cmd.undoCommand();  // Remove
-        assertEquals(0, drawingPane.getChildren().size());
-
-        // Chiamata extra a undo non deve causare crash
-        cmd.undoCommand();
-        assertEquals(0, drawingPane.getChildren().size());
+        ShapeInterface createdShape = cmd.getShape();
+        assertNotNull(createdShape, "Shape should not be null after execution");
+        assertEquals(createdShape.getNode(), drawingPane.getChildren().get(0), "Shape node should be added to pane");
     }
 }

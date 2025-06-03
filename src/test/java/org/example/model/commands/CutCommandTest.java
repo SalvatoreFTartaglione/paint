@@ -4,60 +4,70 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.ShapeReceiver;
-import org.example.model.shape.RectangleShape;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.shape.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Integration test for CutCommand using real implementations of ShapeReceiver, DrawingContextDTO, and ShapeInterface.
- *
- * This test verifies that:
- * 1. The shape is removed from the drawingPane when executeCommand() is called.
- * 2. The shape is restored correctly to the drawingPane when undoCommand() is called.
- */
 public class CutCommandTest {
 
     private DrawingContextDTO dto;
     private Pane drawingPane;
-    private ShapeInterface shape;
     private ShapeReceiver receiver;
-    private CutCommand command;
 
     @BeforeEach
     public void setUp() {
         drawingPane = new Pane();
         dto = new DrawingContextDTO();
         dto.setDrawingPane(drawingPane);
-
-        shape = new RectangleShape(Color.BLACK, Color.LIGHTBLUE, 80, 50, 2);
-        shape.draw(100, 100);
-
-        drawingPane.getChildren().add(shape.getNode());
-
         receiver = new ShapeReceiver(dto);
-        command = new CutCommand(shape, receiver, dto);
     }
 
-    @Test
-    public void testExecuteCommandRemovesShapeAndKeepsCopy() {
-        assertTrue(drawingPane.getChildren().contains(shape.getNode()), "Shape should be in the pane before cut");
+    static Stream<ShapeInterface> shapeProvider() {
+        RectangleShape rectangle = new RectangleShape(Color.BLACK, Color.LIGHTBLUE, 80, 50, 2, 0.0);
+        rectangle.draw(100, 100);
+
+        EllipseShape ellipse = new EllipseShape(Color.BLACK, Color.LIGHTBLUE, 2, 40, 20, 0.0);
+        ellipse.draw(100, 100);
+
+        TextShape text = new TextShape("cut", Color.BLACK, Color.LIGHTBLUE, 80, 30, 14, 1.0, 1.0, 0.0);
+        text.draw(100, 100);
+
+        LineShape line = new LineShape(Color.BLACK, 2, 0.0);
+        line.draw(new Double[]{100.0, 100.0, 150.0, 150.0});
+
+        return Stream.of(rectangle, ellipse, text, line);
+    }
+
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testExecuteCommandRemovesShapeAndKeepsCopy(ShapeInterface shape) {
+        drawingPane.getChildren().add(shape.getNode());
+        CutCommand command = new CutCommand(shape, receiver, dto);
+
+        assertTrue(drawingPane.getChildren().contains(shape.getNode()), "Shape should be in pane before cut");
 
         command.executeCommand();
 
         assertFalse(drawingPane.getChildren().contains(shape.getNode()), "Shape should be removed from pane after cut");
-        assertTrue(receiver.hasShape(), "Receiver should hold a copied shape");
+        assertTrue(receiver.hasShape(), "Receiver should hold a cloned shape");
     }
 
-    @Test
-    public void testUndoCommandRestoresShape() {
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testUndoCommandRestoresShape(ShapeInterface shape) {
+        drawingPane.getChildren().add(shape.getNode());
+        CutCommand command = new CutCommand(shape, receiver, dto);
+
         command.executeCommand();
-        assertFalse(drawingPane.getChildren().contains(shape.getNode()), "Shape should be removed after cut");
+        assertFalse(drawingPane.getChildren().contains(shape.getNode()), "Shape should be removed");
 
         command.undoCommand();
 
-        assertTrue(drawingPane.getChildren().contains(shape.getNode()), "Shape should be restored to pane after undo");
+        assertTrue(drawingPane.getChildren().contains(shape.getNode()), "Shape should be restored after undo");
     }
 }

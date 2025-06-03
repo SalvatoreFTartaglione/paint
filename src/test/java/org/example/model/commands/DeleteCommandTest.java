@@ -4,83 +4,83 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.ShapeReceiver;
-import org.example.model.shape.RectangleShape;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.shape.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Integration test for DeleteCommand using real implementations of ShapeReceiver, DrawingContextDTO, and ShapeInterface.
- *
- * This test verifies that:
- * 1. executeCommand() effectively removes the shape from the drawingPane.
- * 2. undoCommand() correctly restores the shape to its original position in the pane.
- */
 
 public class DeleteCommandTest {
 
     private DrawingContextDTO dto;
     private Pane drawingPane;
-    private ShapeInterface shape;
     private ShapeReceiver receiver;
-    private DeleteCommand command;
 
     @BeforeEach
     public void setUp() {
-        // Prepara una figura e un DTO con pane
         drawingPane = new Pane();
         dto = new DrawingContextDTO();
         dto.setDrawingPane(drawingPane);
-
-        // Crea la shape
-        shape = new RectangleShape(Color.BLACK, Color.ORANGE, 100, 50, 2);
-        shape.draw(100, 100);
-
-        // Aggiungila al Pane
-        drawingPane.getChildren().add(shape.getNode());
-
-        // Receiver reale
         receiver = new ShapeReceiver(dto);
-
-        // Crea il comando
-        command = new DeleteCommand(dto, shape, receiver);
     }
 
-    @Test
-    public void testExecuteCommandRemovesShapeFromPane() {
-        // Pre-condizione: la figura è presente nel pane
-        assertTrue(drawingPane.getChildren().contains(shape.getNode()), "Shape should be in Pane before deletion");
+    static Stream<ShapeInterface> shapeProvider() {
+        RectangleShape rect = new RectangleShape(Color.BLACK, Color.ORANGE, 100, 50, 2, 0.0);
+        rect.draw(100, 100);
+
+        EllipseShape ellipse = new EllipseShape(Color.BLACK, Color.ORANGE, 2, 40, 20, 0.0);
+        ellipse.draw(100, 100);
+
+        TextShape text = new TextShape("delete", Color.BLACK, Color.ORANGE, 80, 30, 14, 1.0, 1.0, 0.0);
+        text.draw(100, 100);
+
+        LineShape line = new LineShape(Color.BLACK, 2, 0.0);
+        line.draw(new Double[]{100.0, 100.0, 150.0, 150.0});
+
+        return Stream.of(rect, ellipse, text, line);
+    }
+
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testExecuteCommandRemovesShapeFromPane(ShapeInterface shape) {
+        drawingPane.getChildren().add(shape.getNode());
+        DeleteCommand command = new DeleteCommand(dto, shape, receiver);
+
+        assertTrue(drawingPane.getChildren().contains(shape.getNode()), "Shape should be in pane before deletion");
 
         command.executeCommand();
 
-        // Dopo delete la figura deve essere rimossa
-        assertFalse(drawingPane.getChildren().contains(shape.getNode()), "Shape should be removed from Pane after delete");
+        assertFalse(drawingPane.getChildren().contains(shape.getNode()), "Shape should be removed from pane after deletion");
     }
 
-    @Test
-    public void testUndoCommandRestoresShapeToPane() {
-        // Rimuovi la figura
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testUndoCommandRestoresShapeToPane(ShapeInterface shape) {
+        drawingPane.getChildren().add(shape.getNode());
+        DeleteCommand command = new DeleteCommand(dto, shape, receiver);
+
         command.executeCommand();
         assertFalse(drawingPane.getChildren().contains(shape.getNode()), "Shape should be removed");
 
-        // Undo
         command.undoCommand();
 
-        // La figura deve tornare
-        assertTrue(drawingPane.getChildren().contains(shape.getNode()), "Shape should be restored to Pane after undo");
+        assertTrue(drawingPane.getChildren().contains(shape.getNode()), "Shape should be restored to pane after undo");
     }
 
-    @Test
-    public void testShapeRestoredInSamePosition() {
-        // Salva posizione originale
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testShapeRestoredInSamePosition(ShapeInterface shape) {
+        drawingPane.getChildren().add(shape.getNode());
         int originalIndex = drawingPane.getChildren().indexOf(shape.getNode());
 
+        DeleteCommand command = new DeleteCommand(dto, shape, receiver);
         command.executeCommand();
         command.undoCommand();
 
-        int newIndex = drawingPane.getChildren().indexOf(shape.getNode());
-        assertEquals(originalIndex, newIndex, "Shape should be restored in the same position");
+        int restoredIndex = drawingPane.getChildren().indexOf(shape.getNode());
+        assertEquals(originalIndex, restoredIndex, "Shape should be restored in the same position");
     }
 }

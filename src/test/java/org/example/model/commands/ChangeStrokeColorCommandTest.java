@@ -2,49 +2,46 @@ package org.example.model.commands;
 
 import javafx.scene.paint.Color;
 import org.example.model.receivers.ChangesOnShapeReceiver;
-import org.example.model.shape.RectangleShape;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.shape.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit test for ChangeStrokeColorCommand.
- *
- * Verifies that:
- * 1. executeCommand() updates the stroke color of the shape.
- * 2. undoCommand() restores the previous stroke color.
- */
-
 public class ChangeStrokeColorCommandTest {
 
-    private ShapeInterface shape;
     private ChangesOnShapeReceiver receiver;
 
     @BeforeEach
-    public void setUp() {
-        shape = new RectangleShape(Color.BLACK, Color.LIGHTGRAY, 100, 60, 2); // stroke: BLACK, fill: LIGHTGRAY
-        receiver = new ChangesOnShapeReceiver(); // può essere una classe vuota se non fa logica extra
+    public void setup() {
+        receiver = new ChangesOnShapeReceiver(); // può essere finto/stateless
     }
 
-    @Test
-    public void testExecuteCommandChangesStrokeColor() {
-        assertEquals(Color.BLACK, shape.getStrokeColor(), "Initial stroke color should be BLACK");
-
-        CommandInterface cmd = new ChangeStrokeColorCommand(shape, Color.DARKGREEN, receiver);
-        cmd.executeCommand();
-
-        assertEquals(Color.DARKGREEN, shape.getStrokeColor(), "Stroke color should be DARKGREEN after execution");
+    static Stream<ShapeInterface> shapeProvider() {
+        return Stream.of(
+                new RectangleShape(Color.BLACK, Color.LIGHTGRAY, 100, 60, 2, 0.0),
+                new EllipseShape(Color.BLACK, Color.YELLOW, 2.0, 50.0, 30.0, 0.0),
+                new LineShape(Color.BLACK, 2.0, 0.0) {{
+                    draw(new Double[]{0.0, 0.0, 100.0, 100.0});
+                }},
+                new TextShape("Test", Color.BLACK, Color.TRANSPARENT, 0, 0, 16, 1.0, 1.0, 0.0)
+        );
     }
 
-    @Test
-    public void testUndoCommandRestoresOldStrokeColor() {
-        CommandInterface cmd = new ChangeStrokeColorCommand(shape, Color.DARKBLUE, receiver);
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testChangeAndUndoStrokeColor(ShapeInterface shape) {
+        Color original = shape.getStrokeColor();
+        Color newColor = Color.DARKCYAN;
+
+        CommandInterface cmd = new ChangeStrokeColorCommand(shape, newColor, receiver);
         cmd.executeCommand();
-        assertEquals(Color.DARKBLUE, shape.getStrokeColor(), "Stroke color should be DARKBLUE after execution");
+        assertEquals(newColor, shape.getStrokeColor(), "Stroke color should be updated after execution");
 
         cmd.undoCommand();
-        assertEquals(Color.BLACK, shape.getStrokeColor(), "Stroke color should revert to BLACK after undo");
+        assertEquals(original, shape.getStrokeColor(), "Stroke color should be restored after undo");
     }
 }

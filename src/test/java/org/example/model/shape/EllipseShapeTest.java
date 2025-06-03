@@ -12,7 +12,7 @@ public class EllipseShapeTest {
 
     @BeforeEach
     public void setUp() {
-        ellipse = new EllipseShape(Color.BLACK, Color.BLUE, 2.0, 50.0, 30.0);
+        ellipse = new EllipseShape(Color.BLACK, Color.BLUE, 2.0, 50.0, 30.0, 15.0);
         ellipse.draw(100.0, 200.0); // posiziona al centro
     }
 
@@ -25,13 +25,13 @@ public class EllipseShapeTest {
         assertEquals(30.0, ellipse.getHeight(), 0.01);
         assertEquals(100.0, ellipse.getX(), 0.01);
         assertEquals(200.0, ellipse.getY(), 0.01);
+        assertEquals(15.0, ellipse.getAngle(), 0.01);
     }
 
     @Test
     public void testSetColors() {
         ellipse.setStrokeColor(Color.RED);
         ellipse.setFillColor(Color.YELLOW);
-
         assertEquals(Color.RED, ellipse.getStrokeColor());
         assertEquals(Color.YELLOW, ellipse.getFillColor());
     }
@@ -61,6 +61,7 @@ public class EllipseShapeTest {
         ellipse.setX(120.0);
         ellipse.setY(150.0);
         ellipse.setSize(60.0, 45.0);
+        ellipse.setAngle(30.0);
 
         EllipseShape clone = (EllipseShape) ellipse.cloneShape();
 
@@ -69,7 +70,9 @@ public class EllipseShapeTest {
         assertEquals(ellipse.getCustomStrokeWidth(), clone.getCustomStrokeWidth(), 0.01);
         assertEquals(ellipse.getWidth(), clone.getWidth(), 0.01);
         assertEquals(ellipse.getHeight(), clone.getHeight(), 0.01);
-        // Nota: cloneShape non copia posizione
+        assertEquals(ellipse.getAngle(), clone.getAngle(), 0.01);
+        assertEquals(ellipse.getX(), clone.getX(), 0.01);
+        assertEquals(ellipse.getY(), clone.getY(), 0.01);
     }
 
     @Test
@@ -88,4 +91,35 @@ public class EllipseShapeTest {
         assertTrue(result.contains(ellipse.getFillColor().toString()));
     }
 
+    @Test
+    public void testStretch() {
+        ellipse.stretch(80.0, 90.0);
+        assertEquals(80.0, ellipse.getWidth(), 0.01);
+        assertEquals(90.0, ellipse.getHeight(), 0.01);
+    }
+
+    @Test
+    public void testResetStretch() {
+        ellipse.resetStretch(40.0, 20.0);
+        assertEquals(40.0, ellipse.getWidth(), 0.01);
+        assertEquals(20.0, ellipse.getHeight(), 0.01);
+    }
+
+    @Test
+    public void testMirrorAroundCenter() {
+        double scaleX = ellipse.getScaleX();
+        double scaleY = ellipse.getScaleY();
+
+        ellipse.mirrorHorizontallyAroundCenter();
+        assertEquals(-scaleX, ellipse.getScaleX(), 0.01);
+
+        ellipse.mirrorVerticallyAroundCenter();
+        assertEquals(-scaleY, ellipse.getScaleY(), 0.01);
+    }
+
+    @Test
+    public void testAngleSetGet() {
+        ellipse.setAngle(123.4);
+        assertEquals(123.4, ellipse.getAngle(), 0.01);
+    }
 }

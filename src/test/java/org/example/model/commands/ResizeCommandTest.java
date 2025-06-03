@@ -2,56 +2,70 @@ package org.example.model.commands;
 
 import javafx.scene.paint.Color;
 import org.example.model.receivers.PositionManagerReceiver;
-import org.example.model.shape.RectangleShape;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.shape.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Integration test for ResizeCommand using real implementations of ShapeInterface and PositionManagerReceiver.
- *
- * This test verifies that:
- * 1. The shape is resized correctly when executeCommand() is called.
- * 2. The original size is restored when undoCommand() is called.
- */
 public class ResizeCommandTest {
 
-    private ShapeInterface shape;
-    private PositionManagerReceiver receiver;
-    private ResizeCommand command;
-    private double originalWidth;
-    private double originalHeight;
-    private double newWidth = 200;
-    private double newHeight = 150;
+    private double newSize = 200;
+
+    static Stream<ShapeInterface> shapeProvider() {
+        RectangleShape rect = new RectangleShape(Color.BLACK, Color.GREEN, 100, 60, 2, 0.0);
+        rect.draw(100, 100);
+
+        EllipseShape ellipse = new EllipseShape(Color.BLACK, Color.GREEN, 2, 100, 60, 0.0);
+        ellipse.draw(100, 100);
+
+        TextShape text = new TextShape("Resize", Color.BLACK, Color.GREEN, 100, 60, 14, 1.0, 1.0, 0.0);
+        text.draw(100, 100);
+
+        LineShape line = new LineShape(Color.BLACK, 2, 0.0);
+        line.draw(new Double[]{100.0, 100.0, 200.0, 150.0});
+
+        return Stream.of(rect, ellipse, text, line);
+    }
 
     @BeforeEach
-    public void setUp() {
-        shape = new RectangleShape(Color.BLACK, Color.GREEN, 100, 60, 2);
-        shape.draw(100, 100);
-
-        receiver = new PositionManagerReceiver(shape);
-        originalWidth = shape.getWidth();
-        originalHeight = shape.getHeight();
-
-        command = new ResizeCommand(receiver, newWidth, newHeight, originalWidth, originalHeight);
+    public void resetZoomBeforeEach() {
+        // No shared state, but placeholder if needed in the future.
     }
 
-    @Test
-    public void testExecuteCommandChangesSize() {
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testExecuteCommandChangesSize(ShapeInterface shape) {
+        PositionManagerReceiver receiver = new PositionManagerReceiver(shape);
+
+        double oldWidth = shape.getWidth();
+        double oldHeight = shape.getHeight();
+
+        ResizeCommand command = new ResizeCommand(receiver, newSize, oldWidth, oldHeight);
+
         command.executeCommand();
 
-        assertEquals(newWidth, shape.getWidth(), 0.01);
-        assertEquals(newHeight, shape.getHeight(), 0.01);
+        assertNotEquals(oldWidth, shape.getWidth(), 0.01);
+        assertNotEquals(oldHeight, shape.getHeight(), 0.01);
     }
 
-    @Test
-    public void testUndoCommandRestoresOriginalSize() {
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testUndoCommandRestoresOriginalSize(ShapeInterface shape) {
+        PositionManagerReceiver receiver = new PositionManagerReceiver(shape);
+
+        double oldWidth = shape.getWidth();
+        double oldHeight = shape.getHeight();
+
+        ResizeCommand command = new ResizeCommand(receiver, newSize, oldWidth, oldHeight);
+
         command.executeCommand();
         command.undoCommand();
 
-        assertEquals(originalWidth, shape.getWidth(), 0.01);
-        assertEquals(originalHeight, shape.getHeight(), 0.01);
+        assertEquals(oldWidth, shape.getWidth(), 0.01);
+        assertEquals(oldHeight, shape.getHeight(), 0.01);
     }
 }

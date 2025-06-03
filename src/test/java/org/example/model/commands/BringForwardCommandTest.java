@@ -3,77 +3,64 @@ package org.example.model.commands;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import org.example.model.receivers.PositionManagerReceiver;
-import org.example.model.shape.RectangleShape;
-import org.example.model.shape.ShapeInterface;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.example.model.shape.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Integration test for BringForwardCommand using real shapes, receiver, and pane.
- *
- * This test verifies that:
- * 1. executeCommand() brings a shape to the front of the pane.
- * 2. undoCommand() restores the original Z-order.
- * 3. An IllegalStateException is thrown if the node is not in a Pane.
- */
+import java.util.stream.Stream;
 
 public class BringForwardCommandTest {
 
-    private Pane drawingPane;
-    private ShapeInterface shape1;
-    private ShapeInterface shape2;
-
-    @BeforeEach
-    public void setUp() {
-        drawingPane = new Pane();
-
-        // Due rettangoli sovrapposti, shape1 è sotto, shape2 sopra
-        shape1 = new RectangleShape(Color.BLACK, Color.RED, 100, 60, 2);
-        shape2 = new RectangleShape(Color.BLACK, Color.BLUE, 100, 60, 2);
-
-        shape1.draw(100, 100);
-        shape2.draw(100, 100);
-
-        drawingPane.getChildren().addAll(shape1.getNode(), shape2.getNode());
+    static Stream<ShapeInterface> shapeProvider() {
+        return Stream.of(
+                new RectangleShape(Color.BLACK, Color.RED, 100, 60, 2, 0.0),
+                new EllipseShape(Color.BLACK, Color.RED, 2.0, 50.0, 30.0, 0.0),
+                new TextShape("Front", Color.BLACK, Color.RED, 0, 0, 16, 1.0, 1.0, 0.0),
+                new LineShape(Color.BLACK, 2.0, 0.0) {{
+                    draw(new Double[]{0.0, 0.0, 100.0, 100.0});
+                }}
+        );
     }
 
-    @Test
-    public void testExecuteCommandBringsShapeToFront() {
-        assertEquals(shape1.getNode(), drawingPane.getChildren().get(0));
-        assertEquals(shape2.getNode(), drawingPane.getChildren().get(1));
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testBringForwardAndUndo(ShapeInterface shapeFront) {
+        // Shape che sta sotto
+        ShapeInterface shapeBack = new RectangleShape(Color.GRAY, Color.LIGHTGRAY, 100, 60, 2, 0.0);
+        shapeBack.draw(50, 50);
+        shapeFront.draw(50, 50);
 
-        // shape1 in basso, portiamola sopra
-        PositionManagerReceiver receiver = new PositionManagerReceiver(shape1);
+        Pane drawingPane = new Pane();
+        drawingPane.getChildren().addAll(shapeBack.getNode(), shapeFront.getNode());
+
+        assertEquals(shapeBack.getNode(), drawingPane.getChildren().get(0));
+        assertEquals(shapeFront.getNode(), drawingPane.getChildren().get(1));
+
+        PositionManagerReceiver receiver = new PositionManagerReceiver(shapeBack);
         BringForwardCommand cmd = new BringForwardCommand(receiver);
 
         cmd.executeCommand();
 
-        assertEquals(shape2.getNode(), drawingPane.getChildren().get(0));
-        assertEquals(shape1.getNode(), drawingPane.getChildren().get(1));
+        // Ora shapeBack è sopra
+        assertEquals(shapeFront.getNode(), drawingPane.getChildren().get(0));
+        assertEquals(shapeBack.getNode(), drawingPane.getChildren().get(1));
+
+        // Undo
+        cmd.undoCommand();
+        assertEquals(shapeBack.getNode(), drawingPane.getChildren().get(0));
+        assertEquals(shapeFront.getNode(), drawingPane.getChildren().get(1));
     }
 
-    @Test
-    public void testUndoCommandRestoresOriginalPosition() {
-        PositionManagerReceiver receiver = new PositionManagerReceiver(shape1);
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testThrowsIfNodeNotInPane(ShapeInterface shape) {
+        // Nessun pane associato
+        PositionManagerReceiver receiver = new PositionManagerReceiver(shape);
         BringForwardCommand cmd = new BringForwardCommand(receiver);
 
-        cmd.executeCommand(); // porta in alto
-        cmd.undoCommand();    // torna nella posizione originale
-
-        assertEquals(shape1.getNode(), drawingPane.getChildren().get(0));
-        assertEquals(shape2.getNode(), drawingPane.getChildren().get(1));
-    }
-
-    @Test
-    public void testExecuteThrowsIfNodeHasNoParent() {
-        // Crea una shape non ancora aggiunta a un Pane
-        ShapeInterface unboundShape = new RectangleShape(Color.BLACK, Color.GREEN, 100, 60, 2);
-        PositionManagerReceiver receiver = new PositionManagerReceiver(unboundShape);
-        BringForwardCommand cmd = new BringForwardCommand(receiver);
-
-        Exception exception = assertThrows(IllegalStateException.class, () -> cmd.executeCommand());
+        Exception exception = assertThrows(IllegalStateException.class, cmd::executeCommand);
         assertTrue(exception.getMessage().contains("Node does not have a Pane parent"));
     }
 }

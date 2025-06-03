@@ -4,62 +4,69 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.receivers.ShapeReceiver;
-import org.example.model.shape.RectangleShape;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.shape.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Integration test for PasteCommand using real implementations of ShapeReceiver and DrawingContextDTO.
- *
- * This test verifies that:
- * 1. The shape copied into the receiver is correctly pasted into the drawingPane.
- * 2. The pasted shape is stored and can be removed by undoCommand().
- */
 public class PasteCommandTest {
 
     private DrawingContextDTO dto;
     private Pane drawingPane;
     private ShapeReceiver receiver;
-    private ShapeInterface copiedShape;
-    private PasteCommand command;
 
     @BeforeEach
     public void setUp() {
-        // Prepare canvas and DTO
         drawingPane = new Pane();
         dto = new DrawingContextDTO();
         dto.setDrawingPane(drawingPane);
         dto.setSceneX(100);
         dto.setSceneY(100);
-
-        // Create and copy a shape
-        copiedShape = new RectangleShape(Color.BLACK, Color.CORNFLOWERBLUE, 80, 40, 2);
-        copiedShape.draw(50, 50);
-
         receiver = new ShapeReceiver(dto);
-        receiver.copy(copiedShape); // simulate a prior CopyCommand
-
-        command = new PasteCommand(receiver, dto);
     }
 
-    @Test
-    public void testExecuteCommandAddsPastedShapeToPane() {
+    static Stream<ShapeInterface> shapeProvider() {
+        RectangleShape rect = new RectangleShape(Color.BLACK, Color.CORNFLOWERBLUE, 80, 40, 2, 0.0);
+        rect.draw(50, 50);
+
+        EllipseShape ellipse = new EllipseShape(Color.BLACK, Color.CORNFLOWERBLUE, 2, 40, 20, 0.0);
+        ellipse.draw(60, 60);
+
+        TextShape text = new TextShape("PasteTest", Color.BLACK, Color.CORNFLOWERBLUE, 80, 20, 16, 1.0, 1.0, 0.0);
+        text.draw(70, 70);
+
+        LineShape line = new LineShape(Color.BLACK, 2, 0.0);
+        line.draw(new Double[]{50.0, 50.0, 150.0, 100.0});
+
+        return Stream.of(rect, ellipse, text, line);
+    }
+
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testExecuteCommandAddsPastedShapeToPane(ShapeInterface copiedShape) {
+        receiver.copy(copiedShape); // simulate a prior CopyCommand
+        PasteCommand command = new PasteCommand(receiver, dto);
+
         assertEquals(0, drawingPane.getChildren().size(), "Pane should be initially empty");
 
         command.executeCommand();
 
         ShapeInterface pasted = command.getPastedShape();
-
         assertNotNull(pasted, "Pasted shape should not be null");
         assertEquals(1, drawingPane.getChildren().size(), "Pane should contain one node after paste");
         assertTrue(drawingPane.getChildren().contains(pasted.getNode()), "Pasted shape node should be in the pane");
     }
 
-    @Test
-    public void testUndoCommandRemovesPastedShapeFromPane() {
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testUndoCommandRemovesPastedShapeFromPane(ShapeInterface copiedShape) {
+        receiver.copy(copiedShape); // simulate a prior CopyCommand
+        PasteCommand command = new PasteCommand(receiver, dto);
+
         command.executeCommand();
         ShapeInterface pasted = command.getPastedShape();
 

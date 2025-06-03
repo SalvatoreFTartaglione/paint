@@ -3,30 +3,21 @@ package org.example.model.commands;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import org.example.model.receivers.DraggingReceiver;
-import org.example.model.shape.RectangleShape;
-import org.example.model.shape.ShapeInterface;
+import org.example.model.shape.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * This test verifies that:
- * 1. executeCommand() moves the shape by the specified deltas.
- * 2. undoCommand() resets the shape's position to the original coordinates.
- */
 public class MoveShapeCommandTest {
 
-    private ShapeInterface shape;
     private DraggingReceiver receiver;
-    private MoveShapeCommand command;
-    private Point2D initialPosition;
 
     @BeforeEach
     public void setUp() {
-        shape = new RectangleShape(Color.BLACK, Color.YELLOW, 100, 60, 2);
-        shape.draw(50, 80); // Initial position
-
         receiver = new DraggingReceiver() {
             @Override
             public void moveShape(ShapeInterface shape, double dx, double dy) {
@@ -39,25 +30,46 @@ public class MoveShapeCommandTest {
                 shape.setY(originalPosition.getY());
             }
         };
-
-        initialPosition = new Point2D(shape.getX(), shape.getY());
-        command = new MoveShapeCommand(shape, 20, 30, receiver);
     }
 
-    @Test
-    public void testExecuteCommandMovesShape() {
+    static Stream<ShapeInterface> shapeProvider() {
+        RectangleShape rect = new RectangleShape(Color.BLACK, Color.YELLOW, 100, 60, 2, 0.0);
+        rect.draw(50, 80);
+
+        EllipseShape ellipse = new EllipseShape(Color.BLACK, Color.YELLOW, 2, 40, 20, 0.0);
+        ellipse.draw(50, 80);
+
+        TextShape text = new TextShape("move", Color.BLACK, Color.YELLOW, 100, 30, 14, 1.0, 1.0, 0.0);
+        text.draw(50, 80);
+
+        LineShape line = new LineShape(Color.BLACK, 2, 0.0);
+        line.draw(new Double[]{50.0, 80.0, 150.0, 120.0});
+
+        return Stream.of(rect, ellipse, text, line);
+    }
+
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testExecuteCommandMovesShape(ShapeInterface shape) {
+        Point2D initial = new Point2D(shape.getX(), shape.getY());
+        MoveShapeCommand command = new MoveShapeCommand(shape, 20, 30, receiver);
+
         command.executeCommand();
 
-        assertEquals(initialPosition.getX() + 20, shape.getX(), 0.01);
-        assertEquals(initialPosition.getY() + 30, shape.getY(), 0.01);
+        assertEquals(initial.getX() + 20, shape.getX(), 0.01, "X should be moved by 20");
+        assertEquals(initial.getY() + 30, shape.getY(), 0.01, "Y should be moved by 30");
     }
 
-    @Test
-    public void testUndoCommandRestoresOriginalPosition() {
-        command.executeCommand(); // move
-        command.undoCommand();    // reset
+    @ParameterizedTest
+    @MethodSource("shapeProvider")
+    public void testUndoCommandRestoresOriginalPosition(ShapeInterface shape) {
+        Point2D initial = new Point2D(shape.getX(), shape.getY());
+        MoveShapeCommand command = new MoveShapeCommand(shape, 20, 30, receiver);
 
-        assertEquals(initialPosition.getX(), shape.getX(), 0.01);
-        assertEquals(initialPosition.getY(), shape.getY(), 0.01);
+        command.executeCommand();
+        command.undoCommand();
+
+        assertEquals(initial.getX(), shape.getX(), 0.01, "X should be restored");
+        assertEquals(initial.getY(), shape.getY(), 0.01, "Y should be restored");
     }
 }
