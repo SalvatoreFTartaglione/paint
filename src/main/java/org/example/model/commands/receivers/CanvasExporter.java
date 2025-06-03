@@ -6,9 +6,9 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Pane;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.factory.product.ShapeInterface;
+
 import javax.imageio.ImageIO;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -25,7 +25,8 @@ public class CanvasExporter {
 
     public void exportAsText(File file) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            System.out.println("Dimension = " + contextDTO.getDrawingPane().getChildren().size());
+            writer.write("My custom canvas");
+            writer.newLine();
             for (Node node : contextDTO.getDrawingPane().getChildren()) {
                 Object userData = node.getUserData();
                 if (userData instanceof ShapeInterface) {

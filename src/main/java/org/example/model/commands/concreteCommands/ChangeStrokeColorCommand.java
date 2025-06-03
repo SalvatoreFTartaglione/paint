@@ -5,13 +5,10 @@ import org.example.model.commands.commandInterface.CommandInterface;
 import org.example.model.commands.receivers.ChangesOnShapeReceiver;
 import org.example.model.factory.product.ShapeInterface;
 
-import java.util.List;
-
 public class ChangeStrokeColorCommand implements CommandInterface {
     private final ShapeInterface shape;
     private final Color newColor;
     private Color oldColor;
-    private List<Color> oldColors;
     private ChangesOnShapeReceiver changesOnShapeReceiver;
 
     /**
@@ -32,12 +29,7 @@ public class ChangeStrokeColorCommand implements CommandInterface {
      */
     @Override
     public void executeCommand() {
-        if(shape.isGroup()){
-            oldColors = shape.getStrokeColors();
-        }
-        else {
-            oldColor = shape.getStrokeColor();
-        }
+        oldColor = shape.getStrokeColor();
         changesOnShapeReceiver.changeStrokeColor(shape, newColor);
     }
 
@@ -46,12 +38,8 @@ public class ChangeStrokeColorCommand implements CommandInterface {
      */
     @Override
     public void undoCommand() {
-        if(shape.isGroup()){
-            shape.setStrokeColors(oldColors);
-        }
-        else {
-            shape.setStrokeColor(oldColor);
-        }
+        shape.setStrokeColor(oldColor);
+
     }
 
 }

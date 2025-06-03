@@ -31,12 +31,7 @@ public class ChangeFillColorCommand implements CommandInterface {
      */
     @Override
     public void executeCommand() {
-        if(shape.isGroup()){
-            oldColors = shape.getFillColors();
-        }
-        else {
-            oldColor = shape.getFillColor();
-        }
+        oldColor = shape.getFillColor();
         changesOnShapeReceiver.changeFillColor(shape,newColor);
     }
 
@@ -45,11 +40,6 @@ public class ChangeFillColorCommand implements CommandInterface {
      */
     @Override
     public void undoCommand() {
-        if(shape.isGroup()){
-            shape.setFillColors(oldColors);
-        }
-        else {
-            shape.setFillColor(oldColor);
-        }
+        shape.setFillColor(oldColor);
     }
 }

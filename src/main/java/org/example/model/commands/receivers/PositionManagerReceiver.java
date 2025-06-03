@@ -6,12 +6,10 @@ import org.example.model.factory.product.ShapeInterface;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class PositionManagerReceiver {
 
     private ShapeInterface shape;
-    private List<Double> oldChildSizes;
 
     public PositionManagerReceiver(ShapeInterface shape) {
         this.shape = shape;
@@ -34,11 +32,9 @@ public class PositionManagerReceiver {
     }
 
     public void resize(double newSize){
-        if (shape.isGroup()) {
-            oldChildSizes = shape.getChildren().stream()
-                    .map(ShapeInterface::getEffectiveSize)
-                    .collect(Collectors.toList());
-        }
+        /*if (shape.isGroup()) {
+            oldChildSizes = shape.getChildren().stream().map(ShapeInterface::getEffectiveSize).collect(Collectors.toList());
+        }*/
         shape.resize(newSize);
     }
 
@@ -47,15 +43,7 @@ public class PositionManagerReceiver {
     }
 
     public void resetResize(double oldWidth, double oldHeight){
-        if (shape.isGroup() && oldChildSizes != null) {
-            List<ShapeInterface> children = shape.getChildren();
-            for (int i = 0; i < children.size(); i++) {
-                children.get(i).resize(oldChildSizes.get(i));
-            }
-        }
-        else {
-            shape.setSize(oldWidth, oldHeight);
-        }
+        shape.setSize(oldWidth, oldHeight);
     }
 
     public void resetStretch(double oldWidth, double oldHeight){

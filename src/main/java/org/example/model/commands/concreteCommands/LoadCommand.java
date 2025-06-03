@@ -17,16 +17,15 @@ public class LoadCommand implements CommandInterface {
     }
 
     @Override
-    public void executeCommand() {
+    public void executeCommand() {throw new UnsupportedOperationException("Not supported yet.");}
+
+    @Override
+    public void executePossibleExceptionCommand() throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"));
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
-            try {
-                canvasImporter.importAsText(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            canvasImporter.importAsText(file);
         }
     }
 

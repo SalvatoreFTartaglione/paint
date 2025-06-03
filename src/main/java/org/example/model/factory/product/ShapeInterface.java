@@ -7,7 +7,6 @@ import org.example.model.enums.MirrorDirectionEnum;
 
 import java.util.Collections;
 import java.util.List;
-
 import java.util.Optional;
 
 public interface ShapeInterface {
@@ -21,10 +20,6 @@ public interface ShapeInterface {
     /** Restituisce i figli di un composite; per le forme semplici torna lista vuota. */
     default List<ShapeInterface> getChildren() {
         return Collections.emptyList();
-    }
-
-    default boolean isGroup() {
-        return false;
     }
 
     // Color utils
@@ -109,12 +104,4 @@ public interface ShapeInterface {
     default void setPoints(Double[] points){
         return;
     }
-
-    //Composite Shape methods
-    default void setFillColors(List<Color> colors){  throw new UnsupportedOperationException("Only composite shapes support setFillColors"); }
-    default List<Color> getFillColors(){  throw new UnsupportedOperationException("Only composite shapes support getFillColors");}
-    default void setStrokeColors(List<Color> colors){  throw new UnsupportedOperationException("Only composite shapes support setStrokeColors");}
-    default List<Color> getStrokeColors(){  throw new UnsupportedOperationException("Only composite shapes support getStrokeColors");}
-
-    default boolean isCompositeShape(){ return false; }
 }

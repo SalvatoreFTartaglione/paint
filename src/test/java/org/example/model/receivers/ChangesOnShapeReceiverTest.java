@@ -39,11 +39,11 @@ public class ChangesOnShapeReceiverTest {
         PolygonShape polygon = new PolygonShape(Color.BLACK, Color.ORANGE, 2.0, 1.0, 1.0, 0.0);
         polygon.draw(new Double[]{250.0, 250.0, 300.0, 300.0, 350.0, 250.0});
 
-        CompositeShape composite = new CompositeShape(List.of(
+        /*CompositeShape composite = new CompositeShape(List.of(
                 rect.cloneShape(), ellipse.cloneShape()
-        ));
+        ));*/
 
-        return Stream.of(rect, ellipse, text, polygon, composite);
+        return Stream.of(rect, ellipse, text, polygon);
     }
 
     @ParameterizedTest

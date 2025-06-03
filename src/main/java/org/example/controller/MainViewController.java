@@ -136,10 +136,7 @@ public class MainViewController implements Initializable, FavoriteObserver {
     private double currentZoom = 1.0;
     private Pane gridPane = new Pane();
     //Usati per il rettangolo della selezione multipla
-    private Rectangle selectionRect;
-    private Point2D selectionStart;
-    private final List<ShapeInterface> currentSelection = new ArrayList<>();
-    private GroupReceiver grpReceiver;
+    /*private final List<ShapeInterface> currentSelection = new ArrayList<>();*/
     private Alert mirrorOutsideCanvasAlert = new Alert(Alert.AlertType.ERROR);
 
     private FavoriteManagerReceiver favoriteManagerReceiver = new FavoriteManagerReceiver();
@@ -167,26 +164,10 @@ public class MainViewController implements Initializable, FavoriteObserver {
         );
 
         favoritesShapeComboBox.setDisable(true);
-
-        initMultiSelectCommand();
         contextDTO.setDrawingPane(drawingPane);
-        grpReceiver = new GroupReceiver(contextDTO);
 
         drawingPane.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
-            if (selectionRect.isVisible()) return;
-
             if (evt.getButton() != MouseButton.PRIMARY) return;
-
-            if (!currentSelection.isEmpty()) {
-                boolean clickOnSelected = currentSelection.stream()
-                        .map(ShapeInterface::getNode)
-                        .anyMatch(node ->
-                                node.contains(node.sceneToLocal(evt.getSceneX(), evt.getSceneY()))
-                        );
-                if (!clickOnSelected) {
-                    clearSelection();
-                }
-            }
         });
 
         fontSizeComboBox.setValue(56);
@@ -206,17 +187,12 @@ public class MainViewController implements Initializable, FavoriteObserver {
         });
 
         drawingPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
-            if (selectionRect.isVisible()) {
-                onSelectionReleased(event);
-                return;
-            }
 
             if (!isDragging && event.getButton() == MouseButton.PRIMARY) {
                 DrawOnCanvas(event);
             }
             else if (event.getButton() == MouseButton.SECONDARY) {
-                boolean clickedOnShape = drawingPane.getChildren().stream()
-                        .anyMatch(node -> node.contains(node.sceneToLocal(event.getSceneX(), event.getSceneY())));
+                boolean clickedOnShape = drawingPane.getChildren().stream().anyMatch(node -> node.contains(node.sceneToLocal(event.getSceneX(), event.getSceneY())));
                 if (!clickedOnShape) {
                     showPasteOnlyContextMenu(event);
                 }
@@ -331,75 +307,6 @@ public class MainViewController implements Initializable, FavoriteObserver {
         updateZoomLabel(1.0);
     }
 
-    private void initMultiSelectCommand() {
-        contextDTO.setDrawingPane(drawingPane);
-        selectionRect = new Rectangle();
-        selectionRect.setStroke(Color.web("#0099FF"));
-        selectionRect.getStrokeDashArray().addAll(5.0, 5.0);
-        selectionRect.setFill(Color.web("#0099FF", 0.1));
-        selectionRect.setVisible(false);
-        drawingPane.getChildren().add(selectionRect);
-
-        drawingPane.addEventFilter(MouseEvent.MOUSE_PRESSED, this::onSelectionPressed);
-        drawingPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, this::onSelectionDragged);
-        drawingPane.addEventFilter(MouseEvent.MOUSE_RELEASED, this::onSelectionReleased);
-    }
-
-    private void onSelectionPressed(MouseEvent e) {
-        boolean clickedShape = drawingPane.getChildren().stream()
-                .filter(n -> n.getUserData() instanceof ShapeInterface)
-                .anyMatch(n -> n.contains(n.sceneToLocal(e.getSceneX(), e.getSceneY())));
-        if (!clickedShape && e.getButton() == MouseButton.PRIMARY) {
-            clearSelection();
-            selectionStart = new Point2D(e.getX(), e.getY());
-            selectionRect.setX(selectionStart.getX());
-            selectionRect.setY(selectionStart.getY());
-            selectionRect.setWidth(0);
-            selectionRect.setHeight(0);
-            selectionRect.setVisible(true);
-        }
-    }
-
-    private void onSelectionDragged(MouseEvent e) {
-        if (!selectionRect.isVisible()) return;
-        double rawX = e.getX();
-        double rawY = e.getY();
-        double clampedX = Math.max(0, Math.min(rawX, drawingPane.getWidth()));
-        double clampedY = Math.max(0, Math.min(rawY, drawingPane.getHeight()));
-
-        double x = Math.min(selectionStart.getX(), clampedX);
-        double y = Math.min(selectionStart.getY(), clampedY);
-        double w = Math.abs(clampedX - selectionStart.getX());
-        double h = Math.abs(clampedY - selectionStart.getY());
-
-        selectionRect.setX(x);
-        selectionRect.setY(y);
-        selectionRect.setWidth(w);
-        selectionRect.setHeight(h);
-    }
-
-    private void onSelectionReleased(MouseEvent e) {
-        if (!selectionRect.isVisible()) return;
-
-        double x1 = selectionRect.getX();
-        double y1 = selectionRect.getY();
-        double w  = selectionRect.getWidth();
-        double h  = selectionRect.getHeight();
-
-        currentSelection.clear();
-        for (Node node : drawingPane.getChildren()) {
-            if (node.getUserData() instanceof ShapeInterface) {
-                Bounds b = node.getBoundsInParent();
-                if (b.intersects(x1, y1, w, h)) {
-                    node.setEffect(new DropShadow(10, Color.web("#0099FF")));
-                    currentSelection.add((ShapeInterface)node.getUserData());
-                }
-            }
-        }
-
-        //warningLabel.setText(currentSelection.size() + " forme selezionate");
-        selectionRect.setVisible(false);
-    }
 
     private void updateZoomLabel(double zoomLevel) {
         int percentage = (int) round(zoomLevel * 100);
@@ -416,19 +323,16 @@ public class MainViewController implements Initializable, FavoriteObserver {
      * NUOVO METODO: Assegna event handler diretti alla forma appena creata
      */
     private void attachEventHandlersToShape(Node shapeNode) {
-        // Assegna l'event handler per il click del mouse
+
         shapeNode.setOnMouseClicked(event -> {
-            // Nascondi eventuali menu contestuali aperti
             if (contextMenu != null && contextMenu.isShowing()) {
                 contextMenu.hide();
             }
-            // Ottieni la ShapeInterface dal userData del nodo
             Object userData = shapeNode.getUserData();
             if (userData instanceof ShapeInterface) {
                 ShapeInterface shape = (ShapeInterface) userData;
                 selectedShapeForContextMenu = shape;
 
-                // Se è click destro, mostra il menu contestuale
                 if (event.getButton() == MouseButton.SECONDARY) {
                     try {
                         showContextMenu(shape, event);
@@ -438,7 +342,6 @@ public class MainViewController implements Initializable, FavoriteObserver {
                 }
             }
 
-            // Consuma l'evento per evitare che si propaghi al container
             event.consume();
         });
     }
@@ -447,11 +350,9 @@ public class MainViewController implements Initializable, FavoriteObserver {
      * Show context menu for selected shape
      */
     private void showContextMenu(ShapeInterface shape, MouseEvent event) throws IOException {
-        // Create context menu actions
         ContextMenuActions actions = new ContextMenuActions() {
 
             @Override
-            //Per evitare che se nel gruppo è presente una linea e si fa il fillColor, alla linea non succeda niente
             public void onFillColorChanged(Color newColor) {
                 CommandInterface cmd = new ChangeFillColorCommand(shape, newColor, changesOnShapeReceiver);
                 invoker.execute(cmd);
@@ -585,7 +486,7 @@ public class MainViewController implements Initializable, FavoriteObserver {
                         alert.setHeaderText("This name is already in the favorites list");
                         alert.setContentText("Please choose a different name to save the shape as a favorite.");
                         alert.showAndWait();
-                        return; // blocca il salvataggio
+                        return;
                     }
 
                     CommandInterface cmd = new SaveFavoriteCommand(
@@ -619,12 +520,7 @@ public class MainViewController implements Initializable, FavoriteObserver {
                     ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
                     Node node = pastedShape.getNode();
                     attachEventHandlersToShape(node);
-                    if (pastedShape.isCompositeShape()) {
-                        makeDraggableGroup(pastedShape);
-                    }
-                    else {
-                        makeDraggable(pastedShape);
-                    }
+                    makeDraggable(pastedShape);
                 }
             }
 
@@ -633,114 +529,40 @@ public class MainViewController implements Initializable, FavoriteObserver {
                 CommandInterface cmd = new DeleteCommand(contextDTO, shape, shapeReceiver);
                 invoker.execute(cmd);
             }
-
-            @Override
-            public void onUngroup() {
-                ShapeInterface groupShape = shape;
-                UngroupCommand cmd = new UngroupCommand(grpReceiver, groupShape);
-                invoker.execute(cmd);
-
-                // 2) Ottengo le shape scomposte
-                List<ShapeInterface> ungroupedChildren = cmd.getChildren();
-
-                // 3) Ottengo le posizioni salvate in coordinate di scena
-                Map<ShapeInterface, Point2D> savedScene = cmd.getOriginalScenePositions();
-
-                // 4) Per ogni child: ripristino posizione e interattività
-                for (ShapeInterface child : ungroupedChildren) {
-                    Node childNode = child.getNode();
-
-                    // a) Prendo il punto salvato in coordinate di scena
-                    Point2D scenePt = savedScene.get(child);
-                    if (scenePt != null) {
-                        // b) Converto in coordinate locali del drawingPane
-                        Point2D localOnPane = drawingPane.sceneToLocal(scenePt);
-
-                        // c) Reset di eventuali traslazioni accumulate
-                        childNode.setTranslateX(0);
-                        childNode.setTranslateY(0);
-
-                        // d) Imposto layoutX/Y basato sulla conversione
-                        childNode.setLayoutX(localOnPane.getX());
-                        childNode.setLayoutY(localOnPane.getY());
-                    }
-
-                    // e) Ripristino interattività
-                    childNode.setMouseTransparent(false);
-                    childNode.setPickOnBounds(true); // opzionale
-
-                    attachEventHandlersToShape(childNode);
-                    makeDraggable(child);
-                }
-            }
         };
 
         // Create context menu
         ContextMenuManager.MenuComponents menuComponents = ContextMenuManager.createContextMenu(shape, actions);
         contextMenu = menuComponents.contextMenu;
-
-        if (currentSelection.size() >= 2 && currentSelection.contains(shape)) {
-            MenuItem groupItem = new MenuItem("Group");
-            groupItem.setOnAction(e -> {
-                List<ShapeInterface> toGroup = new ArrayList<>(currentSelection);
-                GroupCommand cmd = new GroupCommand(grpReceiver, toGroup);
-                invoker.execute(cmd);
-                ShapeInterface composite = cmd.getCreatedGroup(); /*TODO: CAMBIARE LA LOGICA, QUESTA RIGA ROMPE IL PATTERN IL CONTROLLER PARA SOLO CON L'INVOKER*/
-                Node groupNode = composite.getNode();
-                groupNode.setPickOnBounds(true);
-                for (ShapeInterface s : composite.getChildren()) {
-                    s.getNode().setMouseTransparent(true);
-                }
-                attachEventHandlersToShape(groupNode);
-                makeDraggableGroup(composite);
-                clearSelection();
-            });
-            contextMenu = new ContextMenu(groupItem);
-            contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
-            isContextMenuShowing = true;
-            return;
-        }
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
         isContextMenuShowing = true;
     }
 
     private void showPasteOnlyContextMenu(MouseEvent event){
-        // Chiude eventuale menu già aperto
         if (contextMenu != null && contextMenu.isShowing()) {
             contextMenu.hide();
         }
-        // Aggiorna il contesto di disegno con le coordinate cliccate
         contextDTO.setSceneX(event.getSceneX());
         contextDTO.setSceneY(event.getSceneY());
 
-        // Crea il nuovo menu contestuale
         contextMenu = new ContextMenu();
 
-        // Crea l'azione di incolla
         MenuItem pasteItem = new MenuItem("Paste");
         pasteItem.setOnAction(e -> {
             if(shapeReceiver.hasShape()) {
                 CommandInterface cmd = new PasteCommand(shapeReceiver, contextDTO);
                 invoker.execute(cmd);
 
-                // Recupera la shape incollata, perchè senza questo non posso aprire il contextMenu su una figura incollata
                 ShapeInterface pastedShape = ((PasteCommand) cmd).getPastedShape();
                 if (pastedShape != null && pastedShape.getNode() != null) {
                     attachEventHandlersToShape(pastedShape.getNode());
-                    if(pastedShape.isCompositeShape()) {
-                        makeDraggableGroup(pastedShape);
-                    }
-                    else {
-                        makeDraggable(pastedShape);
-                    }
+                    makeDraggable(pastedShape);
                 }
             }
         });
 
-        // Aggiunge al menu
         contextMenu.getItems().add(pasteItem);
 
-        // Mostra il menu nella posizione cliccata
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
     }
 
@@ -769,7 +591,6 @@ public class MainViewController implements Initializable, FavoriteObserver {
 
             favoritesShapeComboBox.setDisable(!(isFavoriteSelected && hasFavorites));
 
-            // opzionale: mostra messaggio d’errore se seleziona “Favorite” ma non ci sono shape salvate
             if (isFavoriteSelected && !hasFavorites) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("No Favorites");
@@ -777,19 +598,15 @@ public class MainViewController implements Initializable, FavoriteObserver {
                 alert.setContentText("Add at least one shape to favorites to use this option.");
                 alert.showAndWait();
 
-                // Rimuovi la shape memorizzata se non stai più usando una Favorite
                 if (!"Favorite".equals(newVal.getName())) {
                     contextDTO.setShape(null);
                 }
-                // Rimuove la selezione
                 shapeComboBox.getSelectionModel().clearSelection();
             }
         });
 
 
         shapeComboBox.getItems().addAll(shapes);
-
-        // Set the cell factory to show name + image
         shapeComboBox.setCellFactory(lv -> new ListCell<>() {
             private final ImageView imageView = new ImageView();
 
@@ -808,8 +625,6 @@ public class MainViewController implements Initializable, FavoriteObserver {
                 }
             }
         });
-
-        // Anche il bottone principale della ChoiceBox va personalizzato
         shapeComboBox.setButtonCell(new ListCell<ShapeOption>() {
             private final ImageView imageView = new ImageView();
 
@@ -831,7 +646,6 @@ public class MainViewController implements Initializable, FavoriteObserver {
 
         shapeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (oldVal != null && newVal != null && !newVal.equals(oldVal)) {
-                // Resetto lo stato del disegno parziale (es. punto iniziale della linea)
                 startPoint = null;
             }
         });
@@ -840,21 +654,17 @@ public class MainViewController implements Initializable, FavoriteObserver {
 
     private void initializeSplitPane() {
         Platform.runLater(() -> {
-            // Cerca il divider DOPO che la scena è stata caricata
             Node divider = splitPane.lookupAll(".split-pane-divider")
                     .stream()
                     .findFirst()
                     .orElse(null);
 
             if (divider != null) {
-                divider.setMouseTransparent(true);  // Impedisce il trascinamento
-                divider.setFocusTraversable(false); // Impedisce la selezione
+                divider.setMouseTransparent(true);
+                divider.setFocusTraversable(false);
             }
 
-            // Imposta posizione iniziale
             splitPane.setDividerPositions(0.3);
-
-            // Mantieni posizione anche al resize
             splitPane.heightProperty().addListener((obs, oldVal, newVal) -> {
                 splitPane.setDividerPositions(0.3);
             });
@@ -884,11 +694,7 @@ public class MainViewController implements Initializable, FavoriteObserver {
             }
             hasDragged = true;
 
-            double deltaX = event.getSceneX() - dragStart[0].getX();
-            double deltaY = event.getSceneY() - dragStart[0].getY();
-
-            Point2D deltaInParent = node.getParent().sceneToLocal(new Point2D(event.getSceneX(), event.getSceneY()))
-                    .subtract(node.getParent().sceneToLocal(dragStart[0]));
+            Point2D deltaInParent = node.getParent().sceneToLocal(new Point2D(event.getSceneX(), event.getSceneY())).subtract(node.getParent().sceneToLocal(dragStart[0]));
 
             double adjustedDeltaX = deltaInParent.getX();
             double adjustedDeltaY = deltaInParent.getY();
@@ -928,67 +734,6 @@ public class MainViewController implements Initializable, FavoriteObserver {
         });
     }
 
-    private void makeDraggableGroup(ShapeInterface compositeShape) {
-        final Point2D[] dragStart = new Point2D[1];
-        final Point2D[] shapeStartPosition = new Point2D[1];
-
-        Node node = compositeShape.getNode();
-        if (node == null) return;
-
-        node.setOnMousePressed(event -> {
-            dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
-            shapeStartPosition[0] = new Point2D(compositeShape.getX(), compositeShape.getY());
-            event.consume();
-        });
-
-        node.setOnMouseDragged(event -> {
-            if (!isDragging0) {
-                isDragging0 = true;
-            }
-            hasDragged = true;
-
-            // Usa coordinate scene invece di coordinate locali del nodo
-            double deltaX = event.getSceneX() - dragStart[0].getX();
-            double deltaY = event.getSceneY() - dragStart[0].getY();
-
-            // Parametri semplificati per il controllo limiti
-            double zoom = drawingPane.getScaleX();
-            double paneWidth = drawingPane.getPrefWidth();
-            double paneHeight = drawingPane.getPrefHeight();
-            double extraMargin = 20;
-
-            // Verifica se il movimento è consentito
-            if (compositeShape.canMoveBy(deltaX, deltaY, paneWidth, paneHeight, zoom, extraMargin)) {
-                compositeShape.moveBy(deltaX, deltaY);
-                dragStart[0] = new Point2D(event.getSceneX(), event.getSceneY());
-            }
-
-            event.consume();
-        });
-
-        node.setOnMouseReleased(event -> {
-            if (hasDragged) {
-                Point2D currentPosition = new Point2D(compositeShape.getX(), compositeShape.getY());
-                double totalDeltaX = currentPosition.getX() - shapeStartPosition[0].getX();
-                double totalDeltaY = currentPosition.getY() - shapeStartPosition[0].getY();
-
-                if (Math.abs(totalDeltaX) > 1 || Math.abs(totalDeltaY) > 1) {
-                    compositeShape.moveBy(-totalDeltaX, -totalDeltaY); // rollback
-                    MoveShapeCommand moveShapeCommand = new MoveShapeCommand(compositeShape, totalDeltaX, totalDeltaY, draggingReceiver);
-                    invoker.execute(moveShapeCommand);
-                }
-
-                Platform.runLater(() -> {
-                    isDragging0 = false;
-                    hasDragged = false;
-                });
-            }
-            event.consume();
-        });
-    }
-
-
-
 
     /**
      * Handles the primary mouse click to draw the selected shape on the canvas.
@@ -1002,7 +747,6 @@ public class MainViewController implements Initializable, FavoriteObserver {
             isContextMenuShowing = false;
             return;
         }
-        clearSelection();
         Label warningLabel = new Label();
         warningLabel.setTextFill(Color.RED);
         // Ignore the click if we just finished dragging
@@ -1031,8 +775,8 @@ public class MainViewController implements Initializable, FavoriteObserver {
                             return;
                         }
                     } else {
-                        textArea.setStyle(""); // Reset style
-                        warningLabel.setText(""); // Clear warning
+                        textArea.setStyle("");
+                        warningLabel.setText("");
                     }
                     contextDTO.setText(text);
                     contextDTO.setFontSize(fontSizeComboBox.getValue());
@@ -1087,7 +831,7 @@ public class MainViewController implements Initializable, FavoriteObserver {
      * Calls the function to save the file
      */
     @FXML
-    private void saveFile(ActionEvent event) throws IOException {
+    private void saveFile(ActionEvent event) {
         canvasExporter = new CanvasExporter(contextDTO);
         SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
         invoker.execute(saveCommandFile);
@@ -1106,16 +850,16 @@ public class MainViewController implements Initializable, FavoriteObserver {
             loadManager(canvasImporter);
             // Assign event handlers to all loaded shapes
             attachEventHandlersToAllShapes();
-            initMultiSelectCommand();
         }
         else {
             // Clear workspace from older shapes
             drawingPane.getChildren().clear();
-            initMultiSelectCommand();
-            // Execute load
             LoadCommand load = new LoadCommand(canvasImporter);
-            invoker.executeLoadCommand(load);
-            // Assign event handlers to all loaded shapes and make nodes draggable
+            try {
+                invoker.executePossibleExceptionCommand(load);
+            } catch (IOException e) {
+                showErrorAlertLoadCanvas(e);
+            }
             attachEventHandlersToAllShapes();
         }
     }
@@ -1129,15 +873,6 @@ public class MainViewController implements Initializable, FavoriteObserver {
             attachEventHandlersToShape(node);
             makeDraggable((ShapeInterface) node.getUserData());
         }
-    }
-
-    private void clearSelection() {
-        // rimuove l’effetto DropShadow da tutte le shape selezionate
-        for (ShapeInterface s : currentSelection) {
-            s.getNode().setEffect(null);
-        }
-        currentSelection.clear();
-        warningLabel.setText("");
     }
 
 
@@ -1161,14 +896,22 @@ public class MainViewController implements Initializable, FavoriteObserver {
                 drawingPane.getChildren().clear();
                 // After saving execute load
                 LoadCommand load = new LoadCommand(canvasImporter);
-                invoker.executeLoadCommand(load);
+                try {
+                    invoker.executePossibleExceptionCommand(load);
+                } catch (IOException e) {
+                    showErrorAlertLoadCanvas(e);
+                }
 
             } else if (result.get().getText().equals("No")) {
                 // Clear workspace from older shapes
                 drawingPane.getChildren().clear();
                 // Execute load
                 LoadCommand load = new LoadCommand(canvasImporter);
-                invoker.executeLoadCommand(load);
+                try {
+                    invoker.executePossibleExceptionCommand(load);
+                } catch (IOException e) {
+                    showErrorAlertLoadCanvas(e);
+                }
             }
         }
     }
@@ -1183,7 +926,6 @@ public class MainViewController implements Initializable, FavoriteObserver {
     public void undoClicked(ActionEvent actionEvent) {
         invoker.undo();
         attachEventHandlersToAllShapes();
-        clearSelection();
     }
 
     public void toggleGrid(ActionEvent actionEvent) {
@@ -1223,6 +965,19 @@ public class MainViewController implements Initializable, FavoriteObserver {
 
     }
 
+    private void showErrorAlertLoadCanvas(IOException e) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Load Canvas Error");
+        alert.setHeaderText(e.getMessage());
+        alert.setContentText("Could not load canvas. Maybe you tried to load a library file.");
+
+        ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
+        alert.getButtonTypes().setAll(okButton);
+
+        alert.showAndWait();
+
+    }
+
     private void showAlertLoadLibrary() throws IOException {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Load Favorite Library");
@@ -1236,8 +991,7 @@ public class MainViewController implements Initializable, FavoriteObserver {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES) {
-            // L'utente ha confermato di voler sovrascrivere
-            favoritesShapeComboBox.getItems().clear(); // Pulisce la libreria attuale
+            favoritesShapeComboBox.getItems().clear();
             LoadLibraryCommand loadLibraryCommand = new LoadLibraryCommand(libraryImporterReceiver);
             invoker.execute(loadLibraryCommand);
         }

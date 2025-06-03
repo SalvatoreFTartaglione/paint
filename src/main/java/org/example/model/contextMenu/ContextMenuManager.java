@@ -61,15 +61,15 @@ public class ContextMenuManager {
         });
         contextMenu.getItems().add(resizePanel);
 
-        if(!shape.isGroup()) {
-            addTransformationButton(contextMenu, "Stretch", () -> {
-                stretchPanel.setVisible(true);
-                resizePanel.setVisible(false);
-                rotatePanel.setVisible(false);
-                flipPanel.setVisible(false);
-            });
-            contextMenu.getItems().add(stretchPanel);
-        }
+
+        addTransformationButton(contextMenu, "Stretch", () -> {
+            stretchPanel.setVisible(true);
+            resizePanel.setVisible(false);
+            rotatePanel.setVisible(false);
+            flipPanel.setVisible(false);
+        });
+        contextMenu.getItems().add(stretchPanel);
+
         addTransformationButton(contextMenu, "Rotate", () -> {
             rotatePanel.setVisible(true);
             resizePanel.setVisible(false);
@@ -112,9 +112,9 @@ public class ContextMenuManager {
             });
         });
 
-        if (shape.isGroup()) {
+        /*if (shape.isGroup()) {
             addMenuItem(contextMenu, "Ungroup", actions::onUngroup);
-        }
+        }*/
 
         addFavoritesItem(contextMenu, actions);
         addMenuItem(contextMenu, "Delete", actions::onDelete);

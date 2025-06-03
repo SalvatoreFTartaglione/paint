@@ -2,7 +2,6 @@ package org.example.model.commands.receivers;
 
 import javafx.scene.paint.Color;
 import org.example.model.factory.concreteCreator.*;
-import org.example.model.factory.concreteProduct.CompositeShape;
 import org.example.model.factory.creator.AbstractShape;
 import org.example.model.factory.product.ShapeInterface;
 
@@ -10,7 +9,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class LibraryImporterReceiver {
 
@@ -69,9 +69,6 @@ public class LibraryImporterReceiver {
     }
 
     private ShapeInterface parseShape(String value) {
-        if (value.startsWith("Group:")) {
-            return parseGroupShape(value);
-        }
 
         String[] tokens = value.split(";");
 
@@ -180,37 +177,5 @@ public class LibraryImporterReceiver {
         polygon.creationOfShape(stroke, fill, strokeWidth, 0, 0, null, scaleX, scaleY, angle);
         polygon.getShape().setPoints(points);
         return polygon.getShape();
-    }
-
-    private ShapeInterface parseGroupShape(String groupLine) {
-        try {
-            String[] parts = groupLine.split(":", 2);
-            if (parts.length != 2) return null;
-
-            String[] positionAndChildren = parts[1].split(" : ", 2);
-            if (positionAndChildren.length != 2) return null;
-
-            String[] positionTokens = positionAndChildren[0].split(";");
-            double groupX = Double.parseDouble(positionTokens[0].trim());
-            double groupY = Double.parseDouble(positionTokens[1].trim());
-
-            String childrenStr = positionAndChildren[1];
-            String[] childStrings = childrenStr.split(" \\| ");
-            List<ShapeInterface> children = new ArrayList<>();
-
-            for (String childStr : childStrings) {
-                ShapeInterface child = parseShape(childStr.trim());
-                if (child != null) {
-                    children.add(child);
-                }
-            }
-
-            CompositeShape group = new CompositeShape(children);
-            group.draw(groupX, groupY);
-            return group;
-        } catch (Exception e) {
-            System.err.println("Failed to parse group: " + e.getMessage());
-            return null;
-        }
     }
 }

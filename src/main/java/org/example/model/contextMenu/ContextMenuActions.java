@@ -20,6 +20,5 @@ public interface ContextMenuActions {
     void onMirrorHorizontalAroundCenter();
     void onMirrorVerticalAroundCenter();
     void onAddToFavoritesWithName(String name);
-    void onUngroup();
     void onRotate(double oldAngle, double newAngle);
 }
