@@ -5,6 +5,11 @@ import org.example.model.factory.creator.AbstractShape;
 import org.example.model.factory.concreteProduct.LineShape;
 import org.example.model.factory.product.ShapeInterface;
 
+/**
+ * The LineCreator class is responsible for creating line shapes.
+ * It extends the AbstractShape class and provides the implementation
+ * for the creation of line shapes using specific properties.
+ */
 public class LineCreator extends AbstractShape {
 
 

@@ -4,6 +4,7 @@ import javafx.scene.paint.Color;
 import org.example.model.observer.FavoriteObserver;
 import org.example.model.factory.concreteProduct.RectangleShape;
 import org.example.model.factory.product.ShapeInterface;
+import org.example.model.registry.FavoriteShapeRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -5,6 +5,11 @@ import org.example.model.factory.creator.AbstractShape;
 import org.example.model.factory.concreteProduct.EllipseShape;
 import org.example.model.factory.product.ShapeInterface;
 
+/**
+ * Implementation of the {@code AbstractShape} abstract class for creating ellipse shapes.
+ * This class specifically focuses on generating instances of {@code EllipseShape},
+ * a type of geometrical shape with defined horizontal and vertical radii.
+ */
 public class EllipseCreator extends AbstractShape {
 
 

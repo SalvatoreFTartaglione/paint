@@ -7,14 +7,32 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import org.example.model.factory.product.ShapeInterface;
 
+/**
+ * The ContextMenuManager is responsible for creating and configuring context menus
+ * tailored to interact with shapes and actions provided. It provides various utilities
+ * to add sections, menu items, and configurable components such as color pickers.
+ */
 public class ContextMenuManager {
 
+    /**
+     * The MenuComponents class is a static inner class designed to encapsulate
+     * the core elements required for creating and configuring a context menu.
+     * It is primarily used for managing the menu components, such as the
+     * context menu itself and the associated color pickers.
+     */
     public static class MenuComponents  {
 
         public final ContextMenu contextMenu;
         public final ColorPicker fillColorPicker;
         public final ColorPicker strokeColorPicker;
 
+        /**
+         * Constructs a MenuComponents instance with the provided context menu and color pickers.
+         *
+         * @param contextMenu        the ContextMenu instance to be used for managing menu options
+         * @param fillColorPicker    the ColorPicker instance for selecting fill colors
+         * @param strokeColorPicker  the ColorPicker instance for selecting stroke colors
+         */
         public MenuComponents(ContextMenu contextMenu, ColorPicker fillColorPicker, ColorPicker strokeColorPicker) {
             this.contextMenu = contextMenu;
             this.fillColorPicker = fillColorPicker;
@@ -112,16 +130,18 @@ public class ContextMenuManager {
             });
         });
 
-        /*if (shape.isGroup()) {
-            addMenuItem(contextMenu, "Ungroup", actions::onUngroup);
-        }*/
-
         addFavoritesItem(contextMenu, actions);
         addMenuItem(contextMenu, "Delete", actions::onDelete);
 
         return new MenuComponents(contextMenu, fillPicker, strokePicker);
     }
 
+    /**
+     * Adds a section header to the given context menu. If the context
+     * menu already contains items, a separator is added before the header.
+     * The header is displayed with a custom style and is non-clickable.
+     *
+     * @param*/
     private static void addSectionHeader(ContextMenu contextMenu, String text) {
         if (!contextMenu.getItems().isEmpty()) {
             contextMenu.getItems().add(new SeparatorMenuItem());
@@ -133,6 +153,14 @@ public class ContextMenuManager {
         contextMenu.getItems().add(headerItem);
     }
 
+    /**
+     * Adds a menu item to the specified {@link ContextMenu} with the given text and action.
+     * The menu item is styled with a specific CSS class and executes the provided action when selected.
+     *
+     * @param contextMenu the context menu to which the menu item will be added
+     * @param text the text to be displayed on the menu item
+     * @param action the action to be executed when the menu item is selected
+     */
     private static void addMenuItem(ContextMenu contextMenu, String text, Runnable action) {
         Label label = new Label(text);
         label.getStyleClass().add("menu-item-label");
@@ -141,6 +169,14 @@ public class ContextMenuManager {
         contextMenu.getItems().add(item);
     }
 
+    /**
+     * Adds a transformation button to the specified {@link ContextMenu}. The button is styled
+     * with a specific indicator and executes the provided action when triggered.
+     *
+     * @param contextMenu the context menu to which the transformation button will be added
+     * @param text the text to be displayed on the transformation button
+     * @param action the action to be executed when the transformation button is selected
+     */
     private static void addTransformationButton(ContextMenu contextMenu, String text, Runnable action) {
         Label label = new Label("▶ " + text);
         label.getStyleClass().add("menu-item-label");
@@ -150,6 +186,8 @@ public class ContextMenuManager {
         contextMenu.getItems().add(item);
     }
 
+    /**
+     * Creates and adds a color picker item to the specified context menu. The color*/
     private static ColorPicker createColorPickerItem(ContextMenu contextMenu, String labelText, Color initialColor, ColorChangeHandler handler) {
         ColorPicker colorPicker = new ColorPicker(initialColor);
         colorPicker.setPrefWidth(100);
@@ -171,6 +209,12 @@ public class ContextMenuManager {
         return colorPicker;
     }
 
+    /**
+     * Creates a flip panel represented by a {@link CustomMenuItem}, which contains buttons
+     * for various mirroring operations. The buttons trigger specific actions defined in
+     * the provided {@link ContextMenuActions} interface.
+     *
+     * @param actions the {@link ContextMenuActions}*/
     private static CustomMenuItem createFlipPanel(ContextMenuActions actions) {
         VBox buttons = new VBox(5);
         buttons.getStyleClass().add("control-panel");
@@ -205,6 +249,15 @@ public class ContextMenuManager {
     }
 
 
+    /**
+     * Creates a stretch configuration item as a {@link CustomMenuItem} for adjusting the width and height
+     * of the given {@link ShapeInterface}. The item includes input fields for entering dimensions,
+     * an apply button, and validation logic with warnings for invalid input.
+     *
+     * @param shape the {@link ShapeInterface} to be stretched, which provides the current dimensions and properties
+     * @param stretchHandler the {@link StretchHandler} to handle the stretch action, receiving the old and new dimensions
+     * @return the fully configured {@link CustomMenuItem} that allows the user to adjust the dimensions of the shape
+     */
     private static CustomMenuItem createStretchItem(ShapeInterface shape, StretchHandler stretchHandler) {
         boolean isTextShape = shape.getText() != null;
         boolean isLineShape = shape.getFillColor() == null;
@@ -286,6 +339,15 @@ public class ContextMenuManager {
         return item;
     }
 
+    /**
+     * Creates a resize configuration item as a {@link CustomMenuItem} for adjusting the size of
+     * the given {@link ShapeInterface}. The item includes a slider for selecting the desired size,
+     * a label to display the current value, and an apply button to confirm the new size. Size changes
+     * are handled through the provided {@link ResizeHandler}.
+     *
+     * @param shape the {@link ShapeInterface} whose size can be adjusted, providing the current size,
+     *              minimum/maximum constraints, and slider label generation
+     * @param resizeHandler the {@link ResizeHandler} to handle the resize action, receiving*/
     private static CustomMenuItem createResizeItem(ShapeInterface shape, ResizeHandler resizeHandler) {
         double currentSize = shape.getEffectiveSize();
         double minSize = shape.getMinSliderSize();
@@ -324,6 +386,18 @@ public class ContextMenuManager {
         return item;
     }
 
+    /**
+     * Creates a rotate configuration item as a {@link CustomMenuItem} for adjusting the rotation angle
+     * of the given {@link ShapeInterface}. The item includes an input field for entering the desired
+     * angle, a button to apply the change, and validation logic with warnings for invalid input.
+     *
+     * @param shape the {@link ShapeInterface} to be rotated, which provides the current angle and
+     *              properties for rotation adjustments
+     * @param rotateHandler the {@link RotateHandler} to handle the rotation action, receiving the
+     *                      old and new angles of the shape
+     * @return the fully configured {@link CustomMenuItem} that allows the user to adjust
+     *         the rotation angle of the shape
+     */
     private static CustomMenuItem createRotateItem(ShapeInterface shape, RotateHandler rotateHandler) {
         TextField angleField = new TextField(String.format("%.1f", shape.getAngle()));
         angleField.getStyleClass().add("control-input");
@@ -370,7 +444,13 @@ public class ContextMenuManager {
     }
 
 
-
+    /**
+     * Adds a "Add to Favorites" menu item to the specified context menu. When selected,
+     * this menu item opens a dialog prompting the user to enter a name for the favorite item
+     * and triggers the associated action defined in the {@link ContextMenuActions}.
+     *
+     * @param contextMenu the {@link ContextMenu} to which the "Add to Favorites" item will be added
+     * @param actions the {@link ContextMenuActions} interface containing the action to*/
     private static void addFavoritesItem(ContextMenu contextMenu, ContextMenuActions actions) {
         Label label = new Label("★ Add to Favorites");
         label.getStyleClass().add("menu-item-label");
@@ -386,21 +466,49 @@ public class ContextMenuManager {
         contextMenu.getItems().add(item);
     }
 
+    /**
+     * Functional interface representing a handler for color change events.
+     *
+     * This interface is used to define a callback method that is called
+     * whenever a color change event occurs. The handler is invoked with
+     * the new color as its parameter, allowing custom logic to be executed
+     * in response to the color change.
+     *
+     * Methods that involve this handler typically allow users to select
+     * or modify colors in the application's context menu or UI components.
+     */
     @FunctionalInterface
     private interface ColorChangeHandler {
         void onColorChanged(Color color);
     }
 
+    /**
+     * Functional interface for handling stretch events on graphical elements.
+     * This interface defines a*/
     @FunctionalInterface
     public interface StretchHandler {
         void onStretch(double oldWidth, double oldHeight, double newWidth, double newHeight);
     }
 
+    /**
+     * The ResizeHandler functional interface is used to handle resize operations for a given component or object.
+     * It provides a single abstract method, `onResize`, which is invoked when the dimensions of an object change.
+     * The method is supplied with*/
     @FunctionalInterface
     public interface ResizeHandler {
         void onResize(double oldWidth, double oldHeight, double newSize);
     }
 
+    /**
+     * Functional interface for handling rotation events within a context menu or related user interactions.
+     * This handler is designed to manage actions associated with rotating a shape or object, such as updating
+     * its rotation angle or triggering specific behaviors tied to rotation changes.
+     *
+     * The interface contains a single method, `onRotate`, which accepts the old angle and the new angle
+     * as parameters, allowing implementers to define custom logic for handling rotation events. The purpose
+     * of this interface is to provide a clear contract for rotation-related transformations without imposing
+     * implementation details, aligning with the principles of functional programming.
+     */
     @FunctionalInterface
     public interface RotateHandler {
         void onRotate(double oldAngle, double newAngle);
