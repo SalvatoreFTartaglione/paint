@@ -1,5 +1,6 @@
 package org.example.model.shape;
 
+import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -16,6 +17,8 @@ public class TextShape implements ShapeInterface {
     private double baseHeight;
     private boolean isFlippedX = false;
     private boolean isFlippedY = false;
+    private double originalY = 0;
+    private double originalScaleY = 0;
 
     public TextShape(String content, Color strokeColor, Color fillingColor, double width, double height, double strokeWidth, double scaleX, double scaleY, double angle) {
         textShape = new Text(content);
@@ -234,44 +237,87 @@ public class TextShape implements ShapeInterface {
 
     @Override
     public void mirrorUp() {
-        textShape.setScaleY(-textShape.getScaleY());
+        double y = textShape.getY();
+        double h = getHeight();
+
+        // Calcolo speculare rispetto al bordo superiore
+        double centerY = y + h / 2;
+        double distance = centerY - y;
+        double mirroredCenterY = y - distance;
+        double newY = mirroredCenterY - h / 2;
+        textShape.setScaleY(-textShape.getScaleY());  // inverte sempre
+        textShape.setY(newY);                         // sposta specularmente
+
         isFlippedY = !isFlippedY;
 
-        // Aggiorna anche l'array points per mantenere la coerenza
         if (points[1] != null) {
             points[1] = textShape.getY();
         }
     }
 
+
     @Override
     public void mirrorDown() {
-        textShape.setScaleY(-textShape.getScaleY());
+        double y = textShape.getY();
+        double h = getHeight();
+
+        // Calcolo speculare rispetto al bordo inferiore
+        double bottomY = y + h;
+        double centerY = y + h / 2;
+        double distance = bottomY - centerY;
+        double mirroredCenterY = bottomY + distance;
+        double newY = mirroredCenterY - h / 2;
+
+        textShape.setScaleY(-textShape.getScaleY()); // flip verticale
+        textShape.setY(newY);                         // sposta sotto
         isFlippedY = !isFlippedY;
 
         if (points[1] != null) {
-            points[1] = textShape.getY();
+            points[1] = newY;
         }
     }
 
     @Override
     public void mirrorLeft() {
-        textShape.setScaleX(-textShape.getScaleX());
+        double x = textShape.getX();
+        double w = this.getWidth();
+
+        double centerX = x + w / 2;
+        double leftX = x;
+        double distance = centerX - leftX;
+        double mirroredCenterX = leftX - distance;
+        double newX = mirroredCenterX - w / 2;
+
+        textShape.setScaleX(-textShape.getScaleX()); // capovolgimento orizzontale
+        textShape.setX(newX);                         // spostamento simmetrico a sinistra
         isFlippedX = !isFlippedX;
 
         if (points[0] != null) {
-            points[0] = textShape.getX();
+            points[0] = newX;
         }
     }
+
 
     @Override
     public void mirrorRight() {
-        textShape.setScaleX(-textShape.getScaleX());
+        double x = textShape.getX();
+        double w = this.getWidth();
+
+        double centerX = x + w / 2;
+        double rightX = x + w;
+        double distance = rightX - centerX;
+        double mirroredCenterX = rightX + distance;
+        double newX = mirroredCenterX - w / 2;
+
+        textShape.setScaleX(-textShape.getScaleX()); // capovolgimento orizzontale
+        textShape.setX(newX);                         // spostamento simmetrico a destra
         isFlippedX = !isFlippedX;
 
         if (points[0] != null) {
-            points[0] = textShape.getX();
+            points[0] = newX;
         }
     }
+
 
     @Override
     public void setScaleX(double scale) {

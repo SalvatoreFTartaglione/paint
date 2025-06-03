@@ -39,8 +39,8 @@ public class MirroringCommand implements CommandInterface{
             case DOWN: positionManagerReceiver.mirrorUp(); break;
             case LEFT: positionManagerReceiver.mirrorRight(); break;
             case RIGHT: positionManagerReceiver.mirrorLeft(); break;
-            case VERTICAL: positionManagerReceiver.mirrorHorizontal(); break;
-            case HORIZONTAL: positionManagerReceiver.mirrorVertical(); break;
+            case VERTICAL: positionManagerReceiver.mirrorVertical(); break;
+            case HORIZONTAL: positionManagerReceiver.mirrorHorizontal(); break;
         }
     }
 
