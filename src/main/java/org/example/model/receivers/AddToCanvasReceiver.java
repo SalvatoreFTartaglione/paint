@@ -106,39 +106,27 @@ public class AddToCanvasReceiver {
             }
 
             case "Polygon": {
-                //drawingDTO.setShapeOption(null);
-                // show preview of the points
-                // get last point from the list of points
                 Circle c = new Circle( drawingDTO.getPolygonPoints().get(drawingDTO.getPolygonPoints().size() - 1).getX(), drawingDTO.getPolygonPoints().get(drawingDTO.getPolygonPoints().size() - 1).getY(), 4, Color.BLUE );
                 drawingDTO.getDrawingPane().getChildren().add(c);
                 previewCircles.add(c);
                 canAdd = false;
-                // Check if the polygon is ready to get drawn
                 if (drawingDTO.canCreatePolygon()) {
                     List<Point2D> points = drawingDTO.getPolygonPoints();
-                    // Convert List<Point2D> to List<Double> (extracting X and Y values)
                     List<Double> doubleList = new ArrayList<>();
                     for (Point2D point : points) {
                         doubleList.add(point.getX());
                         doubleList.add(point.getY());
                     }
-                    // Convert List<Double> to Double[]
                     Double[] doublePoints = doubleList.toArray(new Double[0]);
-                    // Draw the polygon on the canvas
-                    // Invoke the polygon creator
                     AbstractShape abstractPolygon = createPolygon(drawingDTO.getBorderColor(), drawingDTO.getFillColor(), 4, 80, 40, 0);
                     shape = abstractPolygon.getShape();
                     shape.draw(doublePoints);
-                    // Remove previews after 500ms from add
                     Timeline timeline = new Timeline(new KeyFrame(Duration.millis(500), e -> {
                         drawingDTO.getDrawingPane().getChildren().removeAll(previewCircles);
-                        // Clear preview list
                         previewCircles.clear();
                     }));
                     timeline.play();
-                    // Clear array of polygon points
                     drawingDTO.clearPolygonPoints();
-                    // Reset start point for line
                     drawingDTO.setStartPoint(null);
                     canAdd = true;
                     break;
@@ -147,17 +135,31 @@ public class AddToCanvasReceiver {
             }
             case "Favorite": {
                 ShapeInterface favoriteShape = drawingDTO.getShape();
-                //System.out.println("[DEBUG] CASE FAVORITE shape: " + favoriteShape.toString());
                 if (favoriteShape != null) {
                     ShapeInterface clonedShape = favoriteShape.cloneShape();
                     Point2D localCoords = drawingDTO.getDrawingPane().sceneToLocal(drawingDTO.getSceneX(), drawingDTO.getSceneY());
-                    Point2D clampedCoords = clampPosition(localCoords.getX(), localCoords.getY(), clonedShape.getWidth(), clonedShape.getHeight());
-                    clonedShape.draw(clampedCoords.getX(), clampedCoords.getY());
+
+                    Double[] points = clonedShape.getPoints();
+
+                    if (points != null && points.length >= 2) {
+                        Point2D shapeCenter = computeCenter(points);
+                        double dx = localCoords.getX() - shapeCenter.getX();
+                        double dy = localCoords.getY() - shapeCenter.getY();
+                        Double[] translated = translatePoints(points, dx, dy);
+                        Double[] clamped = clampPointsIntoPane(translated);
+                        clonedShape.draw(clamped);
+                    } else {
+                        Point2D clampedCoords = clampPosition(localCoords.getX(), localCoords.getY(), clonedShape.getWidth(), clonedShape.getHeight());
+                        clonedShape.draw(clampedCoords.getX(), clampedCoords.getY());
+                    }
+
                     shape = clonedShape;
                     canAdd = true;
-                    break;
                 }
+                break;
             }
+
+
 
         }
         if (shape != null) {
@@ -169,6 +171,29 @@ public class AddToCanvasReceiver {
             return null;
         }
     }
+
+    private Point2D computeCenter(Double[] points) {
+        double sumX = 0;
+        double sumY = 0;
+        int n = points.length / 2;
+
+        for (int i = 0; i < points.length; i += 2) {
+            sumX += points[i];
+            sumY += points[i + 1];
+        }
+        return new Point2D(sumX / n, sumY / n);
+    }
+
+
+    private Double[] translatePoints(Double[] points, double dx, double dy) {
+        Double[] result = new Double[points.length];
+        for (int i = 0; i < points.length; i += 2) {
+            result[i] = points[i] + dx;
+            result[i + 1] = points[i + 1] + dy;
+        }
+        return result;
+    }
+
 
     private Point2D clampPosition(double x, double y, double shapeWidth, double shapeHeight) {
         double zoom = drawingDTO.getDrawingPane().getScaleX();
@@ -190,6 +215,40 @@ public class AddToCanvasReceiver {
 
         return new Point2D(clampedX, clampedY);
     }
+
+    private Double[] clampPointsIntoPane(Double[] points) {
+        double zoom = drawingDTO.getDrawingPane().getScaleX();
+        double paneWidth = drawingDTO.getDrawingPane().getPrefWidth() * zoom;
+        double paneHeight = drawingDTO.getDrawingPane().getPrefHeight() * zoom;
+
+        double extraMargin = 42;
+        double minX = extraMargin / zoom;
+        double minY = extraMargin / zoom;
+        double maxX = (paneWidth - extraMargin) / zoom;
+        double maxY = (paneHeight - extraMargin) / zoom;
+        double shapeMinX = Double.POSITIVE_INFINITY;
+        double shapeMinY = Double.POSITIVE_INFINITY;
+        double shapeMaxX = Double.NEGATIVE_INFINITY;
+        double shapeMaxY = Double.NEGATIVE_INFINITY;
+
+        for (int i = 0; i < points.length; i += 2) {
+            double x = points[i];
+            double y = points[i + 1];
+            shapeMinX = Math.min(shapeMinX, x);
+            shapeMinY = Math.min(shapeMinY, y);
+            shapeMaxX = Math.max(shapeMaxX, x);
+            shapeMaxY = Math.max(shapeMaxY, y);
+        }
+        double dx = 0, dy = 0;
+        if (shapeMinX < minX) dx = minX - shapeMinX;
+        else if (shapeMaxX > maxX) dx = maxX - shapeMaxX;
+
+        if (shapeMinY < minY) dy = minY - shapeMinY;
+        else if (shapeMaxY > maxY) dy = maxY - shapeMaxY;
+
+        return translatePoints(points, dx, dy);
+    }
+
 
 
     public void addClonedShape(ShapeInterface shape) {
