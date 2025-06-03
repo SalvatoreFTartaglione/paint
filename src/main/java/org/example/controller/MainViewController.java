@@ -22,12 +22,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.commands.commandInterface.CommandInterface;
 import org.example.model.commands.concreteCommands.*;
 import org.example.model.commands.invoker.Invoker;
 import org.example.model.commands.receivers.*;
-import javafx.scene.shape.Rectangle;
+import org.example.model.observer.FavoriteObserver;
 import org.example.model.registry.FavoriteShapeRegistry;
 import org.example.model.contextMenu.ContextMenuActions;
 import org.example.model.contextMenu.ContextMenuManager;
@@ -45,7 +46,7 @@ import java.util.*;
 
 import static java.lang.Math.round;
 
-public class MainViewController implements Initializable {
+public class MainViewController implements Initializable, FavoriteObserver {
 
 
     @FXML
@@ -129,7 +130,6 @@ public class MainViewController implements Initializable {
     private CanvasExporter canvasExporter;
     private LibraryExporterReceiver libraryExporterReceiver;
     private LibraryImporterReceiver libraryImporterReceiver;
-    //private FavoriteManagerReceiver favoriteManagerReceiver;
     private boolean isDragging0 = false;                                                                                // State flag to understand if user is dragging and avoid accidentally adding new shapes to the canvas
     private boolean hasDragged = false;
     private ShapeReceiver shapeReceiver = new ShapeReceiver(null);
@@ -142,10 +142,8 @@ public class MainViewController implements Initializable {
     private GroupReceiver grpReceiver;
     private Alert mirrorOutsideCanvasAlert = new Alert(Alert.AlertType.ERROR);
 
-    private final Point2D[] dragStart = new Point2D[1];
-    private final Point2D[] shapeStartPosition = new Point2D[1];
-
     private FavoriteManagerReceiver favoriteManagerReceiver = new FavoriteManagerReceiver();
+    private boolean isContextMenuShowing = false;
 
 
     /**
@@ -171,17 +169,14 @@ public class MainViewController implements Initializable {
         favoritesShapeComboBox.setDisable(true);
 
         initMultiSelectCommand();
-        grpReceiver = new GroupReceiver(drawingPane);
+        contextDTO.setDrawingPane(drawingPane);
+        grpReceiver = new GroupReceiver(contextDTO);
 
-        // --- NUOVO FILTER per deselezionare solo sul click sinistro in background ---
         drawingPane.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
-            // 1) se sto disegnando il rettangolo di selezione, non toccare nulla
             if (selectionRect.isVisible()) return;
 
-            // 2) solo sul click sinistro
             if (evt.getButton() != MouseButton.PRIMARY) return;
 
-            // 2) se ho già selezionato delle shape e il click non è sopra una di esse, allora clear
             if (!currentSelection.isEmpty()) {
                 boolean clickOnSelected = currentSelection.stream()
                         .map(ShapeInterface::getNode)
@@ -211,17 +206,14 @@ public class MainViewController implements Initializable {
         });
 
         drawingPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
-            // 1) se sto ancora disegnando il rettangolo di selezione, chiudo quella logica
             if (selectionRect.isVisible()) {
                 onSelectionReleased(event);
                 return;
             }
 
-            // 2) altrimenti, se click sinistro senza drag, disegno la nuova forma
             if (!isDragging && event.getButton() == MouseButton.PRIMARY) {
                 DrawOnCanvas(event);
             }
-            // 3) se click destro in background, mostro il menu di “Paste”
             else if (event.getButton() == MouseButton.SECONDARY) {
                 boolean clickedOnShape = drawingPane.getChildren().stream()
                         .anyMatch(node -> node.contains(node.sceneToLocal(event.getSceneX(), event.getSceneY())));
@@ -232,7 +224,6 @@ public class MainViewController implements Initializable {
         });
 
         scrollPane.addEventHandler(MouseEvent.MOUSE_PRESSED, evt -> {
-            // Se c’è un contextMenu aperto, lo chiudo
             if (evt.getButton() == MouseButton.PRIMARY) {
                 if (contextMenu != null && contextMenu.isShowing()) {
                     contextMenu.hide();
@@ -241,39 +232,33 @@ public class MainViewController implements Initializable {
         });
 
 
-        // stops dragging with mouse of the drawing pane
         scrollPane.setPannable(false);
         scrollPane.setTarget(mainCanvasContainer);
-        //drawingPane.getChildren().clear();
-
-        // favoriteShapesComboBox section
-        // Observer attached
         FavoriteShapeRegistry.getInstance().addObserver(this::onFavoriteListChanged);
 
         favoritesShapeComboBox.setOnAction(e -> {
             String selected = favoritesShapeComboBox.getSelectionModel().getSelectedItem();
-            //System.out.println("[DEBUG] Selezionato dal comboBox: " + selected);
 
             if (selected != null) {
                 ShapeInterface shape = FavoriteShapeRegistry.getInstance().get(selected);
-                //System.out.println("[DEBUG] Recuperata shape dal registry: " + shape.toString());
 
                 if (shape != null) {
                     ShapeInterface copy = shape.cloneShape();
-                    //System.out.println("[DEBUG] Clonata shape: " + copy);
                     contextDTO.setShape(copy.cloneShape());
                     contextDTO.setShapeOption(new ShapeOption("Favorite", ""));
-                } else {
-                    //System.out.println("[DEBUG] Nessuna shape trovata nel registry per: " + selected);
                 }
             }
         });
 
     }
 
-    // favoriteShapesComboBox section
-    private void onFavoriteListChanged(Set<String> updatedNames) {
-        //System.out.println("[DEBUG] Observer triggered - new favorites: " + updatedNames);
+    /**
+     * Aggiorna la lista dei preferiti nella combo box dei preferiti e abilita/disabilita
+     * la combo box in base allo stato corrente.
+     *
+     * @param updatedNames insieme di nomi aggiornati degli elementi preferiti.
+     */
+    public void onFavoriteListChanged(Set<String> updatedNames) {
         Platform.runLater(() -> {
             favoritesShapeComboBox.getItems().setAll(updatedNames);
             ShapeOption currentOption = shapeComboBox.getValue();
@@ -282,7 +267,6 @@ public class MainViewController implements Initializable {
             favoritesShapeComboBox.setDisable(!(isFavoriteSelected && hasFavorites));
         });
     }
-
 
     private void initializeAlerts() {
         mirrorOutsideCanvasAlert.setTitle("Shape outside of canvas");
@@ -362,7 +346,6 @@ public class MainViewController implements Initializable {
     }
 
     private void onSelectionPressed(MouseEvent e) {
-        // se clicco sullo sfondo (non sopra una shape)
         boolean clickedShape = drawingPane.getChildren().stream()
                 .filter(n -> n.getUserData() instanceof ShapeInterface)
                 .anyMatch(n -> n.contains(n.sceneToLocal(e.getSceneX(), e.getSceneY())));
@@ -696,17 +679,13 @@ public class MainViewController implements Initializable {
         ContextMenuManager.MenuComponents menuComponents = ContextMenuManager.createContextMenu(shape, actions);
         contextMenu = menuComponents.contextMenu;
 
-        // 3) Se siamo in multi-selezione e sto cliccando su una shape selezionata,
-        //    aggiungi “Group” invece delle restanti opzioni
         if (currentSelection.size() >= 2 && currentSelection.contains(shape)) {
             MenuItem groupItem = new MenuItem("Group");
             groupItem.setOnAction(e -> {
-                // Costruisci e esegui il GroupCommand come fai di consueto
                 List<ShapeInterface> toGroup = new ArrayList<>(currentSelection);
                 GroupCommand cmd = new GroupCommand(grpReceiver, toGroup);
                 invoker.execute(cmd);
                 ShapeInterface composite = cmd.getCreatedGroup(); /*TODO: CAMBIARE LA LOGICA, QUESTA RIGA ROMPE IL PATTERN IL CONTROLLER PARA SOLO CON L'INVOKER*/
-                // pick-on-bounds + figli mouse-transparent
                 Node groupNode = composite.getNode();
                 groupNode.setPickOnBounds(true);
                 for (ShapeInterface s : composite.getChildren()) {
@@ -718,9 +697,11 @@ public class MainViewController implements Initializable {
             });
             contextMenu = new ContextMenu(groupItem);
             contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+            isContextMenuShowing = true;
             return;
         }
         contextMenu.show(mainCanvasContainer, event.getScreenX(), event.getScreenY());
+        isContextMenuShowing = true;
     }
 
     private void showPasteOnlyContextMenu(MouseEvent event){
@@ -1016,6 +997,11 @@ public class MainViewController implements Initializable {
      * @param mouseEvent the mouse event containing click coordinates
      */
     public void DrawOnCanvas(MouseEvent mouseEvent) {
+        if (isContextMenuShowing) {
+            contextMenu.hide();
+            isContextMenuShowing = false;
+            return;
+        }
         clearSelection();
         Label warningLabel = new Label();
         warningLabel.setTextFill(Color.RED);
@@ -1102,7 +1088,7 @@ public class MainViewController implements Initializable {
      */
     @FXML
     private void saveFile(ActionEvent event) throws IOException {
-        canvasExporter = new CanvasExporter(drawingPane);
+        canvasExporter = new CanvasExporter(contextDTO);
         SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
         invoker.execute(saveCommandFile);
     }
@@ -1114,7 +1100,7 @@ public class MainViewController implements Initializable {
      */
     @FXML
     private void loadFile(ActionEvent event) throws IOException {
-        canvasImporter = new CanvasImporter(drawingPane);
+        canvasImporter = new CanvasImporter(contextDTO);
         // Check if canvas is empty
         if (drawingPane.getChildren().stream().anyMatch(node -> node.getUserData() instanceof ShapeInterface)) {
             loadManager(canvasImporter);

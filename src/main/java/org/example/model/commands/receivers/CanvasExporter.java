@@ -7,6 +7,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
+import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.factory.product.ShapeInterface;
 import javax.imageio.ImageIO;
 import java.io.BufferedWriter;
@@ -16,16 +17,16 @@ import java.io.IOException;
 
 public class CanvasExporter {
 
-    private final Pane canvas;
+    private final DrawingContextDTO contextDTO;
 
-    public CanvasExporter(Pane canvas) {
-        this.canvas = canvas;
+    public CanvasExporter(DrawingContextDTO contextDTO) {
+        this.contextDTO = contextDTO;
     }
 
     public void exportAsText(File file) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            System.out.println("Dimension = " + canvas.getChildren().size());
-            for (Node node : canvas.getChildren()) {
+            System.out.println("Dimension = " + contextDTO.getDrawingPane().getChildren().size());
+            for (Node node : contextDTO.getDrawingPane().getChildren()) {
                 Object userData = node.getUserData();
                 if (userData instanceof ShapeInterface) {
                     writer.write(userData.toString());
@@ -35,13 +36,13 @@ public class CanvasExporter {
     }
 
     public void exportAsPng(File file) throws IOException {
-        Background originalBackground = canvas.getBackground();
+        Background originalBackground = contextDTO.getDrawingPane().getBackground();
         Background transparent = new Background(new BackgroundFill(null, null, null));
-        canvas.setBackground(transparent);
+        contextDTO.getDrawingPane().setBackground(transparent);
 
-        WritableImage image = canvas.snapshot(new SnapshotParameters(), null);
+        WritableImage image = contextDTO.getDrawingPane().snapshot(new SnapshotParameters(), null);
         ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-        canvas.setBackground(originalBackground);
+        contextDTO.getDrawingPane().setBackground(originalBackground);
     }
 }
 

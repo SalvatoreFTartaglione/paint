@@ -3,6 +3,7 @@ package org.example.model.commands.receivers;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.factory.concreteCreator.*;
 import org.example.model.factory.concreteProduct.CompositeShape;
 import org.example.model.factory.product.ShapeInterface;
@@ -16,10 +17,10 @@ import java.util.List;
 
 public class CanvasImporter {
 
-    private Pane canvas;
+    private DrawingContextDTO contextDTO;
 
-    public CanvasImporter(Pane canvas) {
-        this.canvas = canvas;
+    public CanvasImporter(DrawingContextDTO contextDTO) {
+        this.contextDTO = contextDTO;
     }
 
     public void importAsText(File file) throws IOException {
@@ -57,7 +58,7 @@ public class CanvasImporter {
                     if (composite != null) {
                         Node groupNode = composite.getNode();
                         groupNode.setUserData(composite);
-                        canvas.getChildren().add(groupNode);
+                        contextDTO.getDrawingPane().getChildren().add(groupNode);
                     }
                     continue; // passo alla prossima iterazione, non va processata come shape singola
                 }
@@ -163,8 +164,8 @@ public class CanvasImporter {
                 if (shape != null) {
                     Node n = shape.getNode();
                     n.setUserData(shape);
-                    canvas.getChildren().add(n);
-                    System.out.println(canvas.getChildren().size());
+                    contextDTO.getDrawingPane().getChildren().add(n);
+                    System.out.println(contextDTO.getDrawingPane().getChildren().size());
                 }else {
                     throw new NullPointerException("Shape is null: " + shape);
                 }

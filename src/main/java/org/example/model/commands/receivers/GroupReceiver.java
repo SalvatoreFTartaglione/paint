@@ -1,6 +1,6 @@
 package org.example.model.commands.receivers;
 
-import javafx.scene.layout.Pane;
+import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.factory.concreteProduct.CompositeShape;
 import org.example.model.factory.product.ShapeInterface;
 
@@ -10,10 +10,10 @@ import java.util.List;
  * Receiver che esegue il raggruppamento e lo sgangio delle shape sul canvas
  */
 public class GroupReceiver {
-    private final Pane drawingPane;
+    private final DrawingContextDTO contextDTO;
 
-    public GroupReceiver(Pane drawingPane) {
-        this.drawingPane = drawingPane;
+    public GroupReceiver(DrawingContextDTO contextDTO) {
+        this.contextDTO = contextDTO;
     }
 
     /**
@@ -22,11 +22,11 @@ public class GroupReceiver {
     public ShapeInterface group(List<ShapeInterface> shapes) {
         // rimuovi le shape singole
         for (ShapeInterface s : shapes) {
-            drawingPane.getChildren().remove(s.getNode());
+            contextDTO.getDrawingPane().getChildren().remove(s.getNode());
         }
         // crea il composite e lo aggiunge
         CompositeShape composite = new CompositeShape(shapes);
-        drawingPane.getChildren().add(composite.getNode());
+        contextDTO.getDrawingPane().getChildren().add(composite.getNode());
         return composite;
     }
 
@@ -35,10 +35,10 @@ public class GroupReceiver {
      */
     public void ungroup(ShapeInterface composite) {
         // rimuovi il nodo del gruppo
-        drawingPane.getChildren().remove(composite.getNode());
+        contextDTO.getDrawingPane().getChildren().remove(composite.getNode());
         // reinserisci le shape figlie
         for (ShapeInterface s : composite.getChildren()) {
-            drawingPane.getChildren().add(s.getNode());
+            contextDTO.getDrawingPane().getChildren().add(s.getNode());
         }
     }
 }
