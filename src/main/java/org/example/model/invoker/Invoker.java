@@ -52,6 +52,15 @@ public class Invoker {
     }
 
     /**
+     * Forgets every recorded command, so that nothing can be undone anymore.
+     * Used when the canvas is replaced (e.g. after loading a drawing): the old commands would
+     * refer to shapes that are no longer there.
+     */
+    public void clearHistory() {
+        history.clear();
+    }
+
+    /**
      * Undoes the last executed command, if available.
      */
     public void undo() {

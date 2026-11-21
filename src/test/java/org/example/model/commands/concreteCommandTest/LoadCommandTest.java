@@ -14,20 +14,20 @@ public class LoadCommandTest {
 
     @BeforeEach
     public void setUp() {
-        // Creazione fittizia di un CanvasImporter con canvas nullo
+        // The importer is built without a canvas: only methods that do not touch it are tested here
         canvasImporter = new CanvasImporter(null);
-        loadCommand = new LoadCommand(canvasImporter);
+        loadCommand = new LoadCommand(canvasImporter, new java.io.File("drawing.txt"));
     }
 
     @Test
     public void testIsUndoableReturnsFalse() {
-        assertFalse(loadCommand.isUndoable(), "LoadCommand dovrebbe restituire false a isUndoable()");
+        assertFalse(loadCommand.isUndoable(), "LoadCommand should return false for isUndoable()");
     }
 
     @Test
     public void testUndoCommandThrowsException() {
         assertThrows(UnsupportedOperationException.class, () -> loadCommand.undoCommand(),
-                "undoCommand() deve lanciare UnsupportedOperationException");
+                "undoCommand() must throw UnsupportedOperationException");
     }
 
 }

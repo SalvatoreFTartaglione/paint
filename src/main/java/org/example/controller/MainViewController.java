@@ -10,10 +10,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -33,21 +29,26 @@ import org.example.model.contextMenu.ContextMenuActions;
 import org.example.model.contextMenu.ContextMenuManager;
 import org.example.model.enums.MirrorDirectionEnum;
 import org.example.model.factory.product.ShapeInterface;
-import org.example.model.observer.FavoriteObserver;
-import org.example.model.registry.FavoriteShapeRegistry;
 import org.example.model.utils.ZoomableScrollPane;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.*;
 
 import static java.lang.Math.round;
 
+/**
+ * Controller of the main window: it wires the FXML view to the model by turning user interactions
+ * into commands that are run (and recorded for undo) by the {@link Invoker}.
+ */
 public class MainViewController implements Initializable, FavoriteObserver {
+
+    /** Maximum number of characters accepted for a text shape. */
+    private static final int MAX_TEXT_LENGTH = 25;
 
 
     @FXML
@@ -125,19 +126,12 @@ public class MainViewController implements Initializable, FavoriteObserver {
     private final DrawingContextDTO contextDTO = new DrawingContextDTO();
     private AddToCanvasReceiver addToCanvasReceiver = null;
     private ChangesOnShapeReceiver changesOnShapeReceiver = new ChangesOnShapeReceiver();
-    private DraggingReceiver draggingReceiver = new DraggingReceiver() {};
+    private DraggingReceiver draggingReceiver = new DraggingReceiver();
     private PositionManagerReceiver positionManagerReceiver;
-    private CanvasImporter canvasImporter;
-    private CanvasExporter canvasExporter;
-    private LibraryExporterReceiver libraryExporterReceiver;
-    private LibraryImporterReceiver libraryImporterReceiver;
     private boolean isDragging0 = false;                                                                                // State flag to understand if user is dragging and avoid accidentally adding new shapes to the canvas
     private boolean hasDragged = false;
     private ShapeReceiver shapeReceiver = new ShapeReceiver(null);
-    private double currentZoom = 1.0;
     private Pane gridPane = new Pane();
-    //Usati per il rettangolo della selezione multipla
-    /*private final List<ShapeInterface> currentSelection = new ArrayList<>();*/
     private Alert mirrorOutsideCanvasAlert = new Alert(Alert.AlertType.ERROR);
 
     private FavoriteManagerReceiver favoriteManagerReceiver = new FavoriteManagerReceiver();
@@ -167,10 +161,6 @@ public class MainViewController implements Initializable, FavoriteObserver {
         favoritesShapeComboBox.setDisable(true);
         contextDTO.setDrawingPane(drawingPane);
 
-        drawingPane.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
-            if (evt.getButton() != MouseButton.PRIMARY) return;
-        });
-
         fontSizeComboBox.setValue(56);
         fontSizeComboBox.setOnAction(event -> {
             Integer selected = fontSizeComboBox.getValue();
@@ -190,7 +180,7 @@ public class MainViewController implements Initializable, FavoriteObserver {
         drawingPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
 
             if (!isDragging && event.getButton() == MouseButton.PRIMARY) {
-                DrawOnCanvas(event);
+                drawOnCanvas(event);
             }
             else if (event.getButton() == MouseButton.SECONDARY) {
                 boolean clickedOnShape = drawingPane.getChildren().stream().anyMatch(node -> node.contains(node.sceneToLocal(event.getSceneX(), event.getSceneY())));
@@ -332,7 +322,9 @@ public class MainViewController implements Initializable, FavoriteObserver {
             updateZoomLabel(zoomLevel);
         });
 
-        updateZoomLabel(1.0);
+        // Make the canvas start at the zoom level shown by the slider and its label (100%)
+        scrollPane.setZoom(zoomSlider.getValue());
+        updateZoomLabel(zoomSlider.getValue());
     }
 
 
@@ -538,7 +530,7 @@ public class MainViewController implements Initializable, FavoriteObserver {
                         alert.showAndWait();
                         return;
                     }
-                    // Controlla se il nome è già nel ComboBox
+                    // Check whether the name is already in the ComboBox
                     if (favoritesShapeComboBox.getItems().contains(name)) {
                         Alert alert = new Alert(Alert.AlertType.WARNING);
                         alert.setTitle("Name Already Exists");
@@ -832,14 +824,12 @@ public class MainViewController implements Initializable, FavoriteObserver {
      *
      * @param mouseEvent the {@code MouseEvent} triggered by clicking the canvas
      */
-    public void DrawOnCanvas(MouseEvent mouseEvent) {
+    public void drawOnCanvas(MouseEvent mouseEvent) {
         if (isContextMenuShowing) {
             contextMenu.hide();
             isContextMenuShowing = false;
             return;
         }
-        Label warningLabel = new Label();
-        warningLabel.setTextFill(Color.RED);
         // Ignore the click if we just finished dragging
         if (hasDragged) {
             return;
@@ -854,21 +844,15 @@ public class MainViewController implements Initializable, FavoriteObserver {
                     if (text == null || text.trim().isEmpty()) {
                         textArea.setStyle("-fx-border-color: red; -fx-border-width: 2;");
                         warningLabel.setText("Text field is empty");
-                        warningLabel.setVisible(true);
                         return;
                     }
-                    // Check length
-                    if (text.length() > 25) {
+                    if (text.length() > MAX_TEXT_LENGTH) {
                         textArea.setStyle("-fx-border-color: red; -fx-border-width: 4;");
-                        if (warningLabel != null) {
-                            warningLabel.setText("Text too long");
-                            warningLabel.setVisible(true);
-                            return;
-                        }
-                    } else {
-                        textArea.setStyle("");
-                        warningLabel.setText("");
+                        warningLabel.setText("Text too long (max " + MAX_TEXT_LENGTH + " characters)");
+                        return;
                     }
+                    textArea.setStyle("");
+                    warningLabel.setText("");
                     contextDTO.setText(text);
                     contextDTO.setFontSize(fontSizeComboBox.getValue());
                 }
@@ -877,29 +861,29 @@ public class MainViewController implements Initializable, FavoriteObserver {
                     contextDTO.setPolygonPoint(new Point2D(mouseEvent.getX(), mouseEvent.getY()));
                 }
 
-                // reset della shapeOption per evitare bug
+                // A stale favorite shape must not leak into a different kind of shape
                 if (!"Favorite".equals(shapeComboBox.getValue().getName())) {
-                    contextDTO.setShape(null); // protezione extra
+                    contextDTO.setShape(null);
                 }
 
                 setParameters(mouseEvent, shapeComboBox, drawingPane, contextDTO.getStartPoint(), borderColorPicker, fillColorPicker);
                 addToCanvasReceiver = new AddToCanvasReceiver(contextDTO);
-                CommandInterface addShape = new AddShapeCommand(contextDTO, addToCanvasReceiver);
+                AddShapeCommand addShape = new AddShapeCommand(contextDTO, addToCanvasReceiver);
                 invoker.execute(addShape);
 
-                // Assign event handlers to newly created shape
-                // Assuming AddShapeCommand adds the shape as the last element of the drawingPane
-                if (!drawingPane.getChildren().isEmpty()) {
-                    Node lastAddedShape = drawingPane.getChildren().get(drawingPane.getChildren().size() - 1);
-                    attachEventHandlersToShape(lastAddedShape);
-                    makeDraggable((ShapeInterface) lastAddedShape.getUserData());
+                // Wire the event handlers to the shape that was actually created. Nothing is created while
+                // the user is still collecting the points of a line or polygon (only preview nodes are shown).
+                ShapeInterface addedShape = addShape.getShape();
+                if (addShape.wasExecuted() && addedShape != null) {
+                    attachEventHandlersToShape(addedShape.getNode());
+                    makeDraggable(addedShape);
                 }
 
                 // Clear text area after adding text to canvas
                 if ("Text".equals(shapeComboBox.getValue().getName())) {
                     textArea.clear();
-                    textArea.setStyle(""); // Clear style after draw
-                    warningLabel.setText(""); // Hide warning
+                    textArea.setStyle("");
+                    warningLabel.setText("");
                 }
             }
         }
@@ -929,46 +913,66 @@ public class MainViewController implements Initializable, FavoriteObserver {
     }
 
     /**
-     * Saves the current canvas to a file using {@code CanvasExporter} and executes
-     * a {@code SaveCommand} via the command {@code Invoker}.
+     * Saves the drawing as a text file (reloadable) or as a PNG image, asking the user where.
      *
      * @param event the action event triggered by clicking the "Save" button
      */
     @FXML
     private void saveFile(ActionEvent event) {
-        canvasExporter = new CanvasExporter(contextDTO);
-        SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
-        invoker.execute(saveCommandFile);
+        FileDialogs.chooseDrawingToSave().ifPresent(this::saveDrawingTo);
     }
 
     /**
-     * Loads a canvas file using {@code CanvasImporter} and executes a {@code LoadCommand}.
-     * <p>If shapes already exist on the canvas, prompts the user to optionally save
-     * before loading a new file.</p>
+     * Saves the drawing to the given file, showing an error alert if it cannot be written.
+     *
+     * @return {@code true} if the drawing was saved
+     */
+    private boolean saveDrawingTo(File file) {
+        return runFileCommand(new SaveCommand(new CanvasExporter(contextDTO), file),
+                "Save Error", "Could not save the drawing.");
+    }
+
+    /**
+     * Loads a drawing from a file, replacing the content of the canvas.
+     * <p>If the canvas is not empty the user is first offered to save it. Nothing is removed from the
+     * canvas until a valid file has been read, so cancelling or choosing an invalid file never loses work.</p>
      *
      * @param event the action event triggered by clicking the "Load" button
-     * @throws IOException if the load operation fails
      */
     @FXML
-    private void loadFile(ActionEvent event) throws IOException {
-        canvasImporter = new CanvasImporter(contextDTO);
-        // Check if canvas is empty
-        if (drawingPane.getChildren().stream().anyMatch(node -> node.getUserData() instanceof ShapeInterface)) {
-            loadManager(canvasImporter);
-            // Assign event handlers to all loaded shapes
-            attachEventHandlersToAllShapes();
-        }
-        else {
-            // Clear workspace from older shapes
-            drawingPane.getChildren().clear();
-            LoadCommand load = new LoadCommand(canvasImporter);
-            try {
-                invoker.executePossibleExceptionCommand(load);
-            } catch (IOException e) {
-                showErrorAlertLoadCanvas(e);
+    private void loadFile(ActionEvent event) {
+        if (hasShapesOnCanvas()) {
+            ButtonType save = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+            ButtonType discard = new ButtonType("No", ButtonBar.ButtonData.NO);
+            Optional<ButtonType> answer = confirm("Save Workspace", "Canvas is not empty.",
+                    "Save the current workspace before loading?", save, discard, ButtonType.CANCEL);
+
+            if (!answer.isPresent() || answer.get() == ButtonType.CANCEL) {
+                return;
             }
+            if (answer.get() == save) {
+                Optional<File> target = FileDialogs.chooseDrawingToSave();
+                if (!target.isPresent() || !saveDrawingTo(target.get())) {
+                    return; // the user must not lose the drawing because saving failed or was cancelled
+                }
+            }
+        }
+
+        Optional<File> file = FileDialogs.chooseDrawingToOpen();
+        if (!file.isPresent()) {
+            return;
+        }
+        boolean loaded = runFileCommand(new LoadCommand(new CanvasImporter(contextDTO), file.get()),
+                "Load Canvas Error", "Could not load the canvas. Maybe you tried to load a library file.");
+        if (loaded) {
+            // Commands recorded so far refer to shapes that are no longer on the canvas
+            invoker.clearHistory();
             attachEventHandlersToAllShapes();
         }
+    }
+
+    private boolean hasShapesOnCanvas() {
+        return drawingPane.getChildren().stream().anyMatch(node -> node.getUserData() instanceof ShapeInterface);
     }
 
     /**
@@ -976,56 +980,9 @@ public class MainViewController implements Initializable, FavoriteObserver {
      */
     private void attachEventHandlersToAllShapes() {
         for (Node node : drawingPane.getChildren()) {
-            attachEventHandlersToShape(node);
-            makeDraggable((ShapeInterface) node.getUserData());
-        }
-    }
-
-
-    /**
-     * Manages the canvas loading process when existing shapes are present.
-     * Prompts the user to save current work before overwriting, and then executes
-     * the {@code LoadCommand} to import a new canvas.
-     *
-     * @param canvasImporter the importer used to load the canvas
-     * @throws IOException if an error occurs during loading
-     */
-    private void loadManager(CanvasImporter canvasImporter) throws IOException {
-        // Confirmation alert
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("SaveCommand Workspace");
-        alert.setHeaderText("Canvas is not empty.");
-        alert.setContentText("SaveCommand current workspace?");
-        ButtonType saveButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-        ButtonType dontSaveButton = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
-        alert.getButtonTypes().setAll(saveButton, dontSaveButton);
-        Optional<ButtonType> result = alert.showAndWait();
-
-        if (result.isPresent()) {
-            if (result.get().getText().equals("Yes")) {
-                // Saving file
-                SaveCommand saveCommandFile = new SaveCommand(canvasExporter);
-                invoker.execute(saveCommandFile);
-                // Clear workspace from older shapes
-                drawingPane.getChildren().clear();
-                // After saving execute load
-                LoadCommand load = new LoadCommand(canvasImporter);
-                try {
-                    invoker.executePossibleExceptionCommand(load);
-                } catch (IOException e) {
-                    showErrorAlertLoadCanvas(e);
-                }
-
-            } else if (result.get().getText().equals("No")) {
-                // Clear workspace from older shapes
-                drawingPane.getChildren().clear();
-                // Execute load
-                LoadCommand load = new LoadCommand(canvasImporter);
-                try {
-                    invoker.executePossibleExceptionCommand(load);
-                } catch (IOException e) {
-                    showErrorAlertLoadCanvas(e);
-                }
+            if (node.getUserData() instanceof ShapeInterface) {
+                attachEventHandlersToShape(node);
+                makeDraggable((ShapeInterface) node.getUserData());
             }
         }
     }
@@ -1042,7 +999,6 @@ public class MainViewController implements Initializable, FavoriteObserver {
         attachEventHandlersToAllShapes();
     }
 
-
     /**
      * Toggles the visibility of the grid on the canvas based on the checkbox state.
      *
@@ -1053,97 +1009,63 @@ public class MainViewController implements Initializable, FavoriteObserver {
     }
 
     /**
-     * Saves the current favorite shape library using a {@code SavaLibraryCommand}.
+     * Exports the favorite shapes to a library file.
      *
      * @param actionEvent the action event triggered by the save library button
-     * @throws IOException if an error occurs while saving the library
      */
-    public void saveLibrary(ActionEvent actionEvent) throws IOException {
-        libraryExporterReceiver = new LibraryExporterReceiver(favoriteManagerReceiver);
-        SavaLibraryCommand savaLibraryCommand = new SavaLibraryCommand(libraryExporterReceiver);
-        invoker.execute(savaLibraryCommand);
+    public void saveLibrary(ActionEvent actionEvent) {
+        FileDialogs.chooseLibraryToSave().ifPresent(file ->
+                runFileCommand(new SaveLibraryCommand(new LibraryExporterReceiver(favoriteManagerReceiver), file),
+                        "Save Library Error", "Could not save the library."));
     }
 
     /**
      * Imports a shape library into the favorites list.
-     * <p>If the current favorites list is not empty, prompts the user for confirmation.</p>
+     * <p>If there already are favorites the user is asked to confirm, because they are replaced.
+     * Existing favorites are kept unless a valid library file is actually loaded.</p>
      *
      * @param actionEvent the action event triggered by the import library button
-     * @throws IOException if an error occurs during import
      */
-    public void importLibrary(ActionEvent actionEvent) throws IOException {
-        libraryImporterReceiver = new LibraryImporterReceiver(favoriteManagerReceiver);
-        if (favoritesShapeComboBox.getItems().isEmpty()) {
-            LoadLibraryCommand loadLibraryCommand = new LoadLibraryCommand(libraryImporterReceiver);
-            try {
-                invoker.executePossibleExceptionCommand(loadLibraryCommand);
-            } catch (IOException e) {
-                showErrorAlertLoadLibrary(e);
+    public void importLibrary(ActionEvent actionEvent) {
+        if (!favoritesShapeComboBox.getItems().isEmpty()) {
+            ButtonType overwrite = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+            Optional<ButtonType> answer = confirm("Load Favorite Library", "Library is not empty.",
+                    "Do you want to override the current library?", overwrite, ButtonType.NO);
+            if (!answer.isPresent() || answer.get() != overwrite) {
+                return;
             }
-        }else {
-            showAlertLoadLibrary();
+        }
+
+        FileDialogs.chooseLibraryToOpen().ifPresent(file ->
+                runFileCommand(new LoadLibraryCommand(new LibraryImporterReceiver(favoriteManagerReceiver), file),
+                        "Load Favorite Library", "Could not load the library. Maybe you tried to load a canvas file."));
+    }
+
+    /**
+     * Runs a command that may fail with an I/O error, showing an error alert in that case.
+     *
+     * @return {@code true} if the command completed successfully
+     */
+    private boolean runFileCommand(CommandInterface command, String title, String message) {
+        try {
+            invoker.executePossibleExceptionCommand(command);
+            return true;
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(title);
+            alert.setHeaderText(e.getMessage());
+            alert.setContentText(message);
+            alert.showAndWait();
+            return false;
         }
     }
 
-    /**
-     * Displays an error alert when a library file fails to load.
-     *
-     * @param e the exception containing error details
-     */
-    private void showErrorAlertLoadLibrary(IOException e) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Load Favorite Library");
-        alert.setHeaderText(e.getMessage());
-        alert.setContentText("Could not load library. Maybe you tried to load a canvas file.");
-
-        ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
-        alert.getButtonTypes().setAll(okButton);
-
-        alert.showAndWait();
-
-    }
-
-    /**
-     * Displays an error alert when a canvas file fails to load.
-     *
-     * @param e the exception containing error details
-     */
-    private void showErrorAlertLoadCanvas(IOException e) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Load Canvas Error");
-        alert.setHeaderText(e.getMessage());
-        alert.setContentText("Could not load canvas. Maybe you tried to load a library file.");
-
-        ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
-        alert.getButtonTypes().setAll(okButton);
-
-        alert.showAndWait();
-
-    }
-
-    /**
-     * Prompts the user to confirm if the current favorite library should be overwritten.
-     * If confirmed, clears existing favorites and loads the new library.
-     *
-     * @throws IOException if an error occurs while loading the library
-     */
-    private void showAlertLoadLibrary() throws IOException {
+    private Optional<ButtonType> confirm(String title, String header, String content, ButtonType... buttons) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Load Favorite Library");
-        alert.setHeaderText("Library is not empty.");
-        alert.setContentText("Do you want override the current library?");
-
-        ButtonType overwriteButton = new ButtonType("Sì", ButtonBar.ButtonData.YES);
-        ButtonType cancelButton = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
-        alert.getButtonTypes().setAll(overwriteButton, cancelButton);
-
-        Optional<ButtonType> result = alert.showAndWait();
-
-        if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES) {
-            favoritesShapeComboBox.getItems().clear();
-            LoadLibraryCommand loadLibraryCommand = new LoadLibraryCommand(libraryImporterReceiver);
-            invoker.execute(loadLibraryCommand);
-        }
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.getButtonTypes().setAll(buttons);
+        return alert.showAndWait();
     }
 }
-

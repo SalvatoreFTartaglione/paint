@@ -7,6 +7,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import org.example.model.enums.MirrorDirectionEnum;
 import org.example.model.factory.product.ShapeInterface;
+import org.example.model.utils.SerializationUtils;
 
 import java.util.Optional;
 
@@ -293,7 +294,7 @@ public class TextShape implements ShapeInterface {
      * @param*/
     @Override
     public void setY(double y) {
-        // Se ribaltato verticalmente, compensa perché Y è baseline
+        // If flipped vertically, compensate because Y is the baseline
         if (isFlippedY) {
             textShape.setY(y + baseHeight);
         } else {
@@ -645,7 +646,7 @@ public class TextShape implements ShapeInterface {
      */
     @Override
     public void setRestorePosition(Point2D point) {
-        draw(point.getX(), point.getY()); // Usa draw come prima
+        draw(point.getX(), point.getY()); // Reuse draw
     }
 
 
@@ -743,7 +744,7 @@ public class TextShape implements ShapeInterface {
      */
     @Override
     public String toString() {
-        return "Text;" + textShape.getText() + ";" + textShape.getStroke() + ";" + textShape.getFill() + ";" +
+        return "Text;" + SerializationUtils.escape(textShape.getText()) + ";" + textShape.getStroke() + ";" + textShape.getFill() + ";" +
                 textShape.getX() + ";" + textShape.getY() + ";" + getCustomStrokeWidth() + ";" + getScaleX() + ";"
                 + getScaleY() + ";" + this.getAngle() + '\n';
     }

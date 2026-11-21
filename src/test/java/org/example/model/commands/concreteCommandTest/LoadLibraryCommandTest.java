@@ -13,8 +13,8 @@ public class LoadLibraryCommandTest {
 
     @BeforeEach
     public void setUp() {
-        // Passiamo un oggetto receiver fittizio (non usato nei metodi testabili)
-        command = new LoadLibraryCommand(new LibraryImporterReceiver(null));
+        // The receiver is a placeholder: only methods that do not use it are tested here
+        command = new LoadLibraryCommand(new LibraryImporterReceiver(null), new java.io.File("Library.txt"));
     }
 
     @Test

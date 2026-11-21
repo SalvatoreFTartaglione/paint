@@ -12,8 +12,9 @@ import org.example.model.factory.product.ShapeInterface;
 import javax.imageio.ImageIO;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 /**
  * A utility class to export the contents of a drawing canvas to various file formats.
@@ -40,8 +41,8 @@ public class CanvasExporter {
      * @throws IOException if an I/O error occurs during file writing
      */
     public void exportAsText(File file) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write("My custom canvas");
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
+            writer.write(CanvasImporter.HEADER);
             writer.newLine();
             for (Node node : contextDTO.getDrawingPane().getChildren()) {
                 Object userData = node.getUserData();
@@ -64,10 +65,12 @@ public class CanvasExporter {
         Background originalBackground = contextDTO.getDrawingPane().getBackground();
         Background transparent = new Background(new BackgroundFill(null, null, null));
         contextDTO.getDrawingPane().setBackground(transparent);
-
-        WritableImage image = contextDTO.getDrawingPane().snapshot(new SnapshotParameters(), null);
-        ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-        contextDTO.getDrawingPane().setBackground(originalBackground);
+        try {
+            WritableImage image = contextDTO.getDrawingPane().snapshot(new SnapshotParameters(), null);
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+        } finally {
+            contextDTO.getDrawingPane().setBackground(originalBackground);
+        }
     }
 }
 

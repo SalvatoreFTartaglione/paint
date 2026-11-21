@@ -14,20 +14,20 @@ public class SaveCommandTest {
 
     @BeforeEach
     public void setUp() {
-        // Istanza con canvasExporter nullo (non necessario per i metodi testati)
+        // The exporter is built without a canvas: only methods that do not touch it are tested here
         canvasExporter = new CanvasExporter(null);
-        saveCommand = new SaveCommand(canvasExporter);
+        saveCommand = new SaveCommand(canvasExporter, new java.io.File("drawing.txt"));
     }
 
     @Test
     public void testIsUndoableReturnsFalse() {
-        assertFalse(saveCommand.isUndoable(), "SaveCommand dovrebbe restituire false a isUndoable()");
+        assertFalse(saveCommand.isUndoable(), "SaveCommand should return false for isUndoable()");
     }
 
     @Test
     public void testUndoCommandThrowsException() {
         assertThrows(UnsupportedOperationException.class, () -> saveCommand.undoCommand(),
-                "undoCommand() deve lanciare UnsupportedOperationException");
+                "undoCommand() must throw UnsupportedOperationException");
     }
 
 }

@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class FavoriteShapeRegistry {
     private static FavoriteShapeRegistry instance;      // SINGLETON
-    private final Map<String, ShapeInterface> favorites = new HashMap<>();
+    private final Map<String, ShapeInterface> favorites = new LinkedHashMap<>();
     private final List<FavoriteObserver> observers = new ArrayList<>();
 
     private FavoriteShapeRegistry() {}
@@ -23,7 +23,7 @@ public class FavoriteShapeRegistry {
      *
      * @return the singleton instance of the FavoriteShapeRegistry
      */
-    public static FavoriteShapeRegistry getInstance() {
+    public static synchronized FavoriteShapeRegistry getInstance() {
         if (instance == null) {
             instance = new FavoriteShapeRegistry();
         }
@@ -39,11 +39,11 @@ public class FavoriteShapeRegistry {
      * @param*/
     public void save(String name, ShapeInterface shape) {
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Il nome della shape non può essere vuoto o nullo.");
+            throw new IllegalArgumentException("The shape name must not be null or empty.");
         }
 
         if (shape == null) {
-            throw new IllegalArgumentException("La shape non può essere nulla.");
+            throw new IllegalArgumentException("The shape must not be null.");
         }
         favorites.put(name, shape);
         notifyObservers();
@@ -119,7 +119,7 @@ public class FavoriteShapeRegistry {
      **/
     //Notify()
     private void notifyObservers() {
-        Set<String> names = new HashSet<>(favorites.keySet());
+        Set<String> names = new LinkedHashSet<>(favorites.keySet());
         for (FavoriteObserver o : observers) {
             o.onFavoriteListChanged(names);
         }

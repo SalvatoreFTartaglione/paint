@@ -1,56 +1,52 @@
 package org.example.model.receivers;
 
 import org.example.model.factory.product.ShapeInterface;
+import org.example.model.utils.SerializationUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Map;
 
 /**
- * The LibraryExporterReceiver class is responsible for exporting a collection of favorite shapes
- * to an external file. It interacts with a FavoriteManagerReceiver instance to retrieve the favorite
- * shapes and writes them to a specified file in a structured format.
+ * Receiver that exports the favorite shapes (the "shape creation commands") to a library file
+ * that can be shared and imported again with {@link LibraryImporterReceiver}.
  */
 public class LibraryExporterReceiver {
 
-    private FavoriteManagerReceiver favoriteManagerReceiver;
+    /** First line of every library file. */
+    public static final String HEADER = "My Custom Library";
+
+    private final FavoriteManagerReceiver favoriteManagerReceiver;
 
     /**
-     * Constructs a LibraryExporterReceiver instance with the specified FavoriteManagerReceiver.
-     * The FavoriteManagerReceiver is used to manage and retrieve favorite shapes for exporting.
+     * Creates an exporter that reads the favorites from the given receiver.
      *
-     * @param favoriteManagerReceiver the FavoriteManagerReceiver instance used to manage
-     *                                favorite shapes and retrieve them for the library export process
+     * @param favoriteManagerReceiver the receiver that manages the favorite shapes
      */
     public LibraryExporterReceiver(FavoriteManagerReceiver favoriteManagerReceiver) {
         this.favoriteManagerReceiver = favoriteManagerReceiver;
     }
 
     /**
-     * Exports the library of favorite shapes to the specified file. The method retrieves the favorites
-     * from the FavoriteManagerReceiver and writes them to the file in a structured format. The output
-     * begins with a fixed header line followed by the favorite shapes represented as key-value pairs.
+     * Writes all the favorite shapes to the given file, one {@code name: shape} entry per line.
+     * Names are escaped, so they may contain any character.
      *
-     * @param file the file to which the library will be exported
-     * @throws IOException if an I/O error occurs during writing to the file
+     * @param file the destination file
+     * @throws IOException if an I/O error occurs while writing
      */
     public void exportLibrary(File file) throws IOException {
         Map<String, ShapeInterface> favoritesMap = favoriteManagerReceiver.getMapFavorites();
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            // Prima riga fissa
-            writer.write("My Custom Library");
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
+            writer.write(HEADER);
             writer.newLine();
 
             for (Map.Entry<String, ShapeInterface> entry : favoritesMap.entrySet()) {
-                String key = entry.getKey();
-                ShapeInterface shape = entry.getValue();
-
-                writer.write(key + ": " + shape.toString());
+                writer.write(SerializationUtils.escape(entry.getKey()) + ": " + entry.getValue().toString());
             }
         }
     }
 }
-

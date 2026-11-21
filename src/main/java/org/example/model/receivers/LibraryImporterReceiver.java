@@ -1,149 +1,160 @@
 package org.example.model.receivers;
 
 import javafx.scene.paint.Color;
-import org.example.model.factory.concreteCreator.*;
+import org.example.model.factory.concreteCreator.EllipseCreator;
+import org.example.model.factory.concreteCreator.LineCreator;
+import org.example.model.factory.concreteCreator.PolygonCreator;
+import org.example.model.factory.concreteCreator.RectangleCreator;
+import org.example.model.factory.concreteCreator.TextCreator;
 import org.example.model.factory.creator.AbstractShape;
 import org.example.model.factory.product.ShapeInterface;
+import org.example.model.utils.SerializationUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * The LibraryImporterReceiver class is responsible for importing a library of shapes
- * from a file. It parses the file, converts the data into shape objects, and stores
- * them as favorites using the FavoriteManagerReceiver.
- *
- * This class supports importing various shapes such as rectangles, ellipses,
- * lines, text, and polygons. The file should adhere to a specific format,
- * with the first line being a header: "My Custom Library."
- *
- * If the file is invalid or its format is not recognized, an IOException is thrown.
+ * Receiver that imports a shape library file (see {@link LibraryExporterReceiver}) and replaces the
+ * current favorites with its content.
+ * <p>
+ * The import is all-or-nothing: favorites are replaced only if the whole file is valid.
  */
 public class LibraryImporterReceiver {
 
-    private FavoriteManagerReceiver favoriteManagerReceiver;
+    private final FavoriteManagerReceiver favoriteManagerReceiver;
 
     /**
-     * Constructs a LibraryImporterReceiver instance with a specified FavoriteManagerReceiver.
+     * Creates an importer that stores the imported shapes through the given receiver.
      *
-     * @param favoriteManagerReceiver the FavoriteManagerReceiver used to manage favorite shapes
+     * @param favoriteManagerReceiver the receiver that manages the favorite shapes
      */
     public LibraryImporterReceiver(FavoriteManagerReceiver favoriteManagerReceiver) {
         this.favoriteManagerReceiver = favoriteManagerReceiver;
     }
 
     /**
-     * Imports and processes a custom library file to populate a map of shapes.
-     * This method reads the content of the provided file, validates its format, parses shapes,
-     * and updates the map maintained by the favoriteManagerReceiver.
+     * Reads a library file and replaces the current favorites with its content.
      *
-     * @param file the file to be imported and processed; it should be in the expected "My Custom Library" format.
-     * @throws IOException if the file format is invalid, cannot be read, or any input/output error occurs.
+     * @param file the library file
+     * @throws IOException if the file cannot be read or is not a valid library; in that case the
+     *                     current favorites are left untouched
      */
     public void importLibrary(File file) throws IOException {
+        favoriteManagerReceiver.setMapFavorites(parse(file));
+    }
+
+    /**
+     * Parses a library file without touching the current favorites.
+     *
+     * @param file the library file
+     * @return the shapes in file order, indexed by name
+     * @throws IOException if the file cannot be read or contains an invalid entry
+     */
+    public Map<String, ShapeInterface> parse(File file) throws IOException {
         Map<String, ShapeInterface> importedMap = new LinkedHashMap<>();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             String header = reader.readLine();
-            if (header == null || !header.equals("My Custom Library")) {
+            if (header == null || !header.equals(LibraryExporterReceiver.HEADER)) {
                 throw new IOException("Not valid file or Unknown format.");
             }
 
             String line;
+            int lineNumber = 1;
             String currentKey = null;
+            int currentLine = 0;
             StringBuilder shapeBuffer = null;
 
             while ((line = reader.readLine()) != null) {
+                lineNumber++;
                 if (line.isEmpty()) continue;
 
+                // Continuation of the previous entry
                 if (line.startsWith(" ") || line.trim().startsWith("|")) {
                     if (shapeBuffer != null) {
                         shapeBuffer.append(" ").append(line.trim());
                     }
-                } else {
-                    if (shapeBuffer != null && currentKey != null) {
-                        ShapeInterface shape = parseShape(shapeBuffer.toString().trim());
-                        if (shape != null) {
-                            importedMap.put(currentKey, shape);
-                        }
-                    }
-
-                    String[] parts = line.split(":", 2);
-                    if (parts.length != 2) continue;
-
-                    currentKey = parts[0].trim();
-                    shapeBuffer = new StringBuilder(parts[1].trim());
+                    continue;
                 }
+
+                // A new entry begins: flush the previous one
+                flush(importedMap, currentKey, shapeBuffer, currentLine);
+
+                int separator = SerializationUtils.indexOfUnescaped(line, ':');
+                if (separator < 0) {
+                    throw new IOException("Line " + lineNumber + ": expected \"name: shape\"");
+                }
+                currentKey = SerializationUtils.unescape(line.substring(0, separator)).trim();
+                currentLine = lineNumber;
+                shapeBuffer = new StringBuilder(line.substring(separator + 1).trim());
             }
 
-            // Gestione ultimo elemento
-            if (shapeBuffer != null && currentKey != null) {
-                ShapeInterface shape = parseShape(shapeBuffer.toString().trim());
-                if (shape != null) {
-                    importedMap.put(currentKey, shape);
-                }
-            }
+            flush(importedMap, currentKey, shapeBuffer, currentLine);
         }
 
-        favoriteManagerReceiver.setMapFavorites(importedMap);
+        return importedMap;
     }
 
-    /**
-     * Parses the provided string value into a specific shape based on its type.
-     * The type of the shape is determined by the first token in the input string.
-     * Depending on the identified type, it delegates processing to the appropriate
-     * parsing method.
-     *
-     * @param value the string representation of the shape, where the first token
-     *              specifies the shape type and subsequent tokens provide its attributes.
-     * @return a ShapeInterface instance corresponding to the parsed type and attributes,
-     *         or null if the type is unknown or unsupported.
-     */
-    private ShapeInterface parseShape(String value) {
+    private void flush(Map<String, ShapeInterface> target, String key, StringBuilder buffer, int line) throws IOException {
+        if (key == null || buffer == null) {
+            return;
+        }
+        try {
+            ShapeInterface shape = parseShape(buffer.toString().trim());
+            target.put(key, shape);
+        } catch (IOException e) {
+            throw new IOException("Line " + line + ": " + e.getMessage(), e);
+        } catch (RuntimeException e) {
+            throw new IOException("Line " + line + ": malformed shape definition (" + e.getMessage() + ")", e);
+        }
+    }
 
-        String[] tokens = value.split(";");
-
-        String type = tokens[0];
+    private ShapeInterface parseShape(String value) throws IOException {
+        List<String> tokens = SerializationUtils.splitUnescaped(value, ';');
+        String type = tokens.get(0);
 
         switch (type) {
             case "Rectangle":
+                requireFields(type, tokens, 9);
                 return parseRectangle(tokens);
             case "Ellipse":
+                requireFields(type, tokens, 9);
                 return parseEllipse(tokens);
             case "Line":
+                requireFields(type, tokens, 8);
                 return parseLine(tokens);
             case "Text":
+                requireFields(type, tokens, 10);
                 return parseText(tokens);
             case "Polygon":
+                requireFields(type, tokens, 8);
                 return parsePolygon(tokens);
             default:
-                return null;
+                throw new IOException("unknown shape type \"" + type + "\"");
         }
     }
 
-    /**
-     * Parses a rectangle's attributes from the provided array of tokens and creates a rectangle shape.
-     * The tokens array must follow the expected structure, where each element corresponds to specific
-     * attributes such as stroke color, fill color, stroke width, dimensions, position, and angle.
-     *
-     * @param tokens an array of strings representing the attributes of the rectangle.
-     *               The expected order is:
-     *               [type, stroke color, fill color, stroke width, width, height, x-position, y-position, angle].
-     * @return a ShapeInterface instance representing the parsed rectangle with the specified attributes.
-     */
-    private ShapeInterface parseRectangle(String[] tokens) {
-        Color stroke = Color.web(tokens[1]);
-        Color fill = Color.web(tokens[2]);
-        int strokeWidth = (int) Double.parseDouble(tokens[3]);
-        double width = Double.parseDouble(tokens[4]);
-        double height = Double.parseDouble(tokens[5]);
-        double x = Double.parseDouble(tokens[6]);
-        double y = Double.parseDouble(tokens[7]);
-        double angle = Double.parseDouble(tokens[8]);
+    private static void requireFields(String type, List<String> tokens, int expected) throws IOException {
+        if (tokens.size() != expected) {
+            throw new IOException(type + " expects " + expected + " fields but found " + tokens.size());
+        }
+    }
+
+    private ShapeInterface parseRectangle(List<String> t) {
+        Color stroke = Color.web(t.get(1));
+        Color fill = Color.web(t.get(2));
+        int strokeWidth = (int) Double.parseDouble(t.get(3));
+        double width = Double.parseDouble(t.get(4));
+        double height = Double.parseDouble(t.get(5));
+        double x = Double.parseDouble(t.get(6));
+        double y = Double.parseDouble(t.get(7));
+        double angle = Double.parseDouble(t.get(8));
 
         AbstractShape rect = new RectangleCreator();
         rect.creationOfShape(stroke, fill, strokeWidth, width, height, null, 0.0, 0.0, angle);
@@ -151,26 +162,15 @@ public class LibraryImporterReceiver {
         return rect.getShape();
     }
 
-    /**
-     * Parses an ellipse's attributes from the provided array of tokens and creates an ellipse shape.
-     * The tokens array must follow the expected structure, where each element corresponds to specific
-     * attributes such as stroke color, fill color, stroke width, radii, position, and angle.
-     *
-     * @param tokens an array of strings representing the attributes of the ellipse.
-     *               The expected order is:
-     *               [type, stroke color, fill color, stroke width, radius X, radius Y,
-     *               x-position, y-position, angle].
-     * @return a ShapeInterface instance representing the parsed ellipse with the specified attributes.
-     */
-    private ShapeInterface parseEllipse(String[] tokens) {
-        Color stroke = Color.web(tokens[1]);
-        Color fill = Color.web(tokens[2]);
-        int strokeWidth = (int) Double.parseDouble(tokens[3]);
-        double radiusX = Double.parseDouble(tokens[4]);
-        double radiusY = Double.parseDouble(tokens[5]);
-        double centerX = Double.parseDouble(tokens[6]);
-        double centerY = Double.parseDouble(tokens[7]);
-        double angle = Double.parseDouble(tokens[8]);
+    private ShapeInterface parseEllipse(List<String> t) {
+        Color stroke = Color.web(t.get(1));
+        Color fill = Color.web(t.get(2));
+        int strokeWidth = (int) Double.parseDouble(t.get(3));
+        double radiusX = Double.parseDouble(t.get(4));
+        double radiusY = Double.parseDouble(t.get(5));
+        double centerX = Double.parseDouble(t.get(6));
+        double centerY = Double.parseDouble(t.get(7));
+        double angle = Double.parseDouble(t.get(8));
 
         AbstractShape ellipse = new EllipseCreator();
         ellipse.creationOfShape(stroke, fill, strokeWidth, radiusX, radiusY, null, 0.0, 0.0, angle);
@@ -178,24 +178,14 @@ public class LibraryImporterReceiver {
         return ellipse.getShape();
     }
 
-    /**
-     * Parses a line's attributes from the provided array of tokens and creates a line shape.
-     * The tokens array should follow the expected structure, where each element corresponds to
-     * specific attributes such as stroke color, start and end coordinates, stroke width, and angle.
-     *
-     * @param tokens an array of strings representing the attributes of the line.
-     *               The expected order is:
-     *               [type, stroke color, end X, end Y, start X, start Y, stroke width, angle].
-     * @return a ShapeInterface instance representing the parsed line with the specified attributes.
-     */
-    private ShapeInterface parseLine(String[] tokens) {
-        Color stroke = Color.web(tokens[1]);
-        double endX = Double.parseDouble(tokens[2]);
-        double endY = Double.parseDouble(tokens[3]);
-        double startX = Double.parseDouble(tokens[4]);
-        double startY = Double.parseDouble(tokens[5]);
-        int strokeWidth = (int) Double.parseDouble(tokens[6]);
-        double angle = Double.parseDouble(tokens[7]);
+    private ShapeInterface parseLine(List<String> t) {
+        Color stroke = Color.web(t.get(1));
+        double endX = Double.parseDouble(t.get(2));
+        double endY = Double.parseDouble(t.get(3));
+        double startX = Double.parseDouble(t.get(4));
+        double startY = Double.parseDouble(t.get(5));
+        int strokeWidth = (int) Double.parseDouble(t.get(6));
+        double angle = Double.parseDouble(t.get(7));
 
         AbstractShape line = new LineCreator();
         line.creationOfShape(stroke, null, strokeWidth, 0, 0, null, 0.0, 0.0, angle);
@@ -204,63 +194,42 @@ public class LibraryImporterReceiver {
         return shape;
     }
 
-    /**
-     * Parses a text shape's attributes from the provided array of tokens and creates a text shape.
-     * The tokens array must follow the expected structure, where each element corresponds to specific
-     * attributes such as text content, stroke color, fill color, position, stroke width, scale factors, and angle.
-     *
-     * @param tokens an array of strings representing the attributes of the text shape.
-     *               The expected order is:
-     *               [type, content, stroke color, fill color, x-position, y-position,
-     *               stroke width, scale X, scale Y, angle].
-     * @return a ShapeInterface instance representing the parsed text shape with*/
-    private ShapeInterface parseText(String[] tokens) {
-        String content = tokens[1];
-        Color stroke = Color.web(tokens[2]);
-        Color fill = Color.web(tokens[3]);
-        double x = Double.parseDouble(tokens[4]);
-        double y = Double.parseDouble(tokens[5]);
-        int strokeWidth = (int) Double.parseDouble(tokens[6]);
-        double scaleX = Double.parseDouble(tokens[7]);
-        double scaleY = Double.parseDouble(tokens[8]);
-        double angle = Double.parseDouble(tokens[9]);
+    private ShapeInterface parseText(List<String> t) {
+        String content = SerializationUtils.unescape(t.get(1));
+        Color stroke = Color.web(t.get(2));
+        Color fill = Color.web(t.get(3));
+        double x = Double.parseDouble(t.get(4));
+        double y = Double.parseDouble(t.get(5));
+        int strokeWidth = (int) Double.parseDouble(t.get(6));
+        double scaleX = Double.parseDouble(t.get(7));
+        double scaleY = Double.parseDouble(t.get(8));
+        double angle = Double.parseDouble(t.get(9));
 
         AbstractShape text = new TextCreator();
         text.creationOfShape(stroke, fill, strokeWidth, x, y, content, scaleX, scaleY, angle);
         return text.getShape();
     }
 
-    /**
-     * Parses a polygon's attributes from the provided array of tokens and creates a polygon shape.
-     * The tokens array must follow the expected structure, where each element corresponds to specific
-     * attributes such as stroke color, fill color, stroke width, scaling factors, points, and angle.
-     *
-     * @param tokens an array of strings representing the attributes of the polygon.
-     *               The expected order is:
-     *               [type, stroke color, fill color, stroke width, scale X, scale Y, points, angle].
-     *               - `points` should be a comma-separated list enclosed in square brackets,
-     *                 representing the coordinates of the polygon's vertices.
-     * @return a ShapeInterface instance representing the parsed polygon with the specified attributes,
-     *         or null if the input is invalid or improperly formatted.
-     */
-    private ShapeInterface parsePolygon(String[] tokens) {
-        Color stroke = Color.web(tokens[1]);
-        Color fill = Color.web(tokens[2]);
-        int strokeWidth = (int) Double.parseDouble(tokens[3]);
-        double scaleX = Double.parseDouble(tokens[4]);
-        double scaleY = Double.parseDouble(tokens[5]);
+    private ShapeInterface parsePolygon(List<String> t) throws IOException {
+        Color stroke = Color.web(t.get(1));
+        Color fill = Color.web(t.get(2));
+        int strokeWidth = (int) Double.parseDouble(t.get(3));
+        double scaleX = Double.parseDouble(t.get(4));
+        double scaleY = Double.parseDouble(t.get(5));
 
-        String pointsStr = tokens[6].trim();
-        if (!pointsStr.startsWith("[") || !pointsStr.endsWith("]")) return null;
-
-        pointsStr = pointsStr.substring(1, pointsStr.length() - 1);
-        String[] pointTokens = pointsStr.split(",");
+        String pointsStr = t.get(6).trim();
+        if (!pointsStr.startsWith("[") || !pointsStr.endsWith("]")) {
+            throw new IOException("Polygon points must be enclosed in square brackets");
+        }
+        String[] pointTokens = pointsStr.substring(1, pointsStr.length() - 1).split(",");
+        if (pointTokens.length < 6 || pointTokens.length % 2 != 0) {
+            throw new IOException("Polygon needs an even number of coordinates (at least 3 points)");
+        }
         Double[] points = new Double[pointTokens.length];
         for (int i = 0; i < pointTokens.length; i++) {
             points[i] = Double.parseDouble(pointTokens[i].trim());
         }
-
-        double angle = Double.parseDouble(tokens[7]);
+        double angle = Double.parseDouble(t.get(7));
 
         AbstractShape polygon = new PolygonCreator();
         polygon.creationOfShape(stroke, fill, strokeWidth, 0, 0, null, scaleX, scaleY, angle);
