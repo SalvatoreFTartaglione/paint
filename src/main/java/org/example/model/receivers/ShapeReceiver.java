@@ -1,10 +1,12 @@
 package org.example.model.receivers;
 
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import org.example.model.DTO.DrawingContextDTO;
 import org.example.model.factory.concreteProduct.LineShape;
 import org.example.model.factory.product.ShapeInterface;
 
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -20,6 +22,7 @@ public class ShapeReceiver {
     // Stack for deleted shapes (Undo task)
     private final Stack<ShapeInterface> deletedShapesStack = new Stack<>();
     private final Stack<Point2D> deletedShapePositions = new Stack<>();
+    private final Stack<Integer> deletedShapeIndices = new Stack<>();
 
     /**
      * Constructs a new ShapeReceiver object with the specified DrawingContextDTO.
@@ -86,7 +89,7 @@ public class ShapeReceiver {
      */
     public void paste(ShapeInterface shape, DrawingContextDTO drawingContextDTO){
         if (shape != null) {
-            // Calcola coordinate locali dal click destro
+            // Compute the local coordinates of the right click
             Point2D localCoords = drawingContextDTO.getDrawingPane().sceneToLocal(
                     drawingContextDTO.getSceneX(), drawingContextDTO.getSceneY());
             double x = localCoords.getX();
@@ -95,19 +98,19 @@ public class ShapeReceiver {
             if (shape instanceof LineShape) {
                 Double[] oldPoints = shape.getPoints();
                 if (oldPoints == null || oldPoints.length != 4) {
-                    System.err.println("Errore: punti non validi nella linea copiata");
+                    // A copied line always has exactly two points; anything else cannot be pasted
                     return;
                 }
 
-                // Centro geometrico della linea originale
+                // Geometric center of the original line
                 double centerX = (oldPoints[0] + oldPoints[2]) / 2.0;
                 double centerY = (oldPoints[1] + oldPoints[3]) / 2.0;
 
-                // Delta tra il centro della linea e il punto cliccato
+                // Delta between the center of the line and the clicked point
                 double deltaX = x - centerX;
                 double deltaY = y - centerY;
 
-                // Nuovi punti traslati
+                // Translated points
                 Double[] newPoints = new Double[] {
                         oldPoints[0] + deltaX, oldPoints[1] + deltaY,
                         oldPoints[2] + deltaX, oldPoints[3] + deltaY
@@ -116,12 +119,12 @@ public class ShapeReceiver {
                 shape.draw(newPoints);
 
             } else {
-                // Per forme non-lineari (centro ben definito)
+                // For non-linear shapes (well-defined center)
                 shape.draw(x, y);
             }
 
 
-            // Inserisci la forma nel DTO, come fanno i tuoi colleghi
+            // Store the shape properties in the DTO
             drawingContextDTO.setStartPoint(null); // reset per sicurezza
             drawingContextDTO.setDrawingPane(drawingContextDTO.getDrawingPane());
             drawingContextDTO.setBorderColor(shape.getStrokeColor());
@@ -172,6 +175,8 @@ public class ShapeReceiver {
     public void delete(DrawingContextDTO drawingDTO, ShapeInterface shape) {
         deletedShapesStack.push(shape);
         deletedShapePositions.push(shape.getRestorePosition());
+        // Remember the z-order so that undo puts the shape back where it was, not on top of everything
+        deletedShapeIndices.push(drawingDTO.getDrawingPane().getChildren().indexOf(shape.getNode()));
 
         drawingDTO.getDrawingPane().getChildren().remove(shape.getNode());
     }
@@ -189,10 +194,16 @@ public class ShapeReceiver {
         if (!deletedShapesStack.isEmpty()) {
             ShapeInterface restoredShape = deletedShapesStack.pop();
             Point2D position = deletedShapePositions.pop();
+            int index = deletedShapeIndices.pop();
 
             if (restoredShape != null && position != null) {
                 restoredShape.setRestorePosition(position);
-                drawingDTO.getDrawingPane().getChildren().add(restoredShape.getNode());
+                List<Node> children = drawingDTO.getDrawingPane().getChildren();
+                if (index >= 0 && index <= children.size()) {
+                    children.add(index, restoredShape.getNode());
+                } else {
+                    children.add(restoredShape.getNode());
+                }
             }
         }
     }
