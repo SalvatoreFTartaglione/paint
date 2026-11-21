@@ -31,16 +31,10 @@ public class ChangesOnShapeReceiverTest {
         TextShape text = new TextShape("Text", Color.BLACK, Color.GREEN, 80, 30, 14, 1.0, 1.0, 0.0);
         text.draw(150, 150);
 
-        // Feature Fill color not supported --> tested manually
-//        LineShape line = new LineShape(Color.BLACK, 2.0, 0.0);
-//        line.draw(new Double[]{200.0, 200.0, 300.0, 250.0});
+        // Lines have no fill color: that feature is tested manually
 
         PolygonShape polygon = new PolygonShape(Color.BLACK, Color.ORANGE, 2.0, 1.0, 1.0, 0.0);
         polygon.draw(new Double[]{250.0, 250.0, 300.0, 300.0, 350.0, 250.0});
-
-        /*CompositeShape composite = new CompositeShape(List.of(
-                rect.cloneShape(), ellipse.cloneShape()
-        ));*/
 
         return Stream.of(rect, ellipse, text, polygon);
     }

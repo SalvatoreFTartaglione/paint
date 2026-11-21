@@ -40,7 +40,7 @@ public class InvokerTest {
         dto.setFillColor(Color.RED);
         dto.setSceneX(100);
         dto.setSceneY(100);
-        dto.setShapeOption(new ShapeOption("Rectangle", "")); // Assicura che Rectangle sia supportato
+        dto.setShapeOption(new ShapeOption("Rectangle", "")); // Make sure Rectangle is supported
 
         invoker = new Invoker();
         addReceiver = new AddToCanvasReceiver(dto);

@@ -32,10 +32,6 @@ public class PositionManagerReceiverTest {
         PolygonShape polygon = new PolygonShape(Color.BLACK, Color.PURPLE, 2.0, 1.0, 1.0, 0.0);
         polygon.draw(new Double[]{250.0, 250.0, 300.0, 300.0, 350.0, 250.0});
 
-        // Not implemented
-//        CompositeShape composite = new CompositeShape(List.of(
-//                rectangle.cloneShape(), ellipse.cloneShape()
-//        ));
 
         return Stream.of(rectangle, ellipse, text, line, polygon);
     }
@@ -91,7 +87,7 @@ public class PositionManagerReceiverTest {
             assertTrue(simulated.get().getY() < 0 || simulated.get().getY() >= 0); // Just to assert simulation returns
         }
 
-        // Altri mirror (eseguibili senza check)
+        // Other mirrors (executable without any check)
         receiver.mirrorDown();
         receiver.mirrorLeft();
         receiver.mirrorRight();

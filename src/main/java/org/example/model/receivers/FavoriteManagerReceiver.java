@@ -11,7 +11,7 @@ import java.util.Map;
  * remove and manage favorite shapes*/
 public class FavoriteManagerReceiver {
     private final FavoriteShapeRegistry registry = FavoriteShapeRegistry.getInstance();
-    //registry è un'istanza singleton di FavoriteShapeRegistry, che funge da contenitore centrale per tutte le shape preferite salvate nella sessione.
+    // The registry is the singleton FavoriteShapeRegistry: the central container of all the favorite shapes saved in the session.
 
     /**
      * Saves a shape as a favorite by cloning it and storing it in the registry with the specified name.

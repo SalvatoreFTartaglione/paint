@@ -34,15 +34,6 @@ public class ChangeFillColorCommandTest {
                 new PolygonShape(Color.BLACK, Color.BLUE, 2.0, 1.0, 1.0, 0.0) {{
                     draw(new Double[]{100.0, 100.0, 150.0, 150.0, 200.0, 100.0});
                 }}
-                // not implemented
-//                new CompositeShape(List.of(
-//                        new RectangleShape(Color.BLACK, Color.BLUE, 100, 50, 2, 0.0) {{
-//                            draw(100, 100);
-//                        }},
-//                        new EllipseShape(Color.BLACK, Color.BLUE, 2, 40, 30, 0.0) {{
-//                            draw(150, 150);
-//                        }}
-//                ))
         );
     }
 

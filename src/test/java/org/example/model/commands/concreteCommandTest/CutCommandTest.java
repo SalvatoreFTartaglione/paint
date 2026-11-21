@@ -45,15 +45,6 @@ public class CutCommandTest {
         PolygonShape polygon = new PolygonShape(Color.BLACK, Color.LIGHTBLUE, 2.0, 1.0, 1.0, 0.0);
         polygon.draw(new Double[]{100.0, 100.0, 150.0, 150.0, 200.0, 100.0});
 
-        // not implemented
-//        CompositeShape composite = new CompositeShape(List.of(
-//                new RectangleShape(Color.BLACK, Color.BISQUE, 60, 30, 2, 0.0) {{
-//                    draw(100, 100);
-//                }},
-//                new EllipseShape(Color.BLACK, Color.BISQUE, 2.0, 30, 30, 0.0) {{
-//                    draw(160, 120);
-//                }}
-//        ));
 
         return Stream.of(rectangle, ellipse, text, line, polygon);
     }

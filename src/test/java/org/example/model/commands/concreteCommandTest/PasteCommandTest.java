@@ -47,15 +47,6 @@ public class PasteCommandTest {
         PolygonShape polygon = new PolygonShape(Color.BLACK, Color.CORNFLOWERBLUE, 2, 1.0, 1.0, 0.0);
         polygon.draw(new Double[]{50.0, 50.0, 100.0, 80.0, 80.0, 120.0});
 
-        // not implemented
-//        CompositeShape composite = new CompositeShape(List.of(
-//                new RectangleShape(Color.BLACK, Color.CORNFLOWERBLUE, 60, 30, 2, 0.0) {{
-//                    draw(50, 50);
-//                }},
-//                new EllipseShape(Color.BLACK, Color.CORNFLOWERBLUE, 2.0, 30, 30, 0.0) {{
-//                    draw(90, 70);
-//                }}
-//        ));
 
         return Stream.of(rect, ellipse, text, line, polygon);
     }

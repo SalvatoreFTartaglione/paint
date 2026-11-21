@@ -5,8 +5,6 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import org.example.model.enums.MirrorDirectionEnum;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -75,18 +73,6 @@ public interface ShapeInterface {
      * @return the current stroke width
      */
     double getCustomStrokeWidth();
-
-    // ========= Children (Composite) =========
-
-    /**
-     * Returns a list of child shapes for composite shapes.
-     * For simple shapes, this returns an empty list.
-     *
-     * @return list of child shapes
-     */
-    default List<ShapeInterface> getChildren() {
-        return Collections.emptyList();
-    }
 
     // ========= Geometry: Resize & Stretch =========
 

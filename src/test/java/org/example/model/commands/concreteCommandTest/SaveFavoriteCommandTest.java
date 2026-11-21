@@ -40,15 +40,6 @@ public class SaveFavoriteCommandTest {
         PolygonShape polygon = new PolygonShape(Color.BLACK, Color.BISQUE, 2.0, 1.0, 1.0, 0.0);
         polygon.draw(new Double[]{10.0, 10.0, 20.0, 30.0, 40.0, 10.0});
 
-        // not implemented
-//        CompositeShape composite = new CompositeShape(List.of(
-//                new RectangleShape(Color.BLACK, Color.BISQUE, 100, 50, 2.0, 0.0) {{
-//                    draw(100, 100);
-//                }},
-//                new EllipseShape(Color.BLACK, Color.BISQUE, 2.0, 40, 30, 0.0) {{
-//                    draw(150, 150);
-//                }}
-//        ));
 
         return Stream.of(rect, ellipse, line, text, polygon);
     }

@@ -20,7 +20,7 @@ public class ChangeStrokeColorCommandTest {
 
     @BeforeEach
     public void setup() {
-        receiver = new ChangesOnShapeReceiver(); // può essere fittizio/stateless
+        receiver = new ChangesOnShapeReceiver(); // can be a stateless placeholder
     }
 
     static Stream<ShapeInterface> shapeProvider() {
@@ -34,15 +34,6 @@ public class ChangeStrokeColorCommandTest {
                 new PolygonShape(Color.BLACK, Color.BLUE, 2.0, 1.0, 1.0, 0.0) {{
                     draw(new Double[]{100.0, 100.0, 150.0, 150.0, 200.0, 100.0});
                 }}
-                // not implemented
-//                new CompositeShape(List.of(
-//                        new RectangleShape(Color.BLACK, Color.BISQUE, 80, 40, 2, 0.0) {{
-//                            draw(100, 100);
-//                        }},
-//                        new EllipseShape(Color.BLACK, Color.BISQUE, 2.0, 30, 30, 0.0) {{
-//                            draw(160, 120);
-//                        }}
-//                ))
         );
     }
 

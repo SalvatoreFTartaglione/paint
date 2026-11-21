@@ -90,7 +90,6 @@ public class LineShape implements ShapeInterface {
      */
     @Override
     public Double[] getPoints(){
-        //return this.points;
         return new Double[] {
                 lineShape.getStartX(),
                 lineShape.getStartY(),
@@ -122,13 +121,13 @@ public class LineShape implements ShapeInterface {
         LineShape cloned = new LineShape(this.getStrokeColor(), this.getCustomStrokeWidth(), this.getAngle());
 
         if (this.points != null && this.points.length == 4) {
-            // Copia profonda dell'array dei punti
+            // Deep copy of the points array
             Double[] copiedPoints = new Double[] {
                     this.points[0], this.points[1],
                     this.points[2], this.points[3]
             };
 
-            cloned.draw(copiedPoints);  // inizializza il nodo grafico e setta anche cloned.points
+            cloned.draw(copiedPoints);  // initializes the graphic node and also sets cloned.points
         }
 
         return cloned;
@@ -235,31 +234,31 @@ public class LineShape implements ShapeInterface {
      */
     @Override
     public void setSize(double width, double height) {
-        // Calcola il vettore corrente (dx, dy)
+        // Compute the current vector (dx, dy)
         double currentDx = getWidth();
         double currentDy = getHeight();
 
-        // Calcola la lunghezza attuale della linea
+        // Compute the current length of the line
         double currentLength = Math.hypot(currentDx, currentDy);
 
-        // Calcola la lunghezza desiderata dal nuovo (width, height)
+        // Compute the desired length from the new (width, height)
         double desiredLength = Math.hypot(width, height);
 
-        // Se la linea è "degenerata" (lunghezza zero) impostiamo un orientamento predefinito, per esempio orizzontale
+        // If the line is degenerate (zero length) fall back to a default orientation, e.g. horizontal
         if (currentLength == 0) {
             lineShape.setEndX(lineShape.getStartX() + desiredLength);
             lineShape.setEndY(lineShape.getStartY());
             return;
         }
 
-        // Calcola il fattore di scala in modo da mantenere l'orientamento
+        // Compute the scale factor so that the orientation is preserved
         double scale = desiredLength / currentLength;
 
-        // Nuove componenti della differenza mantenendo l'orientamento esistente
+        // New components of the difference, keeping the existing orientation
         double newDx = currentDx * scale;
         double newDy = currentDy * scale;
 
-        // Aggiorna il punto finale della linea mantenendo invariato il punto di partenza
+        // Update the end point of the line, leaving the start point unchanged
         lineShape.setEndX(lineShape.getStartX() + newDx);
         lineShape.setEndY(lineShape.getStartY() + newDy);
     }
@@ -276,7 +275,7 @@ public class LineShape implements ShapeInterface {
         double currentLength = Math.hypot(getWidth(), getHeight());
 
         if (currentLength <= 0) {
-            // Se la linea è degenerata, crea una linea orizzontale
+            // If the line is degenerate, create a horizontal line
             lineShape.setEndX(lineShape.getStartX() + newSize);
             lineShape.setEndY(lineShape.getStartY());
         } else {
@@ -289,7 +288,7 @@ public class LineShape implements ShapeInterface {
             lineShape.setEndY(lineShape.getStartY() + newDy);
         }
 
-        // Aggiorna l'array dei punti se esiste
+        // Update the points array if it exists
         if (this.points != null && this.points.length >= 4) {
             this.points[2] = lineShape.getEndX();
             this.points[3] = lineShape.getEndY();
@@ -324,10 +323,10 @@ public class LineShape implements ShapeInterface {
 
     @Override
     public void stretch(double width, double height) {
-        // Imposta lo spessore della linea
+        // Set the line width
         lineShape.setStrokeWidth(height);
 
-        // Calcola il centro attuale della linea
+        // Compute the current center of the line
         double centerX = (lineShape.getStartX() + lineShape.getEndX()) / 2.0;
         double centerY = (lineShape.getStartY() + lineShape.getEndY()) / 2.0;
 
@@ -337,18 +336,18 @@ public class LineShape implements ShapeInterface {
         double currentLength = Math.hypot(deltaX, deltaY);
 
         if (currentLength <= 0) {
-            // Se la linea è degenerata, crea una linea orizzontale con la nuova lunghezza
-            // centrata nella posizione attuale
+            // If the line is degenerate, create a horizontal line con la nuova lunghezza
+            // centered on the current position
             lineShape.setStartX(centerX - width / 2.0);
             lineShape.setStartY(centerY);
             lineShape.setEndX(centerX + width / 2.0);
             lineShape.setEndY(centerY);
         } else {
-            // Calcola il vettore unitario della direzione attuale
+            // Compute the unit vector of the current direction
             double unitX = deltaX / currentLength;
             double unitY = deltaY / currentLength;
 
-            // Calcola i nuovi punti mantenendo il centro fisso
+            // Compute the new points keeping the center fixed
             double halfWidth = width / 2.0;
             lineShape.setStartX(centerX - unitX * halfWidth);
             lineShape.setStartY(centerY - unitY * halfWidth);
@@ -356,7 +355,7 @@ public class LineShape implements ShapeInterface {
             lineShape.setEndY(centerY + unitY * halfWidth);
         }
 
-        // Aggiorna l'array dei punti se esiste
+        // Update the points array if it exists
         if (this.points != null && this.points.length >= 4) {
             this.points[0] = lineShape.getStartX();
             this.points[1] = lineShape.getStartY();
@@ -374,7 +373,7 @@ public class LineShape implements ShapeInterface {
      */
     @Override
     public void resetStretch(double width, double height) {
-        // Ripristina sia la lunghezza che lo spessore
+        // Restore both the length and the width
         stretch(width, height);
     }
 
@@ -438,9 +437,9 @@ public class LineShape implements ShapeInterface {
      * based on its width and height using the distance*/
     @Override
     public double getEffectiveSize() {
-        // Per le linee, la dimensione effettiva è la lunghezza
+        // For lines the effective size is the length
         double length = Math.hypot(getWidth(), getHeight());
-        return length > 0 ? length : 50; // Default se la linea è degenerata
+        return length > 0 ? length : 50; // Default if the line is degenerate
     }
 
     /**
@@ -509,7 +508,7 @@ public class LineShape implements ShapeInterface {
      * @return true if the line can be moved*/
     @Override
     public boolean canMoveBy(double deltaX, double deltaY, double paneWidth, double paneHeight, double zoom, double margin) {
-        // Ottieni i punti attuali
+        // Get the current points
         double x1 = lineShape.getStartX() + deltaX;
         double y1 = lineShape.getStartY() + deltaY;
         double x2 = lineShape.getEndX() + deltaX;
@@ -592,16 +591,16 @@ public class LineShape implements ShapeInterface {
      */
     @Override
     public void mirrorLeft() {
-        // Calcola centro
+        // Compute the center
         double centerX = (lineShape.getStartX() + lineShape.getEndX()) / 2;
 
-        // Calcola distanza orizzontale metà (distanza dal centro all'estremità)
+        // Compute the half horizontal distance (from the center to the end)
         double halfWidth = Math.abs(lineShape.getEndX() - lineShape.getStartX()) / 2;
 
-        // Asse di riflessione: centro - halfWidth
+        // Reflection axis: center - halfWidth
         double axisX = centerX - halfWidth;
 
-        // Riflette entrambi i punti rispetto all'asse verticale
+        // Reflect both points across the vertical axis
         double newStartX = 2 * axisX - lineShape.getStartX();
         double newEndX = 2 * axisX - lineShape.getEndX();
 
@@ -750,7 +749,7 @@ public class LineShape implements ShapeInterface {
             }
             case HORIZONTAL:
             case VERTICAL:
-                // Nessun cambiamento della posizione nel canvas
+                // No change of position on the canvas
                 return Optional.of(new Point2D(centerX, centerY));
         }
 

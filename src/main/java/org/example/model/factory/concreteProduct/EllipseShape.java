@@ -515,7 +515,7 @@ public class EllipseShape implements ShapeInterface {
      */
     @Override
     public double getEffectiveSize() {
-        // Per i cerchi/ellissi, usa il diametro maggiore
+        // For circles/ellipses use the larger diameter
         return Math.max(getWidth(), getHeight());
     }
 

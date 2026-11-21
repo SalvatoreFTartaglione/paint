@@ -9,7 +9,7 @@ import org.example.model.receivers.PositionManagerReceiver;
  **/
 public class ResizeCommand implements CommandInterface {
 
-    private PositionManagerReceiver poistionManagerReceiver;
+    private PositionManagerReceiver positionManagerReceiver;
     private final double newSize;
     private final double oldWidth;
     private final double oldHeight;
@@ -20,15 +20,15 @@ public class ResizeCommand implements CommandInterface {
      * This command utilizes a PositionManagerReceiver to perform the resizing actions and
      * tracks the necessary data for undoing the resize operation.
      *
-     * @param poistionManagerReceiver the receiver responsible for managing the position
+     * @param positionManagerReceiver the receiver responsible for managing the position
      *                                and resizing operations for shapes.
      * @param newSize the new size to which the shape needs to be resized.
      * @param oldWidth the original width of the shape before resizing.
      * @param oldHeight the original height of the shape before resizing.
      */
-    public ResizeCommand(PositionManagerReceiver poistionManagerReceiver, double newSize, double oldWidth, double oldHeight) {
+    public ResizeCommand(PositionManagerReceiver positionManagerReceiver, double newSize, double oldWidth, double oldHeight) {
         this.newSize = newSize;
-        this.poistionManagerReceiver = poistionManagerReceiver;
+        this.positionManagerReceiver = positionManagerReceiver;
         this.oldWidth = oldWidth;
         this.oldHeight = oldHeight;
     }
@@ -37,7 +37,7 @@ public class ResizeCommand implements CommandInterface {
      * Executes the resize command by delegating the resizing action to the {@*/
     @Override
     public void executeCommand() {
-        poistionManagerReceiver.resize(newSize);
+        positionManagerReceiver.resize(newSize);
     }
 
     /**
@@ -50,6 +50,6 @@ public class ResizeCommand implements CommandInterface {
      */
     @Override
     public void undoCommand() {
-        poistionManagerReceiver.resetResize(this.oldWidth, this.oldHeight);
+        positionManagerReceiver.resetResize(this.oldWidth, this.oldHeight);
     }
 }

@@ -70,7 +70,7 @@ public class PolygonShape implements ShapeInterface {
         polygonShape.setStrokeWidth(getCustomStrokeWidth());
         polygonShape.setFill(getFillColor());
 
-        // Aggiorna l'array interno dei punti
+        // Update the internal points array
         this.points = new Double[points.length];
         for (int i = 0; i < points.length; i++) {
             this.points[i] = points[i];
@@ -828,7 +828,7 @@ public class PolygonShape implements ShapeInterface {
             }
         }
 
-        // Trova il punto estremo in base alla direzione
+        // Find the extreme point according to the direction
         Point2D result = null;
 
         switch (direction) {

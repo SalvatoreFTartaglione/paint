@@ -22,7 +22,6 @@ public class DrawingContextDTO {
     private Color fillColor;
     private String textContent;
     private int fontSize;
-    private double selStartX, selStartY, selEndX, selEndY; //Per il rettangolo della selezione multipla
     private ScrollPane scrollPane;
     private Group mainCanvasContainer;
     private List<Point2D> polygonPoints = new ArrayList<>();
@@ -232,62 +231,6 @@ public class DrawingContextDTO {
         this.fontSize = fontSize;
     }
 
-    //Metodi del rettangolo della selezione multipla
-
-    /**
-     * Retrieves the X-coordinate of the start of the selection in the drawing context.
-     *
-     * @return the X-coordinate of the selection start as a double
-     */
-    public double getSelStartX() { return selStartX; }
-
-    /**
-     * Sets the X-coordinate for the start of the selection in the drawing context.
-     *
-     * @param selStartX the X-coordinate of the selection start as a double
-     */
-    public void setSelStartX(double selStartX) { this.selStartX = selStartX; }
-
-    /**
-     * Retrieves the Y-coordinate of the start of the selection in the drawing context.
-     *
-     * @return the Y-coordinate of the selection start as a double
-     */
-    public double getSelStartY() { return selStartY; }
-
-    /**
-     * Sets the Y-coordinate for the start of the selection in the drawing context.
-     *
-     * @param selStartY the Y-coordinate of the selection start as a double
-     */
-    public void setSelStartY(double selStartY) { this.selStartY = selStartY; }
-
-    /**
-     * Retrieves the X-coordinate of the end of the selection in the drawing context.
-     *
-     * @return the*/
-    public double getSelEndX() { return selEndX; }
-
-    /**
-     * Sets the X-coordinate for the end of the selection in the drawing context.
-     *
-     * @param selEndX the X-coordinate of the selection end as a double
-     */
-    public void setSelEndX(double selEndX) { this.selEndX = selEndX; }
-
-    /**
-     * Retrieves the Y-coordinate of the end of the selection in the drawing context.
-     *
-     * @return the Y-coordinate of the selection end as a double
-     */
-    public double getSelEndY() { return selEndY; }
-
-    /**
-     * Sets the Y-coordinate for the end of the selection in the drawing context.
-     *
-     * @param selEndY the Y-coordinate of the selection end as a double
-     */
-    public void setSelEndY(double selEndY) { this.selEndY = selEndY; }
 
     /**
      * Retrieves the current shape being used in the drawing context.

@@ -4,7 +4,6 @@ import javafx.geometry.Point2D;
 import org.example.model.enums.MirrorDirectionEnum;
 import org.example.model.factory.product.ShapeInterface;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -67,9 +66,6 @@ public class PositionManagerReceiver {
     }
 
     public void resize(double newSize){
-        /*if (shape.isGroup()) {
-            oldChildSizes = shape.getChildren().stream().map(ShapeInterface::getEffectiveSize).collect(Collectors.toList());
-        }*/
         shape.resize(newSize);
     }
 

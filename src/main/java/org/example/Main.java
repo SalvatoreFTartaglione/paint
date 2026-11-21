@@ -25,7 +25,7 @@ public class Main extends Application {
     public void start(Stage stage) {
 
         MainViewController controller = new MainViewController();
-        Invoker invoker = new Invoker(); // crea il gestore Undo
+        Invoker invoker = new Invoker(); // handles undo
         MainView view = new MainView(controller, invoker);
         view.start(stage);
 

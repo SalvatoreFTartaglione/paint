@@ -9,6 +9,7 @@ import org.example.model.invoker.Invoker;
 
 import javafx.scene.image.Image;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 /**
  * The MainView class is responsible for initializing and displaying the main user interface of the application.
@@ -42,10 +43,9 @@ public class MainView {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/view/MainView.fxml"));
             Parent root = loader.load();
             stage.getIcons().add(new Image(getClass().getResourceAsStream("/org/example/images/paintBrush.png")));
-            //assegnazione controller
+            // The controller is instantiated by the FXML loader
             mainViewController = loader.getController();
             mainViewController.setUndoManager(invoker);
-            //mainViewController.setController(controller);
 
             Scene scene = new Scene(root);
             stage.setTitle("Paint");
@@ -53,7 +53,8 @@ public class MainView {
             stage.show();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            // Without its layout the application is unusable: fail loudly instead of showing nothing
+            throw new UncheckedIOException("Unable to load the main view", e);
         }
     }
 }

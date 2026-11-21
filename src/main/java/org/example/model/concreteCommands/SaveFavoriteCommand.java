@@ -35,7 +35,7 @@ public class SaveFavoriteCommand implements CommandInterface {
      */
     public SaveFavoriteCommand(FavoriteManagerReceiver receiver, ShapeInterface shape, String name) {
         this.receiver = receiver;
-        this.shape = shape.cloneShape();  // salvo una copia
+        this.shape = shape.cloneShape();  // keep a copy
         this.name = name;
     }
 

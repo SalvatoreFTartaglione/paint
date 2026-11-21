@@ -34,11 +34,6 @@ public class RotateCommandTest {
         PolygonShape polygon = new PolygonShape(Color.BLACK, Color.CYAN, 2.0, 1.0, 1.0, 0.0);
         polygon.draw(new Double[]{90.0, 90.0, 140.0, 140.0, 190.0, 90.0});
 
-        // not implemented
-//        CompositeShape composite = new CompositeShape(List.of(
-//                new RectangleShape(Color.BLACK, Color.CYAN, 50, 30, 2, 0.0) {{ draw(20, 20); }},
-//                new EllipseShape(Color.BLACK, Color.CYAN, 2, 20, 10, 0.0) {{ draw(40, 40); }}
-//        ));
 
         return Stream.of(rect, ellipse, text, line, polygon);
     }

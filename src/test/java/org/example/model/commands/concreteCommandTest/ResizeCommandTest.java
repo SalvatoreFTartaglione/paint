@@ -33,15 +33,6 @@ public class ResizeCommandTest {
         PolygonShape polygon = new PolygonShape(Color.BLACK, Color.GREEN, 2.0, 1.0, 1.0, 0.0);
         polygon.draw(new Double[]{100.0, 100.0, 150.0, 120.0, 130.0, 160.0});
 
-        // not implemented
-//        CompositeShape composite = new CompositeShape(List.of(
-//                new RectangleShape(Color.BLACK, Color.GREEN, 60, 40, 2, 0.0) {{
-//                    draw(100, 100);
-//                }},
-//                new EllipseShape(Color.BLACK, Color.GREEN, 2.0, 40, 30, 0.0) {{
-//                    draw(140, 120);
-//                }}
-//        ));
 
         return Stream.of(rect, ellipse, text, line, polygon);
     }
@@ -80,7 +71,6 @@ public class ResizeCommandTest {
 
 
         // Increased tolerance to account for numerical approximation differences
-        // caused by resizing complex shapes like TextShape or CompositeShape.
         assertEquals(oldWidth, shape.getWidth(), 2.5, "Width should be restored after undo");
         assertEquals(oldHeight, shape.getHeight(), 2.5, "Height should be restored after undo");
     }

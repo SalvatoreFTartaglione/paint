@@ -14,7 +14,7 @@ public class EllipseShapeTest {
     @BeforeEach
     public void setUp() {
         ellipse = new EllipseShape(Color.BLACK, Color.BLUE, 2.0, 50.0, 30.0, 15.0);
-        ellipse.draw(100.0, 200.0); // posiziona al centro
+        ellipse.draw(100.0, 200.0); // place at the center
     }
 
     @Test
